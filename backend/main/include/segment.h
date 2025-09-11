@@ -19,6 +19,7 @@ private:
     Point _first;
     Point _second;
 
+    bool is_intersecting(const Point &point) const noexcept;
     long long get_signed_length_x() const noexcept;
     long long get_signed_length_y() const noexcept;
 };
