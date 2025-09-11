@@ -49,11 +49,3 @@ int Segment::sine_sign(const Point &point) const noexcept {
     long long cross_product = (get_second() - get_first()).cross_product(point - get_first());
     return (cross_product > 0) - (cross_product < 0);
 }
-
-long long Segment::get_signed_length_x() const noexcept { // TODO remove
-    return _second.get_x() - _first.get_x();
-}
-
-long long Segment::get_signed_length_y() const noexcept { // TODO remove
-    return _second.get_y() - _first.get_y();
-}

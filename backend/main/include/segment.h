@@ -21,8 +21,6 @@ private:
 
     bool is_intersecting(const Point &point) const noexcept;
     int sine_sign(const Point &point) const noexcept;
-    long long get_signed_length_x() const noexcept;
-    long long get_signed_length_y() const noexcept;
 };
 
 #endif // SEGMENT_H
