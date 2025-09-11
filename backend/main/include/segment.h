@@ -16,8 +16,11 @@ public:
     const Point &get_second() const noexcept;
     bool is_intersecting(const Segment &route) const noexcept;
 private:
-    Point first;
-    Point second;
+    Point _first;
+    Point _second;
+
+    long long get_signed_length_x() const noexcept;
+    long long get_signed_length_y() const noexcept;
 };
 
 #endif // SEGMENT_H
