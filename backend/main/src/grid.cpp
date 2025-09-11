@@ -1,13 +1,12 @@
 #include "grid.h"
 
-Grid::Grid(Point left_down_point, Point right_up_point, std::span<Segment> borders)
-    : left_down_point(left_down_point),
-      right_up_point(right_up_point),
-      _borders({})
-{
-    
-}
+#include <algorithm>
+
+Grid::Grid(std::span<Segment> borders)
+    : _borders(borders.begin(), borders.end()) {}
 
 bool Grid::is_intersecting(const Segment &route) const noexcept {
-    
+    return std::any_of(
+        _borders.begin(), _borders.end(),
+        [&route](const auto &border) { return border.is_intersecting(route); });
 }

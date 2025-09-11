@@ -4,12 +4,11 @@
 #include <span>
 #include <vector>
 
-#include "point.h"
 #include "segment.h"
 
 class Grid {
 public:
-    Grid(Point left_down_point, Point right_up_point, std::span<Segment> borders);
+    explicit Grid(std::span<Segment> borders);
     Grid(const Grid &) = default;
     Grid(Grid &&) noexcept = default;
     Grid &operator=(const Grid &) = default;
@@ -18,8 +17,6 @@ public:
 
     bool is_intersecting(const Segment &route) const noexcept;
 private:
-    Point left_down_point;
-    Point right_up_point;
     std::vector<Segment> _borders;
 };
 
