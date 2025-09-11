@@ -15,7 +15,6 @@ const Point &Segment::get_second() const noexcept {
 }
 
 bool Segment::is_intersecting(const Segment &route) const noexcept {
-    // TODO refactor
     if (get_first() == get_second()) {
         return route.is_intersecting(get_first());
     }
@@ -24,7 +23,8 @@ bool Segment::is_intersecting(const Segment &route) const noexcept {
     }
     if ((get_second() - get_first())
             .cross_product(route.get_second() - route.get_first()) != 0) {
-        return true;
+        return sine_sign(route.get_first()) != sine_sign(route.get_second()) &&
+            route.sine_sign(get_first()) != route.sine_sign(get_second());
     }
     if (get_first() == route.get_first()) {
         return true;
@@ -43,6 +43,11 @@ bool Segment::is_intersecting(const Point &point) const noexcept {
     int min_y = std::min(get_first().get_y(), get_second().get_y());
     return min_y <= point.get_y() &&
         point.get_y() <= max_y;
+}
+
+int Segment::sine_sign(const Point &point) const noexcept {
+    long long cross_product = (get_second() - get_first()).cross_product(point - get_first());
+    return (cross_product > 0) - (cross_product < 0);
 }
 
 long long Segment::get_signed_length_x() const noexcept { // TODO remove
