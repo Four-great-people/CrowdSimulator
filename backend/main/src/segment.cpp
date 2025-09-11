@@ -1,18 +1,13 @@
 #include "segment.h"
+
 #include <algorithm>
 
 Segment::Segment(const Point &first, const Point &second)
-    : _first(first),
-      _second(second)
-{}
+    : _first(first), _second(second) {}
 
-const Point &Segment::get_first() const noexcept {
-    return _first;
-}
+const Point &Segment::get_first() const noexcept { return _first; }
 
-const Point &Segment::get_second() const noexcept {
-    return _second;
-}
+const Point &Segment::get_second() const noexcept { return _second; }
 
 bool Segment::is_intersecting(const Segment &route) const noexcept {
     if (get_first() == get_second()) {
@@ -24,28 +19,34 @@ bool Segment::is_intersecting(const Segment &route) const noexcept {
     if ((get_second() - get_first())
             .cross_product(route.get_second() - route.get_first()) != 0) {
         return sine_sign(route.get_first()) != sine_sign(route.get_second()) &&
-            route.sine_sign(get_first()) != route.sine_sign(get_second());
+               route.sine_sign(get_first()) != route.sine_sign(get_second());
     }
     if (get_first() == route.get_first()) {
         return true;
     }
-    return (get_second() - get_first()).cross_product(get_second() - route.get_first()) == 0;
+    if ((get_second() - get_first())
+            .cross_product(get_second() - route.get_first()) != 0) {
+        return false;
+    }
+    return is_intersecting(route.get_first()) ||
+           is_intersecting(route.get_second()) ||
+           route.is_intersecting(get_first()) ||
+           route.is_intersecting(get_second());
 }
 
 bool Segment::is_intersecting(const Point &point) const noexcept {
     if (get_first().get_y() == get_second().get_y()) {
         int max_x = std::max(get_first().get_x(), get_second().get_x());
         int min_x = std::min(get_first().get_x(), get_second().get_x());
-        return min_x <= point.get_x() &&
-            point.get_x() <= max_x;
+        return min_x <= point.get_x() && point.get_x() <= max_x;
     }
     int max_y = std::max(get_first().get_y(), get_second().get_y());
     int min_y = std::min(get_first().get_y(), get_second().get_y());
-    return min_y <= point.get_y() &&
-        point.get_y() <= max_y;
+    return min_y <= point.get_y() && point.get_y() <= max_y;
 }
 
 int Segment::sine_sign(const Point &point) const noexcept {
-    long long cross_product = (get_second() - get_first()).cross_product(point - get_first());
+    long long cross_product =
+        (get_second() - get_first()).cross_product(point - get_first());
     return (cross_product > 0) - (cross_product < 0);
 }
