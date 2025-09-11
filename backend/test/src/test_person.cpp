@@ -62,3 +62,16 @@ TEST(test_person, calculate_route__unreachable_point_inside__returns_empty_vecto
 
     ASSERT_EQ(route.size(), 0);
 }
+
+TEST(test_person, calculate_route__unreachable_point_outside__returns_empty_vector) {
+    std::vector border{Segment(Point(0, 0), Point(0, 10)),
+                       Segment(Point(0, 10), Point(10, 10)),
+                       Segment(Point(10, 10), Point(10, 0)),
+                       Segment(Point(0, 0), Point(10, 0))};
+    Grid grid(border);
+    Person person(Point(1, 20), Point(1, 1), &grid);
+    
+    std::vector<Point> route = person.calculate_route();
+
+    ASSERT_EQ(route.size(), 0);
+}
