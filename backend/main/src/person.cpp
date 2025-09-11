@@ -38,7 +38,7 @@ std::vector<Point> Person::calculate_route() const {
             }
             int new_cost = current_priority + 1;
             if (!point_to_cost.contains(position) || new_cost < point_to_cost[position]) {
-                point_to_cost[_position] = new_cost;
+                point_to_cost[position] = new_cost;
                 int priority = new_cost + (_goal - position).abs_norm();
                 if (point_to_iterator.contains(position)) {
                     priority_to_point.erase(point_to_iterator[position]);
