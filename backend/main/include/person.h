@@ -19,6 +19,8 @@ private:
     Point _position;
     Point _goal;
     Grid *_personal_grid;
+
+    int h(const Point &point) const noexcept;
 };
 
 #endif // PERSON_H
