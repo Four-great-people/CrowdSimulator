@@ -2,6 +2,7 @@
 #define POINT_H
 
 #include <functional>
+#include "actions.h"
 class Point {
    public:
     Point(int x, int y);
@@ -14,12 +15,14 @@ class Point {
     bool operator==(const Point &other) const noexcept;
     bool operator!=(const Point &other) const noexcept;
     Point operator-(const Point &other) const noexcept;
+    Point operator+(const Action &action) const;
 
     int get_x() const noexcept;
     int get_y() const noexcept;
     long long cross_product(const Point &other) const noexcept;
     std::vector<Point> get_neighbors() const noexcept;
     long long abs_norm() const noexcept;
+    Action to_another(const Point &point) const;
 
    private:
     int _x;

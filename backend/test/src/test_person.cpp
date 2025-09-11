@@ -2,11 +2,12 @@
 
 #include <vector>
 
+#include "actions.h"
 #include "grid.h"
 #include "person.h"
 #include "point.h"
 
-TEST(test_person, calculate_route__same_point__returns_same) {
+TEST(test_person, calculate_route__same_point__returns_empty_vector) {
     std::vector border{Segment(Point(0, 0), Point(0, 10)),
                        Segment(Point(0, 10), Point(10, 10)),
                        Segment(Point(10, 10), Point(10, 0)),
@@ -14,10 +15,10 @@ TEST(test_person, calculate_route__same_point__returns_same) {
     Grid grid(border);
     Person person(Point(1, 1), Point(1, 1), &grid);
     
-    std::vector<Point> route = person.calculate_route();
+    auto route = person.calculate_route();
 
-    ASSERT_EQ(route.size(), 1);
-    ASSERT_EQ(route[0], Point(1, 1));
+    ASSERT_TRUE(route.has_value());
+    ASSERT_EQ(route.value().size(), 0);
 }
 
 TEST(test_person, calculate_route__another_point__returns_route) {
@@ -28,11 +29,11 @@ TEST(test_person, calculate_route__another_point__returns_route) {
     Grid grid(border);
     Person person(Point(1, 1), Point(1, 2), &grid);
     
-    std::vector<Point> route = person.calculate_route();
+    auto route = person.calculate_route();
 
-    ASSERT_EQ(route.size(), 2);
-    ASSERT_EQ(route[0], Point(1, 1));
-    ASSERT_EQ(route[1], Point(1, 2));
+    ASSERT_TRUE(route.has_value());
+    ASSERT_EQ(route.value().size(), 1);
+    ASSERT_EQ(route.value()[0], Action::UP);
 }
 
 TEST(test_person, calculate_route__far_away_point__returns_route) {
@@ -43,14 +44,16 @@ TEST(test_person, calculate_route__far_away_point__returns_route) {
     Grid grid(border);
     Person person(Point(1, 1), Point(1, 20), &grid);
     
-    std::vector<Point> route = person.calculate_route();
+    auto route = person.calculate_route();
 
-    ASSERT_GT(route.size(), 2);
-    ASSERT_EQ(route[0], Point(1, 1));
-    ASSERT_EQ(route.back(), Point(1, 20));
+    ASSERT_TRUE(route.has_value());
+    ASSERT_EQ(route.value().size(), 19);
+    for (int i = 0; i < route.value().size(); ++i) {
+        ASSERT_EQ(route.value()[0], Action::UP);
+    }
 }
 
-TEST(test_person, calculate_route__unreachable_point_inside__returns_empty_vector) {
+TEST(test_person, calculate_route__unreachable_point_inside__returns_nullopt) {
     std::vector border{Segment(Point(0, 0), Point(0, 10)),
                        Segment(Point(0, 10), Point(10, 10)),
                        Segment(Point(10, 10), Point(10, 0)),
@@ -58,12 +61,12 @@ TEST(test_person, calculate_route__unreachable_point_inside__returns_empty_vecto
     Grid grid(border);
     Person person(Point(1, 1), Point(1, 20), &grid);
     
-    std::vector<Point> route = person.calculate_route();
+    auto route = person.calculate_route();
 
-    ASSERT_EQ(route.size(), 0);
+    ASSERT_FALSE(route.has_value());
 }
 
-TEST(test_person, calculate_route__unreachable_point_outside__returns_empty_vector) {
+TEST(test_person, calculate_route__unreachable_point_outside__returns_nullopt) {
     std::vector border{Segment(Point(0, 0), Point(0, 10)),
                        Segment(Point(0, 10), Point(10, 10)),
                        Segment(Point(10, 10), Point(10, 0)),
@@ -71,7 +74,7 @@ TEST(test_person, calculate_route__unreachable_point_outside__returns_empty_vect
     Grid grid(border);
     Person person(Point(1, 20), Point(1, 1), &grid);
     
-    std::vector<Point> route = person.calculate_route();
+    auto route = person.calculate_route();
 
-    ASSERT_EQ(route.size(), 0);
+    ASSERT_FALSE(route.has_value());
 }

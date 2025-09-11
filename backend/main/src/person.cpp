@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "actions.h"
 #include "point.h"
 #include "segment.h"
 
@@ -16,9 +17,9 @@ int Person::h(const Point &point) const noexcept {
 }
 
 // f is priority, g is cost
-std::vector<Point> Person::calculate_route() const {
+std::optional<std::vector<Action>> Person::calculate_route() const {
     if (_position == _goal) {
-        return {_position};
+        return std::vector<Action>{};
     }
     std::multimap<int, Point> f_to_point;
     std::unordered_map<Point, std::multimap<int, Point>::iterator>
@@ -62,12 +63,14 @@ std::vector<Point> Person::calculate_route() const {
         }
     }
     if (!previous_in_route.contains(_goal)) {
-        return {};
+        return std::nullopt;
     }
-    std::vector<Point> reverse_route = {_goal};
-    while (reverse_route.back() != _position) {
-        reverse_route.push_back(
-            previous_in_route.find(reverse_route.back())->second);
+    std::vector<Action> reverse_route;
+    Point last_position = _goal;
+    while (last_position != _position) {
+        Point previous_step = previous_in_route.find(last_position)->second;
+        reverse_route.push_back(previous_step.to_another(last_position));
+        last_position = previous_step;
     }
     std::reverse(reverse_route.begin(), reverse_route.end());
     return reverse_route;

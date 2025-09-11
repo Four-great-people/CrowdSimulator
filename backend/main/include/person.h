@@ -1,7 +1,10 @@
 #ifndef PERSON_H
 #define PERSON_H
 
+#include <optional>
 #include <vector>
+
+#include "actions.h"
 #include "grid.h"
 #include "point.h"
 
@@ -14,7 +17,7 @@ public:
     Person &operator=(Person &&) noexcept = default;
     ~Person() noexcept = default;
 
-    std::vector<Point> calculate_route() const;
+    std::optional<std::vector<Action>> calculate_route() const;
 private:
     Point _position;
     Point _goal;

@@ -23,13 +23,13 @@ TEST(test_person, random_test) {
                 Point(distribution(generator), distribution(generator))));
         }
         Grid grid(border);
-        Point current(distribution(generator), distribution(generator));
-        Point start = current;
+        Point finish(distribution(generator), distribution(generator));
+        Point start = finish;
         int try_steps = distribution(generator);
         while (try_steps--) {
             int direction_index = direction_distribution(generator);
-            std::vector<Point> neighbors = current.get_neighbors();
-            Segment move(current, neighbors[direction_index]);
+            std::vector<Point> neighbors = finish.get_neighbors();
+            Segment move(finish, neighbors[direction_index]);
             if (grid.is_intersecting(move) ||
                 neighbors[direction_index].get_x() > grid.get_upper_right().get_x() ||
                 neighbors[direction_index].get_y() > grid.get_upper_right().get_y() ||
@@ -37,15 +37,17 @@ TEST(test_person, random_test) {
                 neighbors[direction_index].get_y() < grid.get_lower_left().get_y()) {
                 continue;
             }
-            current = neighbors[direction_index];
+            finish = neighbors[direction_index];
         }
-        Person person(start, current, &grid);
-        std::vector<Point> route = person.calculate_route();
-        ASSERT_GT(route.size(), 0);
-        ASSERT_EQ(route[0], start);
-        ASSERT_EQ(route.back(), current);
-        for (int j = 1; j < route.size(); ++j) {
-            ASSERT_FALSE(grid.is_intersecting(Segment(route[j - 1], route[j])));
+        Person person(start, finish, &grid);
+        auto route = person.calculate_route();
+        ASSERT_TRUE(route.has_value());
+        Point current_point = start;
+        for (auto action : route.value()) {
+            Point next_point = current_point + action;
+            ASSERT_FALSE(grid.is_intersecting(Segment(current_point, next_point)));
+            current_point = next_point;
         }
+        ASSERT_EQ(current_point, finish);
     }
 }
