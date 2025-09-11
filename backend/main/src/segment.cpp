@@ -16,12 +16,14 @@ const Point &Segment::get_second() const noexcept {
 
 bool Segment::is_intersecting(const Segment &route) const noexcept {
     // TODO refactor
+    if (get_first() == get_second()) {
+        return route.is_intersecting(get_first());
+    }
     if (route.get_first() == route.get_second()) {
         return is_intersecting(route.get_first());
     }
-    long long cross_product = (get_second() - get_first())
-                        .cross_product(route.get_second() - route.get_first());
-    if (cross_product != 0) {
+    if ((get_second() - get_first())
+            .cross_product(route.get_second() - route.get_first()) != 0) {
         return true;
     }
     if (get_first() == route.get_first()) {
