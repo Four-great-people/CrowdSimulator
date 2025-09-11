@@ -1,8 +1,9 @@
 #ifndef POINT_H
 #define POINT_H
 
+#include <functional>
 class Point {
-public:
+   public:
     Point(int x, int y);
     Point(const Point &) = default;
     Point(Point &&) noexcept = default;
@@ -17,9 +18,22 @@ public:
     int get_x() const noexcept;
     int get_y() const noexcept;
     long long cross_product(const Point &other) const noexcept;
-private:
+    std::vector<Point> get_neighbors() const noexcept;
+    long long abs_norm() const noexcept;
+
+   private:
     int _x;
     int _y;
 };
 
-#endif // POINT_H
+namespace std {
+template <>
+struct hash<Point> {
+    std::size_t operator()(const Point &point) const noexcept {
+        return 31 * std::hash<int>()(point.get_x()) +
+               std::hash<int>()(point.get_y());
+    }
+};
+}  // namespace std
+
+#endif  // POINT_H

@@ -28,3 +28,16 @@ int Point::get_y() const noexcept {
 long long Point::cross_product(const Point &other) const noexcept {
     return get_x() * other.get_y() - get_y() * other.get_x();
 }
+
+std::vector<Point> Point::get_neighbors() const noexcept {
+    return {
+        Point(_x, _y + 1),
+        Point(_x, _y - 1),
+        Point(_x + 1, _y),
+        Point(_x - 1, _y),
+    };
+}
+
+long long Point::abs_norm() const noexcept {
+    return std::abs(_x) + std::abs(_y);
+}
