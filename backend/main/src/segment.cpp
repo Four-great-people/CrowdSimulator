@@ -35,6 +35,10 @@ bool Segment::is_intersecting(const Segment &route) const noexcept {
 }
 
 bool Segment::is_intersecting(const Point &point) const noexcept {
+    if ((get_second() - get_first())
+            .cross_product(get_second() - point) != 0) {
+        return false;
+    }
     if (get_first().get_y() == get_second().get_y()) {
         int max_x = std::max(get_first().get_x(), get_second().get_x());
         int min_x = std::min(get_first().get_x(), get_second().get_x());

@@ -49,7 +49,7 @@ TEST(test_person, calculate_route__far_away_point__returns_route) {
     ASSERT_TRUE(route.has_value());
     ASSERT_EQ(route.value().size(), 19);
     for (int i = 0; i < route.value().size(); ++i) {
-        ASSERT_EQ(route.value()[0], Action::UP);
+        ASSERT_EQ(route.value()[i], Action::UP);
     }
 }
 

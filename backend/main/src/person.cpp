@@ -13,7 +13,7 @@ Person::Person(Point position, Point goal, Grid *grid)
     : _position(position), _goal(goal), _personal_grid(grid) {}
 
 int Person::h(const Point &point) const noexcept {
-    return (_goal - point).abs_norm();
+    return static_cast<int>((_goal - point).abs_norm());
 }
 
 // f is priority, g is cost
@@ -44,7 +44,7 @@ std::optional<std::vector<Action>> Person::calculate_route() const {
                 position.get_x() > _personal_grid->get_upper_right().get_x() ||
                 position.get_x() < _personal_grid->get_lower_left().get_x() ||
                 position.get_y() > _personal_grid->get_upper_right().get_y() ||
-                position.get_y() < _personal_grid->get_lower_left().get_x()) {
+                position.get_y() < _personal_grid->get_lower_left().get_y()) {
                 continue;
             }
             int new_g = current_f + 1;
@@ -58,7 +58,7 @@ std::optional<std::vector<Action>> Person::calculate_route() const {
                 auto multimap_iterator =
                     f_to_point.emplace(f, position);
                 point_to_iterator[position] = multimap_iterator;
-                previous_in_route.emplace(position, current_position);
+                previous_in_route.insert_or_assign(position, current_position);
             }
         }
     }

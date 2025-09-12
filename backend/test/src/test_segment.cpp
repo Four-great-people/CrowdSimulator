@@ -169,3 +169,16 @@ TEST(test_segment, is_intersecting__in_one_line_not_crossed__returns_false) {
 
     ASSERT_FALSE(result);
 }
+
+TEST(test_segment, is_intersecting__point_in_not_one_line_not_crossed__returns_false) {
+    Point start_one(0, 0);
+    Point finish_one(0, 2);
+    Point start_two(1, 1);
+    Point finish_two(1, 1);
+    Segment segment(start_one, finish_one);
+    Segment another_segment(start_two, finish_two);
+
+    bool result = segment.is_intersecting(another_segment);
+
+    ASSERT_FALSE(result);
+}
