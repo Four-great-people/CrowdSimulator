@@ -12,16 +12,18 @@ POST /route
 Request:
 ```
 {
-    "up_right_point": [10, 10],
-    "down_left_point": [0, 0],
+    "_id": 0,
+    "up_right_point": { "x": 10, "y": 10 },
+    "down_left_point": { "x": 0, "y": 0 },
     "borders": [
-        [[0, 0], [10, 0]],
-        [[10, 0], [10, 10]]
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 10, "y": 0 } },
+        { "first": { "x": 10, "y": 0 }, "second": { "x": 10, "y": 10 } },
     ],
     "persons": [
         {
-            "position": [0, 1],
-            "goal": [1, 1]
+            "id": 0,
+            "position": { "x": 0, "y": 1 },
+            "goal": { "x": 1, "y": 1 }
         }
     ]
 }
@@ -30,8 +32,7 @@ Response:
 ```
 [
     {
-        "position": [0, 1],
-        "goal": [1, 1],
+        "id": 0,
         "route": [
             "UP",
             "LEFT",
