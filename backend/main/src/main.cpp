@@ -23,7 +23,7 @@ int main(int argc, const char** argv) {
                 return crow::response(s.str());
             } catch (const nlohmann::json::parse_error &error) {
                 return crow::response(crow::status::BAD_REQUEST, "Not json");
-            } catch (const std::invalid_argument& error) {
+            } catch (const nlohmann::json::out_of_range& error) {
                 return crow::response(crow::status::BAD_REQUEST,
                                       "Invalid JSON format");
             }

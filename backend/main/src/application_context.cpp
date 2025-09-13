@@ -3,8 +3,6 @@
 #include <mutex>
 #include <vector>
 
-#include <nlohmann/json-schema.hpp>
-
 #include "actions.h"
 #include "grid.h"
 #include "person.h"
@@ -16,66 +14,6 @@ using Action::LEFT;
 using Action::RIGHT;
 using Action::UP;
 using nlohmann::json;
-using nlohmann::json_schema::json_validator;
-
-static json map_schema = R"(
-{
-    "bsonType": "object",
-    "required": ["id", "lower_left", "upper_right", "borders", "persons"],
-    "properties": {
-        "_id": {"bsonType": "int"},
-        "lower_left": {
-            "bsonType": "object",
-            "required": ["x", "y"],
-            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-        },
-        "upper_right": {
-            "bsonType": "object",
-            "required": ["x", "y"],
-            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-        },
-        "borders": {
-            "bsonType": "array",
-            "items": {
-                "bsonType": "object",
-                "required": ["first", "second"],
-                "properties": {
-                    "first": {
-                        "bsonType": "object",
-                        "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-                    },
-                    "second": {
-                        "bsonType": "object",
-                        "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-                    }
-                }
-            }
-        },
-        "persons": {
-            "bsonType": "array",
-            "items": {
-                "bsonType": "object",
-                "required": ["id", "position", "goal"],
-                "properties": {
-                    "id": {"bsonType": "int"},
-                    "position": {
-                        "bsonType": "object",
-                        "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-                    },
-                    "goal": {
-                        "bsonType": "object",
-                        "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
-                    }
-                }
-            }
-        }
-    }
-}
-)"_json;
 
 NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
                                          {UP, "UP"},
@@ -137,9 +75,6 @@ Segment to_segment(const Convertor::Segment &s) {
 
 json ApplicationContext::calculate_route(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
-    // json_validator validator;
-    // validator.set_root_schema(map_schema);
-    // validator.validate(input);  // std::invalid_argument
     auto map = input.template get<Convertor::Map>();
     std::vector<Segment> borders;
     for (const auto &segment : map.borders) {

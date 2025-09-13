@@ -3,6 +3,16 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+# Backend. Установка библиотек
+
+Устанавливать библиотеки лучше на Linux/WSL
+
+```
+sudo apt install libasio-dev zlib1g-dev libssl-dev
+wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+dpkg -i Crow-1.2.1-Linux.deb
+```
+
 # Backend. Запросы на сервер
 
 Формат запросов:
