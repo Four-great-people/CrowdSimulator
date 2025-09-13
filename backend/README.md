@@ -13,17 +13,19 @@ Request:
 ```
 {
     "_id": 0,
-    "up_right_point": { "x": 10, "y": 10 },
+    "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
         { "first": { "x": 0, "y": 0 }, "second": { "x": 10, "y": 0 } },
         { "first": { "x": 10, "y": 0 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 10 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 0, "y": 10 } }
     ],
     "persons": [
         {
             "id": 0,
             "position": { "x": 0, "y": 1 },
-            "goal": { "x": 1, "y": 1 }
+            "goal": { "x": 20, "y": 1 }
         }
     ]
 }
@@ -43,6 +45,11 @@ Response:
         ]
     }
 ]
+```
+Пустой маршрут тоже возможен.
+Если добраться невозможно:
+```
+[{"id":0,"route":null}]
 ```
 
 # Backend. Система сборки

@@ -1,12 +1,12 @@
 #include "application_context.h"
 
 #include <mutex>
-#include <nlohmann/json-schema.hpp>
 #include <vector>
+
+#include <nlohmann/json-schema.hpp>
 
 #include "actions.h"
 #include "grid.h"
-#include "json.hpp"
 #include "person.h"
 #include "point.h"
 #include "segment.h"
@@ -27,12 +27,12 @@ static json map_schema = R"(
         "lower_left": {
             "bsonType": "object",
             "required": ["x", "y"],
-            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
+            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
         },
         "upper_right": {
             "bsonType": "object",
             "required": ["x", "y"],
-            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
+            "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
         },
         "borders": {
             "bsonType": "array",
@@ -43,15 +43,15 @@ static json map_schema = R"(
                     "first": {
                         "bsonType": "object",
                         "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
+                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
                     },
                     "second": {
                         "bsonType": "object",
                         "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                    },
-                },
-            },
+                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
+                    }
+                }
+            }
         },
         "persons": {
             "bsonType": "array",
@@ -63,16 +63,16 @@ static json map_schema = R"(
                     "position": {
                         "bsonType": "object",
                         "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
+                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
                     },
                     "goal": {
                         "bsonType": "object",
                         "required": ["x", "y"],
-                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                    },
-                },
-            },
-        },
+                        "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}}
+                    }
+                }
+            }
+        }
     }
 }
 )"_json;
@@ -110,13 +110,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Person, id, position, goal)
 
 struct Map {
     int _id;
-    Point lower_left;
-    Point upper_right;
+    Point down_left_point;
+    Point up_right_point;
     std::vector<Segment> borders;
     std::vector<Person> persons;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, lower_left, upper_right, borders,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, down_left_point, up_right_point, borders,
                                    persons)
 
 struct RouteResult {
@@ -137,16 +137,16 @@ Segment to_segment(const Convertor::Segment &s) {
 
 json ApplicationContext::calculate_route(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
-    json_validator validator;
-    validator.set_root_schema(map_schema);
-    validator.validate(input);  // std::invalid_argument
+    // json_validator validator;
+    // validator.set_root_schema(map_schema);
+    // validator.validate(input);  // std::invalid_argument
     auto map = input.template get<Convertor::Map>();
     std::vector<Segment> borders;
     for (const auto &segment : map.borders) {
         borders.push_back(to_segment(segment));
     }
-    Grid grid(borders, Point(map.lower_left.x, map.lower_left.y),
-              Point(map.upper_right.x, map.upper_right.y));
+    Grid grid(borders, Point(map.down_left_point.x, map.down_left_point.y),
+              Point(map.up_right_point.x, map.up_right_point.y));
     std::vector<Convertor::RouteResult> results;
     for (const auto &person : map.persons) {
         Person p(person.id, to_point(person.position),
