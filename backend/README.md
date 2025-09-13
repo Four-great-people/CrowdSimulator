@@ -3,6 +3,47 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+# Backend. Запросы на сервер
+
+Формат запросов:
+```
+POST /route
+```
+Request:
+```
+{
+    "up_right_point": [10, 10],
+    "down_left_point": [0, 0],
+    "borders": [
+        [[0, 0], [10, 0]],
+        [[10, 0], [10, 10]]
+    ],
+    "persons": [
+        {
+            "position": [0, 1],
+            "goal": [1, 1]
+        }
+    ]
+}
+```
+Response:
+```
+[
+    {
+        "position": [0, 1],
+        "goal": [1, 1],
+        "route": [
+            "UP",
+            "LEFT",
+            "UP",
+            "RIGHT",
+            "DOWN",
+            "RIGHT",
+        ]
+    }
+]
+```
+
 # Backend. Система сборки
 
 Проект на C++ с системой сборки CMake и различными вариантами компиляции для тестирования и анализа. Всё тестировалось под Linux, однако

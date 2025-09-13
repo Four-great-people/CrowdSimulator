@@ -11,10 +11,21 @@ FILE (GLOB_RECURSE TEST_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/test/include/* ${CMA
 endif()
 include_directories(${PATH_INCLUDES})
 
+find_package(GTest REQUIRED)
+find_package(Crow REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(ZLIB REQUIRED)
+
 FILE (GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main/src/*)
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main/src/main.cpp)
 FILE (GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main/src/* ${CMAKE_CURRENT_SOURCE_DIR}/test/src/*)
-set(LIBS )
-set(TEST_LIBS gmock gtest gtest_main pthread)
+list(REMOVE_ITEM TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main/src/main.cpp)
+set(LIBS pthread Crow::Crow OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB)
+set(TEST_LIBS gmock gtest gtest_main)
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/main/src/main.cpp ${HEADERS})
+target_link_libraries(${PROJECT_NAME} ${LIBS})
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
 
 enable_testing()
 add_executable(${PROJECT_NAME}_test ${TEST_SOURCES} ${TEST_HEADERS})
