@@ -1,56 +1,57 @@
-from pymongo.collection import Collection
 from .client import get_db
 from .config import MAPS_COLLECTION
 
 def apply_collection_validator():
-    """
-    JSON Schema-validator for maps collections.
-    """
     db = get_db()
+
+    point = {
+        "bsonType": "object",
+        "required": ["x", "y"],
+        "properties": {
+            "x": {"bsonType": "int"},
+            "y": {"bsonType": "int"},
+        },
+        "additionalProperties": False,
+    }
+
+    segment = {
+        "bsonType": "object",
+        "required": ["first", "second"],
+        "properties": {
+            "first": point,
+            "second": point,
+        },
+        "additionalProperties": False,
+    }
+
+    person = {
+        "bsonType": "object",
+        "required": ["position", "goal"],
+        "properties": {
+            "id": {"bsonType": ["int", "string", "null"]},
+            "position": point,
+            "goal": point,
+        },
+        "additionalProperties": False,
+    }
+
     schema = {
         "$jsonSchema": {
             "bsonType": "object",
-            "required": ["name", "lower_left", "upper_right", "borders"],
+            "required": ["up_right_point", "down_left_point", "borders", "persons"],
             "properties": {
-                "name": {"bsonType": "string", "minLength": 1},
-                "description": {"bsonType": ["string", "null"]},
-                "lower_left": {
-                    "bsonType": "object",
-                    "required": ["x", "y"],
-                    "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                },
-                "upper_right": {
-                    "bsonType": "object",
-                    "required": ["x", "y"],
-                    "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                },
-                "borders": {
-                    "bsonType": "array",
-                    "items": {
-                        "bsonType": "object",
-                        "required": ["first", "second"],
-                        "properties": {
-                            "first": {
-                                "bsonType": "object",
-                                "required": ["x", "y"],
-                                "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                            },
-                            "second": {
-                                "bsonType": "object",
-                                "required": ["x", "y"],
-                                "properties": {"x": {"bsonType": "int"}, "y": {"bsonType": "int"}},
-                            },
-                        },
-                    },
-                },
+                "_id": {},
+                "up_right_point": point,
+                "down_left_point": point,
+                "borders": {"bsonType": "array", "items": segment},
+                "persons": {"bsonType": "array", "items": person},
             },
+            "additionalProperties": False,
         }
     }
 
-    # creating collection with validator
     if MAPS_COLLECTION not in db.list_collection_names():
         db.create_collection(MAPS_COLLECTION, validator=schema)
     else:
-        # update validator of already existing collection
         db.command("collMod", MAPS_COLLECTION, validator=schema)
 

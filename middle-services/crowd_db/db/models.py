@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Union
 from bson import ObjectId
 
 
@@ -28,40 +28,53 @@ class Segment:
     def from_bson(d: Dict[str, Any]) -> "Segment":
         return Segment(Point.from_bson(d["first"]), Point.from_bson(d["second"]))
 
+@dataclass
+class PersonSpec:
+    id: Optional[Union[int, str]]
+    position: Point
+    goal: Point
+
+    def to_bson(self) -> Dict[str, Any]:
+        doc: Dict[str, Any] = {
+            "position": self.position.to_bson(),
+            "goal": self.goal.to_bson(),
+        }
+        if self.id is not None:
+            doc["id"] = self.id
+        return doc
+
+    @staticmethod
+    def from_bson(d: Dict[str, Any]) -> "PersonSpec":
+        return PersonSpec(
+            id=d.get("id"),
+            position=Point.from_bson(d["position"]),
+            goal=Point.from_bson(d["goal"]),
+        )
+
 
 @dataclass
-class GridMap:
-    """
-    Map structure:
-    - borders: lower_left and upper_right 
-    - obstacles: list of segment-obstacles
-    - metadata: name/description/etc.
-    """
-    name: str
-    lower_left: Point = field(default_factory=lambda: Point(-50, -50))
-    upper_right: Point = field(default_factory=lambda: Point(50, 50))
+class MapDoc:
+    up_right_point: Point
+    down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
-    description: str | None = None
-    _id: ObjectId | None = None
+    persons: List[PersonSpec] = field(default_factory=list)
+    _id: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
         return {
             "_id": self._id if self._id else ObjectId(),
-            "name": self.name,
-            "lower_left": self.lower_left.to_bson(),
-            "upper_right": self.upper_right.to_bson(),
+            "up_right_point": self.up_right_point.to_bson(),
+            "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
-            "description": self.description,
+            "persons": [p.to_bson() for p in self.persons],
         }
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "GridMap":
-        return GridMap(
-            name=d["name"],
-            lower_left=Point.from_bson(d["lower_left"]),
-            upper_right=Point.from_bson(d["upper_right"]),
+    def from_bson(d: Dict[str, Any]) -> "MapDoc":
+        return MapDoc(
+            up_right_point=Point.from_bson(d["up_right_point"]),
+            down_left_point=Point.from_bson(d["down_left_point"]),
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
-            description=d.get("description"),
+            persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
             _id=d.get("_id"),
         )
-
