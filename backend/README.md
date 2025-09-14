@@ -3,6 +3,29 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+# Backend. Python
+
+Для интеграционного тестирования всего сервиса здесь используется Python.
+Если хотите запустить эти тесты, выполните следующее:
+```
+sudo apt install -y python3-venv 
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+Затем скомпилируйте и запустите сервис:
+```
+mkdir build
+cd build
+cmake ..
+make backend
+./backend
+```
+Затем запустите тесты:
+```
+pytest integration_tests/
+```
+
 # Backend. Установка библиотек
 
 Устанавливать библиотеки лучше на Linux/WSL
@@ -99,6 +122,7 @@ make
 
 ### Основные цели
 
+- **`backend`** - стандартная сборка
 - **`backend_test`** - стандартная сборка тестов
 - **`backend_test_sans`** - тесты с санитайзерами AddressSanitizer и UndefinedBehaviorSanitizer
 - **`backend_test_gcov`** - тесты с покрытием кода (gcov)
