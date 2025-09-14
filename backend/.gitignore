@@ -43,3 +43,5 @@ build
 .cache
 .vscode
 compile_commands.json
+venv
+__pycache__

@@ -9,8 +9,8 @@
 #include "point.h"
 #include "segment.h"
 
-Person::Person(Point position, Point goal, Grid *grid)
-    : _position(position), _goal(goal), _personal_grid(grid) {}
+Person::Person(int id, Point position, Point goal, Grid *grid)
+    : _id(id), _position(position), _goal(goal), _personal_grid(grid) {}
 
 int Person::h(const Point &point) const noexcept {
     return static_cast<int>((_goal - point).abs_norm());
@@ -74,4 +74,8 @@ std::optional<std::vector<Action>> Person::calculate_route() const {
     }
     std::reverse(reverse_route.begin(), reverse_route.end());
     return reverse_route;
+}
+
+int Person::get_id() const noexcept {
+    return _id;
 }

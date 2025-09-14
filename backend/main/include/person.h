@@ -10,7 +10,7 @@
 
 class Person {
 public:
-    Person(Point position, Point goal, Grid *grid);
+    Person(int id, Point position, Point goal, Grid *grid);
     Person(const Person &) = default;
     Person(Person &&) noexcept = default;
     Person &operator=(const Person &) = default;
@@ -18,10 +18,12 @@ public:
     ~Person() noexcept = default;
 
     std::optional<std::vector<Action>> calculate_route() const;
+    int get_id() const noexcept;
 private:
     Point _position;
     Point _goal;
     Grid *_personal_grid;
+    int _id;
 
     int h(const Point &point) const noexcept;
 };

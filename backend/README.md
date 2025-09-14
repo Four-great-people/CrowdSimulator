@@ -3,6 +3,88 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+# Backend. Python
+
+Для интеграционного тестирования всего сервиса здесь используется Python.
+Если хотите запустить эти тесты, выполните следующее:
+```
+sudo apt install -y python3-venv 
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+Затем скомпилируйте и запустите сервис:
+```
+mkdir build
+cd build
+cmake ..
+make backend
+./backend
+```
+Затем запустите тесты:
+```
+pytest integration_tests/
+```
+
+# Backend. Установка библиотек
+
+Устанавливать библиотеки лучше на Linux/WSL
+
+```
+sudo apt install libasio-dev zlib1g-dev libssl-dev
+wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+dpkg -i Crow-1.2.1-Linux.deb
+```
+
+# Backend. Запросы на сервер
+
+Формат запросов:
+```
+POST /route
+```
+Request:
+```
+{
+    "_id": 0,
+    "up_right_point": { "x": 100, "y": 100 },
+    "down_left_point": { "x": 0, "y": 0 },
+    "borders": [
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 10, "y": 0 } },
+        { "first": { "x": 10, "y": 0 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 10 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 0, "y": 10 } }
+    ],
+    "persons": [
+        {
+            "id": 0,
+            "position": { "x": 0, "y": 1 },
+            "goal": { "x": 20, "y": 1 }
+        }
+    ]
+}
+```
+Response:
+```
+[
+    {
+        "id": 0,
+        "route": [
+            "UP",
+            "LEFT",
+            "UP",
+            "RIGHT",
+            "DOWN",
+            "RIGHT",
+        ]
+    }
+]
+```
+Пустой маршрут тоже возможен.
+Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
+
 # Backend. Система сборки
 
 Проект на C++ с системой сборки CMake и различными вариантами компиляции для тестирования и анализа. Всё тестировалось под Linux, однако
@@ -40,6 +122,7 @@ make
 
 ### Основные цели
 
+- **`backend`** - стандартная сборка
 - **`backend_test`** - стандартная сборка тестов
 - **`backend_test_sans`** - тесты с санитайзерами AddressSanitizer и UndefinedBehaviorSanitizer
 - **`backend_test_gcov`** - тесты с покрытием кода (gcov)
