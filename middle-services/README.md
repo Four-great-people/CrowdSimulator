@@ -8,7 +8,7 @@ This services are working with many computation-lite requests like signing up, s
 В качестве хранилища используется MongoDB. Работа с базой выполняется через Python (библиотека pymongo).
 
 ## Структура проекта
-`
+```
 crowd_db/
 ├── pytest.ini
 ├── requirements.txt
@@ -34,7 +34,7 @@ crowd_db/
     ├── test_repository_integration.py
     ├── test_repository_unit.py
     └── test_validator_integration.py
-`
+```
 ## Установка MONGODB и python-окружения
 
 - Если ОС - linux (Ubuntu), то запустите скрипт install_mongodb_ubuntu.sh
