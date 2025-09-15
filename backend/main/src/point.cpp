@@ -93,3 +93,19 @@ Action Point::to_another(const Point &point) const {
             throw std::logic_error("Points are not close to each other!");
     }
 }
+
+Point operator*(const Point &p, int scalar) noexcept {
+    return Point(p.get_x() * scalar, p.get_y() * scalar);
+}
+
+Point operator+(const Point &p, int scalar) noexcept {
+    return Point(p.get_x() + scalar, p.get_y() + scalar);
+}
+
+Point operator*(int scalar, const Point &p) noexcept {
+    return p * scalar;
+}
+
+Point operator+(int scalar, const Point &p) noexcept {
+    return p + scalar;
+}

@@ -15,10 +15,10 @@ TEST(test_person, random_test) {
     std::uniform_int_distribution<std::mt19937::result_type>
         direction_distribution(0, 3);
     for (int i = 0; i < 1000; ++i) {
-        std::vector<Segment> border;
+        std::vector<Border> border;
         int border_size = distribution(generator);
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Segment(
+            border.push_back(Border(
                 Point(distribution(generator), distribution(generator)),
                 Point(distribution(generator), distribution(generator))));
         }
@@ -39,7 +39,7 @@ TEST(test_person, random_test) {
             }
             finish = neighbors[direction_index];
         }
-        Person person(start, finish, &grid);
+        Person person(0, start, finish, &grid);
         auto route = person.calculate_route();
         ASSERT_TRUE(route.has_value());
         Point current_point = start;

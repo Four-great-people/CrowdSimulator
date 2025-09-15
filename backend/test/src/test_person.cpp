@@ -8,12 +8,12 @@
 #include "point.h"
 
 TEST(test_person, calculate_route__same_point__returns_empty_vector) {
-    std::vector border{Segment(Point(0, 0), Point(0, 10)),
-                       Segment(Point(0, 10), Point(10, 10)),
-                       Segment(Point(10, 10), Point(10, 0)),
-                       Segment(Point(0, 0), Point(10, 0))};
+    std::vector border{Border(Point(0, 0), Point(0, 10)),
+                       Border(Point(0, 10), Point(10, 10)),
+                       Border(Point(10, 10), Point(10, 0)),
+                       Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(Point(1, 1), Point(1, 1), &grid);
+    Person person(0, Point(1, 1), Point(1, 1), &grid);
     
     auto route = person.calculate_route();
 
@@ -22,12 +22,12 @@ TEST(test_person, calculate_route__same_point__returns_empty_vector) {
 }
 
 TEST(test_person, calculate_route__another_point__returns_route) {
-    std::vector border{Segment(Point(0, 0), Point(0, 10)),
-                       Segment(Point(0, 10), Point(10, 10)),
-                       Segment(Point(10, 10), Point(10, 0)),
-                       Segment(Point(0, 0), Point(10, 0))};
+    std::vector border{Border(Point(0, 0), Point(0, 10)),
+                       Border(Point(0, 10), Point(10, 10)),
+                       Border(Point(10, 10), Point(10, 0)),
+                       Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(Point(1, 1), Point(1, 2), &grid);
+    Person person(0, Point(1, 1), Point(1, 2), &grid);
     
     auto route = person.calculate_route();
 
@@ -37,12 +37,12 @@ TEST(test_person, calculate_route__another_point__returns_route) {
 }
 
 TEST(test_person, calculate_route__far_away_point__returns_route) {
-    std::vector border{Segment(Point(0, 0), Point(0, 10)),
-                       Segment(Point(2, 10), Point(10, 10)),
-                       Segment(Point(10, 10), Point(10, 0)),
-                       Segment(Point(0, 0), Point(10, 0))};
+    std::vector border{Border(Point(0, 0), Point(0, 10)),
+                       Border(Point(2, 10), Point(10, 10)),
+                       Border(Point(10, 10), Point(10, 0)),
+                       Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(Point(1, 1), Point(1, 20), &grid);
+    Person person(0, Point(1, 1), Point(1, 20), &grid);
     
     auto route = person.calculate_route();
 
@@ -54,12 +54,12 @@ TEST(test_person, calculate_route__far_away_point__returns_route) {
 }
 
 TEST(test_person, calculate_route__unreachable_point_inside__returns_nullopt) {
-    std::vector border{Segment(Point(0, 0), Point(0, 10)),
-                       Segment(Point(0, 10), Point(10, 10)),
-                       Segment(Point(10, 10), Point(10, 0)),
-                       Segment(Point(0, 0), Point(10, 0))};
+    std::vector border{Border(Point(0, 0), Point(0, 10)),
+                       Border(Point(0, 10), Point(10, 10)),
+                       Border(Point(10, 10), Point(10, 0)),
+                       Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(Point(1, 1), Point(1, 20), &grid);
+    Person person(0, Point(1, 1), Point(1, 20), &grid);
     
     auto route = person.calculate_route();
 
@@ -67,12 +67,12 @@ TEST(test_person, calculate_route__unreachable_point_inside__returns_nullopt) {
 }
 
 TEST(test_person, calculate_route__unreachable_point_outside__returns_nullopt) {
-    std::vector border{Segment(Point(0, 0), Point(0, 10)),
-                       Segment(Point(0, 10), Point(10, 10)),
-                       Segment(Point(10, 10), Point(10, 0)),
-                       Segment(Point(0, 0), Point(10, 0))};
+    std::vector border{Border(Point(0, 0), Point(0, 10)),
+                       Border(Point(0, 10), Point(10, 10)),
+                       Border(Point(10, 10), Point(10, 0)),
+                       Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(Point(1, 20), Point(1, 1), &grid);
+    Person person(0, Point(1, 20), Point(1, 1), &grid);
     
     auto route = person.calculate_route();
 

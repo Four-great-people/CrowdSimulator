@@ -7,7 +7,6 @@
 #include "grid.h"
 #include "person.h"
 #include "point.h"
-#include "segment.h"
 
 using Action::DOWN;
 using Action::LEFT;
@@ -69,16 +68,16 @@ Point to_point(const Convertor::Point &p) {
     return Point(p.x, p.y);
 }
 
-Segment to_segment(const Convertor::Segment &s) {
-    return Segment(to_point(s.first), to_point(s.second));
+Border to_border(const Convertor::Segment &s) {
+    return Border(to_point(s.first), to_point(s.second));
 }
 
 json ApplicationContext::calculate_route(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
     auto map = input.template get<Convertor::Map>();
-    std::vector<Segment> borders;
+    std::vector<Border> borders;
     for (const auto &segment : map.borders) {
-        borders.push_back(to_segment(segment));
+        borders.push_back(to_border(segment));
     }
     Grid grid(borders, Point(map.down_left_point.x, map.down_left_point.y),
               Point(map.up_right_point.x, map.up_right_point.y));
