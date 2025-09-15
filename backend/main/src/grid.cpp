@@ -2,7 +2,9 @@
 
 #include <algorithm>
 
-Grid::Grid(std::span<Segment> borders, Point lower_left, Point upper_right)
+#include "border.h"
+
+Grid::Grid(std::span<Border> borders, Point lower_left, Point upper_right)
     : _borders(borders.begin(), borders.end()),
       _lower_left_point(lower_left),
       _upper_right_point(upper_right) {}
