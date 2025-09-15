@@ -29,6 +29,11 @@ class Point {
     int _y;
 };
 
+Point operator*(const Point &p, int scalar) noexcept;
+Point operator*(int scalar, const Point &p) noexcept;
+Point operator+(const Point &p, int scalar) noexcept;
+Point operator+(int scalar, const Point &p) noexcept;
+
 namespace std {
 template <>
 struct hash<Point> {
