@@ -56,6 +56,13 @@ class Cell {
             goal: this.goal,
         };
     }
+
+    clone(): Cell {
+        const newCell = new Cell(this.x, this.y, this.isWall, this.goal ? { ...this.goal } : null);
+        newCell.directionOfWall = [...this.directionOfWall];
+        newCell.persons = this.persons.map(person => person.clone());
+        return newCell;
+    }
 }
 
 export default Cell;

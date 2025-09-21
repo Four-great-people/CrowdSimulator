@@ -15,6 +15,13 @@ export class Wall {
             second: this.second
         };
     }
+
+    clone(): Wall {
+        return new Wall(
+            { ...this.first },
+            { ...this.second }
+        );
+    }
 }
 
 export default Wall

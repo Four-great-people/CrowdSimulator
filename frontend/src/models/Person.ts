@@ -4,11 +4,11 @@ class Person {
     goal: { x: number, y: number };
     reachedGoal: boolean;
 
-    constructor(id: number, position: { x: number, y: number }, goal: { x: number, y: number }) {
+    constructor(id: number, position: { x: number, y: number }, goal: { x: number, y: number }, reachedGoal: boolean = false) {
         this.id = id;
         this.position = position;
         this.goal = goal;
-        this.reachedGoal = false;
+        this.reachedGoal = reachedGoal;
     }
 
     updatePosition(newPosition: { x: number, y: number }) {
@@ -25,6 +25,15 @@ class Person {
             position: this.position,
             goal: this.goal,
         };
+    }
+
+    clone(): Person {
+        return new Person(
+            this.id,
+            { ...this.position },
+            { ...this.goal },
+            this.reachedGoal
+        );
     }
 }
 

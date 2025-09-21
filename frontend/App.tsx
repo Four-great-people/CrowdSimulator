@@ -52,36 +52,26 @@ const App: React.FC = () => {
         setIsAnimating(true);
 
         try {
-            await SendGridDataToBackend(grid);
-            const routesFromBackend = await GetRoutesFromBackend();
-
-            const gridCopy = grid.clone();
-            
-            const persons: Person[] = [];
-            grid.cells.forEach(row => {
-                row.forEach(cell => {
-                    if (cell.persons.length > 0) {
-                        cell.persons.forEach(person => {
-                            const newPerson = new Person(
-                                person.id,
-                                { ...person.position },
-                                { ...person.goal }
-                            );
-                            newPerson.reachedGoal = person.reachedGoal || false;
-                            persons.push(newPerson);
-                            gridCopy.addPerson(newPerson);
-                        });
-                    }
-                });
+        await SendGridDataToBackend(grid);
+        const routesFromBackend = await GetRoutesFromBackend();
+        const gridCopy = grid.clone();
+        setGrid(gridCopy);
+        
+        const persons: Person[] = [];
+        gridCopy.cells.forEach(row => {
+            row.forEach(cell => {
+                if (cell.persons.length > 0) {
+                    persons.push(...cell.persons);
+                }
             });
-            
-            setGrid(gridCopy);
-            executeSteps(gridCopy, persons, 0, routesFromBackend);
-            
-        } catch (error) {
-            console.error('Ошибка при работе с бэкендом:', error);
-            setIsAnimating(false);
-        }
+        });
+        
+        executeSteps(gridCopy, persons, 0, routesFromBackend);
+        
+    } catch (error) {
+        console.error('Ошибка при работе с бэкендом:', error);
+        setIsAnimating(false);
+    }
     };
 
     const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
@@ -124,8 +114,7 @@ const App: React.FC = () => {
                         oldCell.persons = oldCell.persons.filter(p => p.id !== person.id);
                     }
                     
-                    const newPerson = new Person(person.id, newPosition, person.goal);
-                    newPerson.reachedGoal = person.reachedGoal;
+                    const newPerson = new Person(person.id, newPosition, person.goal, person.reachedGoal);
 
                     if (newPosition.x === person.goal.x && newPosition.y === person.goal.y) {
                         newPerson.reachedGoal = true;
@@ -136,22 +125,18 @@ const App: React.FC = () => {
                             goalCell.removeGoal();
                         }
                     }
-                    const newCell = newGrid.getCell(newPosition.x, newPosition.y);
-                    if (newCell) {
-                        newCell.persons.push(newPerson);
-                    }
 
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                     updatedSteps[person.id] = stepIndex + 1;
                 } else {
-                    const newPerson = new Person(person.id, person.position, person.goal);
+                    const newPerson = new Person(person.id, person.position, person.goal, person.reachedGoal);
                     newPerson.reachedGoal = person.reachedGoal;
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                 }
             } else {
-                const newPerson = new Person(person.id, person.position, person.goal);
+                const newPerson = new Person(person.id, person.position, person.goal, person.reachedGoal);
                 newPerson.reachedGoal = person.reachedGoal;
                 updatedPersons.push(newPerson);
                 newGrid.addPerson(newPerson);
@@ -173,7 +158,7 @@ const App: React.FC = () => {
         <div className="App">
             <div className="controls">
                 <button onClick={startAnimation} disabled={isAnimating}>
-                    {isAnimating ? 'Анимация...' : 'Запустить анимацию'}
+                    {isAnimating ? 'Animating...' : 'Start Animation'}
                 </button>
             </div>
             {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals}  />}

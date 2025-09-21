@@ -1,4 +1,3 @@
-import { pseudoRandomBytes } from 'crypto';
 import Cell from './Cell';
 import Person from './Person';
 import Wall from './Wall';
@@ -30,19 +29,27 @@ export class Grid {
         return grid;
     }
 
+
     clone(): Grid {
         const newGrid = new Grid(this.width, this.height);
-        
+
         this.cells.forEach((row, y) => {
             row.forEach((cell, x) => {
                 const targetCell = newGrid.getCell(x, y);
                 if (targetCell) {
-                    targetCell.isWall = cell.isWall;
-                    targetCell.directionOfWall = cell.directionOfWall;
-                    targetCell.persons = [...cell.persons]; 
-                    targetCell.goal = cell.goal ? {...cell.goal} : null;
+                    newGrid.cells[y][x] = cell.clone();
                 }
             });
+        });
+        
+        newGrid.walls = this.walls.map(wall => wall.clone());
+        
+        newGrid.persons = this.persons.map(person => {
+            const cell = newGrid.getCell(person.position.x, person.position.y);
+            if (cell && cell.persons.length > 0) {
+                return cell.persons.find(p => p.id === person.id) || person.clone();
+            }
+            return person.clone();
         });
         
         return newGrid;
@@ -92,7 +99,9 @@ export class Grid {
 
     getDataForBackend() {
         return {
-            walls: this.walls.map(wall => wall.toJSON()),
+            up_right_point: { x: this.width - 1, y: this.height - 1 },
+            down_left_point: { x: 0, y: 0 },
+            borders: this.walls.map(wall => wall.toJSON()),
             persons: this.persons.map(person => ({
                 id: person.id,
                 position: person.position,
