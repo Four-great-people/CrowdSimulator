@@ -3,7 +3,7 @@ import './styles/App.css';
 import GridComponent from './src/components/GridComponent';
 import Grid from './src/models/Grid';
 import Person from './src/models/Person';
-import { SendGridDataToBackend, GetRoutesFromBackend } from './src/services/api';
+import { saveMapToBackend, GetRoutesFromBackend } from './src/services/api';
 
 
 const App: React.FC = () => {
@@ -11,6 +11,8 @@ const App: React.FC = () => {
     const [currentSteps, setCurrentSteps] = useState<{[id: number]: number}>({});
     const [completedGoals, setCompletedGoals] = useState<{[id: number]: boolean}>({});  
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
 
     useEffect(() => {
@@ -46,14 +48,34 @@ const App: React.FC = () => {
         };
     }, []);
 
+    const saveMap = async () => {
+        if (!grid || isSaving) return;
+        
+        setIsSaving(true);
+        try {
+            const generatedMapId = await saveMapToBackend(grid);
+            setMapId(generatedMapId);
+            console.log(generatedMapId);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    
+
     const startAnimation = async () => {
+        if (!mapId) {
+            alert("Необходимо сохранить карту");
+            return;
+        }
         if (!grid || isAnimating) return;
         
         setIsAnimating(true);
 
         try {
-        await SendGridDataToBackend(grid);
-        const routesFromBackend = await GetRoutesFromBackend();
+        const routesFromBackend = await GetRoutesFromBackend(mapId);
         const gridCopy = grid.clone();
         setGrid(gridCopy);
         
@@ -157,6 +179,9 @@ const App: React.FC = () => {
     return (
         <div className="App">
             <div className="controls">
+                <button onClick={saveMap} disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save Map"}
+                </button>
                 <button onClick={startAnimation} disabled={isAnimating}>
                     {isAnimating ? 'Animating...' : 'Start Animation'}
                 </button>

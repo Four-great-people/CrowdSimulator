@@ -1,16 +1,25 @@
 import { Grid } from '../models/Grid';
 
-export const SendGridDataToBackend = async (grid: Grid): Promise<void> => {
+export interface SaveMapResponse {
+    mapId: string;
+}
+
+export const saveMapToBackend = async (grid: Grid): Promise<string> => {
     try {
-        const requestData = grid.getDataForBackend();      
+        const requestData = grid.getDataForBackend();
+
+        // const data: SaveMapResponse = await response.json();
+        // return data.mapId;
+        
         console.log(requestData);
+        return "id-1234";
         
     } catch (error) {
         throw error;
     }
 };
 
-export const GetRoutesFromBackend = async (): Promise<{id: number, route: string[]}[]> => {
+export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
     try {
 
         // Заглушка ответа
