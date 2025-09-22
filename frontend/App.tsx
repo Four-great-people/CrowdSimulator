@@ -12,6 +12,7 @@ const App: React.FC = () => {
     const [completedGoals, setCompletedGoals] = useState<{[id: number]: boolean}>({});  
     const [isAnimating, setIsAnimating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [animationCompleted, setAnimationCompleted] = useState(false);
     const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
 
@@ -70,9 +71,14 @@ const App: React.FC = () => {
             alert("Необходимо сохранить карту");
             return;
         }
+        if (animationCompleted) {
+            alert("Анимация завершена");
+            return;
+        }
         if (!grid || isAnimating) return;
         
         setIsAnimating(true);
+        setAnimationCompleted(false);
 
         try {
         const routesFromBackend = await GetRoutesFromBackend(mapId);
@@ -104,6 +110,7 @@ const App: React.FC = () => {
         
         if (allRoutesCompleted) {
             setIsAnimating(false);
+            setAnimationCompleted(true);
             return;
         }
         
