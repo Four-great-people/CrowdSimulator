@@ -3,6 +3,70 @@
 ### Purpose
 This services are working with many computation-lite requests like signing up, saving map etc. This services are also between frontend and backend on finding paths requests.
 
+# Flask сервер
+Этот сервис для взаимодействия между фронтом и C++-бэкендом:
+- принимает карту от фронта и сохраняет её в MONGODB
+- по ID отдаёт карту
+- по ID отправляет карту на C++ и возвращает рассчитанные маршруты
+
+## Быстрый старт
+1. Зависимости и окружение
+```bash 
+cd middle-services
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+MongoDB должен быть запущен (см. ниже)
+
+2. Запуск фласк
+```bash
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run --port 5000
+
+```
+## Эндпоинты
+### POST /maps - сохранить карту
+сохраняет документ и возвращает _id
+```bash
+curl -X POST http://127.0.0.1:5000/maps \
+  -H "Content-Type: application/json" \
+  -d '{
+    "up_right_point": {"x": 10, "y": 10},
+    "down_left_point": {"x": 0, "y": 0},
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
+      {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+    ]
+  }'
+
+```
+Ответ:
+```json
+{ "_id": "..." }
+```
+### GET /maps/<id> — получить карту по ID
+Возвращает карту в «правильном» порядке ключей (как выше).
+```bash
+curl http://127.0.0.1:5000/maps/<id>
+```
+### POST /maps/<id>/simulate — запустить расчёт маршрутов
+- Достаёт карту из БД,
+- формирует JSON в нужном порядке ключей,
+- отправляет на C++ POST CPP_BACKEND_URL,
+- возвращает ответ C++ как есть (обычно массив маршрутов).
+```bash
+curl -X POST http://127.0.0.1:5000/maps/<id>/simulate
+```
+
+## Тесты
+```bash
+pytest -q tests_api
+```
 # Crowd DB
 Проект представляет собой базу данных для хранения карт и людей для симуляции толпы.
 В качестве хранилища используется MongoDB. Работа с базой выполняется через Python (библиотека pymongo).
