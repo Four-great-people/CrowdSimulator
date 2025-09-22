@@ -1,20 +1,16 @@
 import { Grid } from '../models/Grid';
 
-export interface SaveMapResponse {
-    mapId: string;
-}
-
 export const saveMapToBackend = async (grid: Grid): Promise<string> => {
     try {
         const requestData = grid.getDataForBackend();
 
-        const response = await fetch("localhost::5000/maps", {
+        const response = await fetch("http://localhost:5000/maps", {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(requestData)
         });
-        const data: SaveMapResponse = await response.json();
-        return data.mapId;
+        const data = await response.json();
+        return data._id;
         
     } catch (error) {
         throw error;
@@ -24,7 +20,7 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
 export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
     try {
 
-        const response = await fetch("localhost:5000/maps/" + mapId + "/simulate");
+        const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", {method: 'POST'});
         const data = await response.json();
         return data;
         
