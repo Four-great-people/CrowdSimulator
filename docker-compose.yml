@@ -5,6 +5,16 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
+    depends_on:
+      - middle-end
+    networks:
+      - app-network
+  middle-end:
+    build: ./middle-services
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
     networks:
       - app-network
   backend:
