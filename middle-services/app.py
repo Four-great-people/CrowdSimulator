@@ -10,15 +10,18 @@ from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc
 from crowd_db.db.repository import MongoMapRepository
+from crowd_db.db.validators import apply_collection_validator
 
 load_dotenv()
 
-CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://localhost:8080/route")
+CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://0.0.0.0:8080/route")
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 CORS(app)
 
+# apply_collection_validator()
+storage = ""
 repo = MongoMapRepository()
 
 
@@ -41,10 +44,13 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
 # ------- 1) Сохранить карту -------
 @app.route("/maps", methods=["POST"])
 def create_map():
+    global storage
     payload = request.get_json(force=True)
     try:
         m = MapDoc.from_bson(payload)
-        oid = repo.create(m)
+        # oid = repo.create(m)
+        oid = 0
+        storage = m
         return jsonify({"_id": str(oid)}), 201
     except Exception as e:
         return jsonify({"error": f"invalid map payload: {e}"}), 400
@@ -53,7 +59,9 @@ def create_map():
 # ------- 2) Получить карту по id -------
 @app.route("/maps/<map_id>", methods=["GET"])
 def get_map(map_id: str):
-    m = repo.get(map_id)
+    global storage
+    # m = repo.get(map_id)
+    m = storage
     if not m:
         return jsonify({"error": "map not found"}), 400
 
@@ -74,7 +82,9 @@ def get_map(map_id: str):
 # ------- 3) Запустить симуляцию -------
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
-    m = repo.get(map_id)
+    global storage
+    # m = repo.get(map_id)
+    m = storage
     if not m:
         return jsonify({"error": "map not found"}), 400
 
