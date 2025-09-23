@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - middle-end
+    networks:
+      - app-network
+  middle-end:
+    build: ./middle-services
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+      - db
+    networks:
+      - app-network
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+  db:
+    image: mongo:4.4.6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+    volumes:
+      - $HOME/mongo_db/data/db
+      - ./init_mongo.sh:/docker-entrypoint-initdb.d/init_mongo.sh:ro
+
+volumes:
+  mongo_db:
+
+networks: 
+  app-network:
+    driver: bridge
