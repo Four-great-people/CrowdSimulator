@@ -15,4 +15,4 @@ ENV MONGODB_COLLECTION_MAPS=maps
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=development
-CMD ["flask", "run", "--port", "5000"]
+CMD ["flask", "run", "--port", "5000", "--host", "0.0.0.0"]
