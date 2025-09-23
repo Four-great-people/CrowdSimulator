@@ -45,7 +45,7 @@ POST /route
 Request:
 ```
 {
-    "_id": 0,
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
