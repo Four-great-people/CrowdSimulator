@@ -55,7 +55,7 @@ def create_map():
 def get_map(map_id: str):
     m = repo.get(map_id)
     if not m:
-        return jsonify({"error": "map not found"}), 404
+        return jsonify({"error": "map not found"}), 400
 
     resp = OrderedDict()
     if m._id is not None:
@@ -76,7 +76,7 @@ def get_map(map_id: str):
 def simulate(map_id: str):
     m = repo.get(map_id)
     if not m:
-        return jsonify({"error": "map not found"}), 404
+        return jsonify({"error": "map not found"}), 400
 
     od = mapdoc_to_json(m)
     payload = json.dumps(od, ensure_ascii=False)
@@ -90,7 +90,7 @@ def simulate(map_id: str):
         )
         r.raise_for_status()
     except requests.RequestException as e:
-        return jsonify({"error": "cpp backend error", "details": str(e)}), 502
+        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
 
     return jsonify(r.json()), 200
 

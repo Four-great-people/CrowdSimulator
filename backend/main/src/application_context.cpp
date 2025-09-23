@@ -46,7 +46,7 @@ struct Person {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Person, id, position, goal)
 
 struct Map {
-    int _id;
+    std::string _id;
     Point down_left_point;
     Point up_right_point;
     std::vector<Segment> borders;
