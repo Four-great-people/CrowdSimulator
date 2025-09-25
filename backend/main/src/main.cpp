@@ -2,7 +2,6 @@
 #include <crow/middlewares/cors.h>
 
 #include <sstream>
-#include <stdexcept>
 #include <string>
 
 #include "application_context.h"
@@ -21,15 +20,18 @@ int main(int argc, const char** argv) {
                 std::stringstream s;
                 s << result;
                 return crow::response(s.str());
-            } catch (const nlohmann::json::parse_error &error) {
+            } catch (const nlohmann::json::parse_error& error) {
                 return crow::response(crow::status::BAD_REQUEST, "Not json");
             } catch (const nlohmann::json::out_of_range& error) {
                 return crow::response(crow::status::BAD_REQUEST,
                                       "Invalid JSON format");
+            } catch (const nlohmann::json::type_error& error) {
+                return crow::response(crow::status::BAD_REQUEST,
+                                      "Invalid JSON format: type error");
             }
         });
 
-    auto &cors = app.get_middleware<crow::CORSHandler>();
+    auto& cors = app.get_middleware<crow::CORSHandler>();
     cors.global().origin("*");
     app.port(8080).multithreaded().run();
     return 0;
