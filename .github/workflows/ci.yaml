@@ -1,0 +1,90 @@
+name: ci
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install -y wget cmake g++
+          sudo apt install -y libasio-dev zlib1g-dev libssl-dev libgtest-dev libgmock-dev
+          wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+          sudo dpkg -i Crow-1.2.1-Linux.deb
+      
+      - name: set cmake
+        run: |
+          cd backend
+          mkdir build
+          cd build
+          cmake ..
+      
+      - name: build
+        run: |
+          cd backend/build
+          make backend
+      
+      - name: test
+        run: |
+          cd backend/build
+          make backend_test
+          ./backend_test
+      
+      - name: asan test
+        run: |
+          cd backend/build
+          make backend_test_sans
+          ./backend_test_sans
+      
+      - name: tsan test
+        run: |
+          cd backend/build
+          make backend_test_tsan
+          ./backend_test_tsan
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install npm nodejs curl
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+          \. "$HOME/.nvm/nvm.sh"
+          nvm install 22
+          cd frontend
+          npm install
+
+      - name: build
+        run: |
+          cd frontend
+          npm run build
+  
+  test-middle-end:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install python3-pip
+          python3 -m pip config set global.break-system-packages true
+          cd middle-services
+          pip3 install -r requirements.txt
+          pip3 install -r crowd_db/requirements.txt
+
+      - name: mock-tests
+        run: |
+          cd middle-services
+          pytest -q tests_api
