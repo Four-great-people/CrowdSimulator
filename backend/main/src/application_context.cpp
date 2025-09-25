@@ -12,6 +12,10 @@ using Action::DOWN;
 using Action::LEFT;
 using Action::RIGHT;
 using Action::UP;
+using Action::RIGHT_DOWN;
+using Action::LEFT_DOWN;
+using Action::LEFT_UP;
+using Action::RIGHT_UP;
 using nlohmann::json;
 
 NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
@@ -19,6 +23,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
                                          {DOWN, "DOWN"},
                                          {LEFT, "LEFT"},
                                          {RIGHT, "RIGHT"},
+                                         {RIGHT_UP, "RIGHT_UP"},
+                                         {LEFT_UP, "LEFT_UP"},
+                                         {RIGHT_DOWN, "RIGHT_DOWN"},
+                                         {LEFT_DOWN, "LEFT_DOWN"},
                                      })
 
 namespace Convertor {

@@ -22,6 +22,10 @@ Point Point::operator-(const Point &other) const noexcept {
 Point Point::operator+(const Action &action) const {
     Point copy = *this;
     switch (action) {
+        case Action::LEFT_UP:
+            --copy._x;
+            ++copy._y;
+            return copy;
         case Action::UP:
             ++copy._y;
             return copy;
@@ -36,6 +40,19 @@ Point Point::operator+(const Action &action) const {
             return copy;
         case Action::WAIT:
             return copy;
+        case Action::RIGHT_UP:
+            ++copy._x;
+            ++copy._y;
+            return copy;
+        case Action::LEFT_DOWN:
+            --copy._x;
+            --copy._y;
+            return copy;
+        case Action::RIGHT_DOWN:
+            ++copy._x;
+            --copy._y;
+            return copy;
+            break;
     }
     throw std::logic_error("Unreachable");
 }
@@ -77,10 +94,16 @@ Action Point::to_another(const Point &point) const {
     Point temp = point - *this;
     switch (temp.get_x()) {
         case -1:
-            if (temp.get_y() != 0) {
-                throw std::logic_error("Move uses two axis!");
+            switch (temp.get_y()) {
+                case -1:
+                    return Action::LEFT_DOWN;
+                case 0:
+                    return Action::LEFT;
+                case 1:
+                    return Action::LEFT_UP;
+                default:
+                    throw std::logic_error("Points are not close to each other!");
             }
-            return Action::LEFT;
         case 0:
             switch (temp.get_y()) {
                 case -1:
@@ -93,10 +116,16 @@ Action Point::to_another(const Point &point) const {
                     throw std::logic_error("Points are not close to each other!");
             }
         case 1:
-            if (temp.get_y() != 0) {
-                throw std::logic_error("Move uses two axis!");
+            switch (temp.get_y()) {
+                case -1:
+                    return Action::RIGHT_DOWN;
+                case 0:
+                    return Action::RIGHT;
+                case 1:
+                    return Action::RIGHT_UP;
+                default:
+                    throw std::logic_error("Points are not close to each other!");
             }
-            return Action::RIGHT;
         default:
             throw std::logic_error("Points are not close to each other!");
     }
