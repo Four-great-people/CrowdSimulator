@@ -4,13 +4,15 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
     try {
         const requestData = grid.getDataForBackend();
 
-        const response = await fetch("http://localhost:5000/maps", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(requestData)
-        });
-        const data = await response.json();
-        return data._id;
+        // const response = await fetch("http://localhost:5000/maps", {
+        //     method: 'POST',
+        //     headers: {'Content-Type': 'application/json'},
+        //     body: JSON.stringify(requestData)
+        // });
+        // const data = await response.json();
+        // return data._id;
+        console.log(requestData);
+        return "0";
         
     } catch (error) {
         throw error;
@@ -20,9 +22,26 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
 export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
     try {
 
-        const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", {method: 'POST'});
-        const data = await response.json();
-        return data;
+        // const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", {method: 'POST'});
+        // const data = await response.json();
+        // return data;
+        // Заглушка ответа
+
+
+
+        return [
+
+
+            { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
+
+
+            { "id": 2, "route": ["UP", "RIGHT", "RIGHT", "RIGHT", "RIGHT"] },
+
+
+            { "id": 3, "route": ["DOWN", "LEFT", "LEFT", "LEFT"] }
+
+
+        ];
         
     } catch (error) {
         throw error;
