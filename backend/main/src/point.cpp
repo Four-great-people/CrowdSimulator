@@ -72,7 +72,11 @@ long long Point::cross_product(const Point &other) const noexcept {
 std::vector<Point> Point::get_neighbors() const noexcept {
     return {
         Point(_x, _y + 1),
+        Point(_x + 1, _y + 1),
+        Point(_x - 1, _y + 1),
         Point(_x, _y - 1),
+        Point(_x + 1, _y - 1),
+        Point(_x - 1, _y - 1),
         Point(_x + 1, _y),
         Point(_x - 1, _y),
     };
