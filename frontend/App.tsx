@@ -102,16 +102,14 @@ const App: React.FC = () => {
         }
     };
 
-    const isRouteCompleted = (route: any, stepIndex: number): boolean => {
-        let countOfDiagonalElements = route.route.reduce((c: number, w: string) => { return w.includes("_") ? c + 1 : c; }, 0);
-        let countOfNonDiagonalElements = route.route.length - countOfDiagonalElements
-        return !route || countOfDiagonalElements * 2 + countOfNonDiagonalElements * 3 <= stepIndex
+    const isRouteCompleted = (route: any): boolean => {
+        return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
 
     const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
-            return isRouteCompleted(route, stepIndex);
+            return isRouteCompleted(route);
         });
 
         if (allRoutesCompleted) {
@@ -130,26 +128,29 @@ const App: React.FC = () => {
 
         persons.forEach(person => {
             const route = routes.find(r => r.id === person.id);
-            if (!route.animationIndex) {
+            if (route.animationIndex === undefined) {
                 route.animationIndex = 0
+                route.waitIndex = 0
             }
 
-            if (!isRouteCompleted(route, stepIndex)) {
+            if (!isRouteCompleted(route)) {
                 const direction = route.route[route.animationIndex];
                 const newPosition = { ...person.position };
 
-                if (stepIndex % 2 == 1) {
+                if (route.waitIndex == 1) {
                     route.animationIndex += 1;
+                    route.waitIndex = -1;
                     switch (direction) {
                         case 'RIGHT': newPosition.x += 1; break;
                         case 'LEFT': newPosition.x -= 1; break;
                         case 'UP': newPosition.y += 1; break;
                         case 'DOWN': newPosition.y -= 1; break;
-                        default: route.animationIndex -= 1;
+                        default: route.animationIndex -= 1; route.waitIndex = 1;
                     }
                 }
-                if (stepIndex % 3 == 2) {
+                if (route.waitIndex == 2) {
                     route.animationIndex += 1;
+                    route.waitIndex = -1
                     switch (direction) {
                         case 'RIGHT_UP': newPosition.x += 1; newPosition.y += 1; break;
                         case 'LEFT_UP': newPosition.x -= 1; newPosition.y += 1; break;
@@ -158,6 +159,7 @@ const App: React.FC = () => {
                         default: route.animationIndex -= 1;
                     }
                 }
+                route.waitIndex += 1;
 
                 const targetCell = currentGrid.getCell(newPosition.x, newPosition.y);
                 if (targetCell) {

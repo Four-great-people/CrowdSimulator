@@ -35,7 +35,7 @@ export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, 
             { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
 
 
-            { "id": 2, "route": ["UP", "RIGHT", "RIGHT", "RIGHT", "RIGHT"] },
+            { "id": 2, "route": ["RIGHT_UP", "RIGHT", "RIGHT", "RIGHT"] },
 
 
             { "id": 3, "route": ["DOWN", "LEFT", "LEFT", "LEFT"] }
