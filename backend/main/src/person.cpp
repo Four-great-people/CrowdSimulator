@@ -13,7 +13,7 @@ Person::Person(int id, Point position, Point goal, Grid *grid)
     : _id(id), _position(position), _goal(goal), _personal_grid(grid) {}
 
 int Person::h(const Point &point) const noexcept {
-    return static_cast<int>((_goal - point).abs_norm());
+    return static_cast<int>((_goal - point).diag_norm_multiplied2());
 }
 
 // f is priority, g is cost

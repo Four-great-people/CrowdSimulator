@@ -65,6 +65,14 @@ long long Point::abs_norm() const noexcept {
     return std::abs(_x) + std::abs(_y);
 }
 
+long long Point::diag_norm_multiplied2() const noexcept {
+    int abs_x = std::abs(_x);
+    int abs_y = std::abs(_y);
+    int min_coordinate = std::min(abs_x, abs_y);
+    // move through diagonal efficiently and then use grid
+    return min_coordinate * 3 + (std::max(abs_x, abs_y) - min_coordinate) * 2;
+}
+
 Action Point::to_another(const Point &point) const {
     Point temp = point - *this;
     switch (temp.get_x()) {
