@@ -106,6 +106,49 @@ const App: React.FC = () => {
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
 
+    const getTimeToWait = (direction: any): number => {
+        switch (direction) {
+            case 'RIGHT':
+            case 'LEFT':
+            case 'UP':
+            case 'DOWN': return 1;
+            case 'RIGHT_UP':
+            case 'LEFT_UP':
+            case 'RIGHT_DOWN':
+            case 'LEFT_DOWN': return 2;
+            default:
+                throw new Error("Unsupported direction!");
+        }
+    }
+
+    const transformToNextRouteState = (route: any, newPosition: {
+        x: number;
+        y: number;
+    }) => {
+        if (route.animationIndex === undefined) {
+            route.animationIndex = 0
+            route.tactToWait = getTimeToWait(route.route[route.animationIndex]) - 1
+        }
+        if (route.tactToWait == 0) {
+            const direction = route.route[route.animationIndex];
+            route.animationIndex += 1;
+            if (!isRouteCompleted(route)) {
+                route.tactToWait = getTimeToWait(route.route[route.animationIndex]) + 1
+            }
+            switch (direction) {
+                case 'RIGHT': newPosition.x += 1; break;
+                case 'LEFT': newPosition.x -= 1; break;
+                case 'UP': newPosition.y += 1; break;
+                case 'DOWN': newPosition.y -= 1; break;
+                case 'RIGHT_UP': newPosition.x += 1; newPosition.y += 1; break;
+                case 'LEFT_UP': newPosition.x -= 1; newPosition.y += 1; break;
+                case 'RIGHT_DOWN': newPosition.x += 1; newPosition.y -= 1; break;
+                case 'LEFT_DOWN': newPosition.x -= 1; newPosition.y -= 1; break;
+            }
+        }
+        route.tactToWait -= 1;
+    }
+
     const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
@@ -119,48 +162,16 @@ const App: React.FC = () => {
         }
 
         const newGrid = currentGrid.clone();
-
-
-
         const updatedPersons: Person[] = [];
         const updatedSteps = { ...currentSteps };
         const updatedCompleted = { ...completedGoals };
 
         persons.forEach(person => {
             const route = routes.find(r => r.id === person.id);
-            if (route.animationIndex === undefined) {
-                route.animationIndex = 0
-                route.waitIndex = 0
-            }
 
             if (!isRouteCompleted(route)) {
-                const direction = route.route[route.animationIndex];
                 const newPosition = { ...person.position };
-
-                if (route.waitIndex == 1) {
-                    route.animationIndex += 1;
-                    route.waitIndex = -1;
-                    switch (direction) {
-                        case 'RIGHT': newPosition.x += 1; break;
-                        case 'LEFT': newPosition.x -= 1; break;
-                        case 'UP': newPosition.y += 1; break;
-                        case 'DOWN': newPosition.y -= 1; break;
-                        default: route.animationIndex -= 1; route.waitIndex = 1;
-                    }
-                }
-                if (route.waitIndex == 2) {
-                    route.animationIndex += 1;
-                    route.waitIndex = -1
-                    switch (direction) {
-                        case 'RIGHT_UP': newPosition.x += 1; newPosition.y += 1; break;
-                        case 'LEFT_UP': newPosition.x -= 1; newPosition.y += 1; break;
-                        case 'RIGHT_DOWN': newPosition.x += 1; newPosition.y -= 1; break;
-                        case 'LEFT_DOWN': newPosition.x -= 1; newPosition.y -= 1; break;
-                        default: route.animationIndex -= 1;
-                    }
-                }
-                route.waitIndex += 1;
-
+                transformToNextRouteState(route, newPosition);
                 const targetCell = currentGrid.getCell(newPosition.x, newPosition.y);
                 if (targetCell) {
                     const oldCell = newGrid.getCell(person.position.x, person.position.y);

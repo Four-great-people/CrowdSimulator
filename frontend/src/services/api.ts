@@ -33,7 +33,7 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
     return data._id;
 }
 
-function fakeGetRoutes() {
+function fakeGetRoutes(mapId: string) {
     return [
         { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
         { "id": 2, "route": ["RIGHT_UP", "RIGHT", "RIGHT", "RIGHT"] },
