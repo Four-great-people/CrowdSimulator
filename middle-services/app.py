@@ -95,6 +95,20 @@ def simulate(map_id: str):
     return jsonify(r.json()), 200
 
 
+# ------- 4) Обновить карту по id -------
+@app.route("/maps/<map_id>", methods=["PUT"])
+def update_map(map_id: str):
+    payload = request.get_json(force=True)
+    try:
+        m = MapDoc.from_bson(payload)
+        m._id = ObjectId(map_id)  
+        ok = repo.replace(m)
+        if not ok:
+            return jsonify({"error": "map not found"}), 400
+        return jsonify({"message": "map updated"}), 200
+    except Exception as e:
+        return jsonify({"error": f"invalid map payload: {e}"}), 400
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
 
