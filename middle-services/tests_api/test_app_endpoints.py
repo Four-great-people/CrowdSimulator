@@ -45,9 +45,9 @@ def test_get_map_returns_full_document_in_order(client):
     i_persons = raw.find('"persons"')
     assert 0 <= i_id < i_up < i_down < i_borders < i_persons
 
-def test_get_map_404(client):
+def test_get_map_400(client):
     resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa")  
-    assert resp.status_code == 404
+    assert resp.status_code == 400
 
 def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock_requests):
     
