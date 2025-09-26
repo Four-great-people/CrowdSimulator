@@ -13,7 +13,7 @@ Person::Person(int id, Point position, Point goal, Grid *grid)
     : _id(id), _position(position), _goal(goal), _personal_grid(grid) {}
 
 int Person::h(const Point &point) const noexcept {
-    return static_cast<int>((_goal - point).abs_norm());
+    return static_cast<int>((_goal - point).diag_norm_multiplied2());
 }
 
 // f is priority, g is cost
@@ -47,7 +47,7 @@ std::optional<std::vector<Action>> Person::calculate_route() const {
                 position.get_y() < _personal_grid->get_lower_left().get_y()) {
                 continue;
             }
-            int new_g = current_f + 1;
+            int new_g = current_f + (position - current_position).diag_norm_multiplied2();
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;
