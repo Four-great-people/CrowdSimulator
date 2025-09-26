@@ -1,7 +1,12 @@
 import { Grid } from '../models/Grid';
 
+const useFakeCalls = process.env.MODE ? true : false
+
 export const saveMapToBackend = async (grid: Grid): Promise<string> => {
     try {
+        if (useFakeCalls) {
+            return fakeSave(grid);
+        }
         return await saveToRealBackend(grid);
     } catch (error) {
         throw error;
@@ -10,6 +15,9 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
 
 export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
     try {
+        if (useFakeCalls) {
+            return fakeGetRoutes(mapId);
+        }
         return await getRoutes(mapId);
     } catch (error) {
         throw error;
