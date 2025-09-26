@@ -17,6 +17,18 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
     }
 };
 
+
+export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<void> => {
+  const requestData = grid.getDataForBackend();
+  const response = await fetch(`http://localhost:5000/maps/${mapId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestData),
+  });
+  if (!response.ok) throw new Error("Ошибка обновления карты");
+};
+
+
 export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
     try {
 

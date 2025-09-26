@@ -3,7 +3,7 @@ import './styles/App.css';
 import GridComponent from './src/components/GridComponent';
 import Grid from './src/models/Grid';
 import Person from './src/models/Person';
-import { saveMapToBackend, GetRoutesFromBackend } from './src/services/api';
+import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend } from './src/services/api';
 
 
 const App: React.FC = () => {
@@ -54,11 +54,35 @@ const App: React.FC = () => {
         
         setIsSaving(true);
         try {
-            const generatedMapId = await saveMapToBackend(grid);
-            setMapId(generatedMapId);
-            console.log(generatedMapId);
+            if (mapId) {
+                await updateMapInBackend(mapId, grid);
+                alert("Карта обновлена");
+            } 
+
+            else {
+                const generatedMapId = await saveMapToBackend(grid);
+                setMapId(generatedMapId);
+                alert("Карта сохранена с новым ID: " + generatedMapId)
+            }
+
         } catch (error) {
             console.error(error);
+            alert("Ошибка сохранения карты");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const saveMapAs = async () => {
+        if (!grid || isSaving) return;
+        setIsSaving(true);
+        try {
+            const generatedMapId = await saveMapToBackend(grid);
+            setMapId(generatedMapId);
+            alert("Карта сохранена как новая с ID: " + generatedMapId);
+        } catch (error) {
+            console.error(error);
+            alert("Ошибка при сохранении карты как новой");
         } finally {
             setIsSaving(false);
         }
@@ -188,6 +212,9 @@ const App: React.FC = () => {
             <div className="controls">
                 <button onClick={saveMap} disabled={isSaving}>
                     {isSaving ? "Saving..." : "Save Map"}
+                </button>
+                <button onClick={saveMapAs} disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save Map As"}
                 </button>
                 <button onClick={startAnimation} disabled={isAnimating}>
                     {isAnimating ? 'Animating...' : 'Start Animation'}
