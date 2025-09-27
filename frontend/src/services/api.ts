@@ -15,13 +15,14 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
 
 
 export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<void> => {
-  const requestData = grid.getDataForBackend();
-  const response = await fetch(`http://localhost:5000/maps/${mapId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestData),
-  });
-  if (!response.ok) throw new Error("Ошибка обновления карты");
+  try {
+      if (useFakeCalls) {
+          return fakeUpdate(mapId, grid);
+      }
+      return await updateToRealBackend(mapId, grid);
+  } catch (error) {
+      throw error;
+  }
 };
 
 
@@ -53,6 +54,19 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
     return data._id;
 }
 
+async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
+  const requestData = grid.getDataForBackend();
+  const response = await fetch(`${BACKEND}/maps/${mapId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestData),
+  });
+  if (!response.ok) {
+      const t = await response.text().catch(() => '');
+      throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
+  }
+}
+
 function fakeGetRoutes(mapId: string) {
     return [
         { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
@@ -65,5 +79,10 @@ function fakeSave(grid: Grid) {
     const requestData = grid.getDataForBackend();
     console.log(requestData);
     return "0";
+}
+
+function fakeUpdate(mapId: string, grid: Grid): void {
+    const payload = grid.getDataForBackend();
+    console.log('[FAKE updateMapInBackend] mapId:', mapId, 'payload:', payload);
 }
 
