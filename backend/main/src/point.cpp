@@ -22,6 +22,10 @@ Point Point::operator-(const Point &other) const noexcept {
 Point Point::operator+(const Action &action) const {
     Point copy = *this;
     switch (action) {
+        case Action::LEFT_UP:
+            --copy._x;
+            ++copy._y;
+            return copy;
         case Action::UP:
             ++copy._y;
             return copy;
@@ -36,6 +40,19 @@ Point Point::operator+(const Action &action) const {
             return copy;
         case Action::WAIT:
             return copy;
+        case Action::RIGHT_UP:
+            ++copy._x;
+            ++copy._y;
+            return copy;
+        case Action::LEFT_DOWN:
+            --copy._x;
+            --copy._y;
+            return copy;
+        case Action::RIGHT_DOWN:
+            ++copy._x;
+            --copy._y;
+            return copy;
+            break;
     }
     throw std::logic_error("Unreachable");
 }
@@ -55,7 +72,11 @@ long long Point::cross_product(const Point &other) const noexcept {
 std::vector<Point> Point::get_neighbors() const noexcept {
     return {
         Point(_x, _y + 1),
+        Point(_x + 1, _y + 1),
+        Point(_x - 1, _y + 1),
         Point(_x, _y - 1),
+        Point(_x + 1, _y - 1),
+        Point(_x - 1, _y - 1),
         Point(_x + 1, _y),
         Point(_x - 1, _y),
     };
@@ -65,14 +86,28 @@ long long Point::abs_norm() const noexcept {
     return std::abs(_x) + std::abs(_y);
 }
 
+long long Point::diag_norm_multiplied2() const noexcept {
+    int abs_x = std::abs(_x);
+    int abs_y = std::abs(_y);
+    int min_coordinate = std::min(abs_x, abs_y);
+    // move through diagonal efficiently and then use grid
+    return min_coordinate * 3 + (std::max(abs_x, abs_y) - min_coordinate) * 2;
+}
+
 Action Point::to_another(const Point &point) const {
     Point temp = point - *this;
     switch (temp.get_x()) {
         case -1:
-            if (temp.get_y() != 0) {
-                throw std::logic_error("Move uses two axis!");
+            switch (temp.get_y()) {
+                case -1:
+                    return Action::LEFT_DOWN;
+                case 0:
+                    return Action::LEFT;
+                case 1:
+                    return Action::LEFT_UP;
+                default:
+                    throw std::logic_error("Points are not close to each other!");
             }
-            return Action::LEFT;
         case 0:
             switch (temp.get_y()) {
                 case -1:
@@ -85,10 +120,16 @@ Action Point::to_another(const Point &point) const {
                     throw std::logic_error("Points are not close to each other!");
             }
         case 1:
-            if (temp.get_y() != 0) {
-                throw std::logic_error("Move uses two axis!");
+            switch (temp.get_y()) {
+                case -1:
+                    return Action::RIGHT_DOWN;
+                case 0:
+                    return Action::RIGHT;
+                case 1:
+                    return Action::RIGHT_UP;
+                default:
+                    throw std::logic_error("Points are not close to each other!");
             }
-            return Action::RIGHT;
         default:
             throw std::logic_error("Points are not close to each other!");
     }

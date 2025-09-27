@@ -8,8 +8,8 @@ import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend } from './sr
 
 const App: React.FC = () => {
     const [grid, setGrid] = useState<Grid | null>(null);
-    const [currentSteps, setCurrentSteps] = useState<{[id: number]: number}>({});
-    const [completedGoals, setCompletedGoals] = useState<{[id: number]: boolean}>({});  
+    const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
+    const [completedGoals, setCompletedGoals] = useState<{ [id: number]: boolean }>({});
     const [isAnimating, setIsAnimating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
@@ -26,19 +26,19 @@ const App: React.FC = () => {
 
         const person1 = new Person(1, { x: 15, y: 15 }, { x: 18, y: 15 });
         const person2 = new Person(2, { x: 14, y: 16 }, { x: 18, y: 17 });
-        const person3 = new Person(3, { x: 13, y: 13}, { x: 10, y: 12});
+        const person3 = new Person(3, { x: 13, y: 13 }, { x: 10, y: 12 });
         newGrid.addPerson(person1);
         newGrid.addPerson(person2);
         newGrid.addPerson(person3);
 
         newGrid.setGoal({ x: 18, y: 15 });
         newGrid.setGoal({ x: 18, y: 17 });
-        newGrid.setGoal({ x: 10, y: 12});
+        newGrid.setGoal({ x: 10, y: 12 });
 
         setGrid(newGrid);
-        
-        const initialSteps: {[id: number]: number} = {};
-        const initialCompleted: {[id: number]: boolean} = {};
+
+        const initialSteps: { [id: number]: number } = {};
+        const initialCompleted: { [id: number]: boolean } = {};
         setCurrentSteps(initialSteps);
         setCompletedGoals(initialCompleted);
 
@@ -51,7 +51,7 @@ const App: React.FC = () => {
 
     const saveMap = async () => {
         if (!grid || isSaving) return;
-        
+
         setIsSaving(true);
         try {
             if (mapId) {
@@ -88,7 +88,7 @@ const App: React.FC = () => {
         }
     };
 
-    
+
 
     const startAnimation = async () => {
         if (!mapId) {
@@ -100,79 +100,115 @@ const App: React.FC = () => {
             return;
         }
         if (!grid || isAnimating) return;
-        
+
         setIsAnimating(true);
         setAnimationCompleted(false);
 
         try {
-        const routesFromBackend = await GetRoutesFromBackend(mapId);
-        const gridCopy = grid.clone();
-        setGrid(gridCopy);
-        
-        const persons: Person[] = [];
-        gridCopy.cells.forEach(row => {
-            row.forEach(cell => {
-                if (cell.persons.length > 0) {
-                    persons.push(...cell.persons);
-                }
+            const routesFromBackend = await GetRoutesFromBackend(mapId);
+            const gridCopy = grid.clone();
+            setGrid(gridCopy);
+
+            const persons: Person[] = [];
+            gridCopy.cells.forEach(row => {
+                row.forEach(cell => {
+                    if (cell.persons.length > 0) {
+                        persons.push(...cell.persons);
+                    }
+                });
             });
-        });
-        
-        executeSteps(gridCopy, persons, 0, routesFromBackend);
-        
-    } catch (error) {
-        console.error('Ошибка при работе с бэкендом:', error);
-        setIsAnimating(false);
-    }
+
+            executeSteps(gridCopy, persons, 0, routesFromBackend);
+
+        } catch (error) {
+            console.error('Ошибка при работе с бэкендом:', error);
+            setIsAnimating(false);
+        }
     };
+
+    const isRouteCompleted = (route: any): boolean => {
+        return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
+    }
+
+    const getTimeToWait = (direction: any): number => {
+        switch (direction) {
+            case 'RIGHT':
+            case 'LEFT':
+            case 'UP':
+            case 'DOWN': return 1;
+            case 'RIGHT_UP':
+            case 'LEFT_UP':
+            case 'RIGHT_DOWN':
+            case 'LEFT_DOWN': return 2;
+            default:
+                throw new Error("Unsupported direction!");
+        }
+    }
+
+    const transformToNextRouteState = (route: any, newPosition: {
+        x: number;
+        y: number;
+    }) => {
+        if (route.animationIndex === undefined) {
+            route.animationIndex = 0
+            route.tactToWait = getTimeToWait(route.route[route.animationIndex]) - 1
+        }
+        if (route.tactToWait == 0) {
+            const direction = route.route[route.animationIndex];
+            route.animationIndex += 1;
+            if (!isRouteCompleted(route)) {
+                route.tactToWait = getTimeToWait(route.route[route.animationIndex]) + 1
+            }
+            switch (direction) {
+                case 'RIGHT': newPosition.x += 1; break;
+                case 'LEFT': newPosition.x -= 1; break;
+                case 'UP': newPosition.y += 1; break;
+                case 'DOWN': newPosition.y -= 1; break;
+                case 'RIGHT_UP': newPosition.x += 1; newPosition.y += 1; break;
+                case 'LEFT_UP': newPosition.x -= 1; newPosition.y += 1; break;
+                case 'RIGHT_DOWN': newPosition.x += 1; newPosition.y -= 1; break;
+                case 'LEFT_DOWN': newPosition.x -= 1; newPosition.y -= 1; break;
+            }
+        }
+        route.tactToWait -= 1;
+    }
 
     const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
-            return !route || stepIndex >= route.route.length;
+            return isRouteCompleted(route);
         });
-        
+
         if (allRoutesCompleted) {
             setIsAnimating(false);
             setAnimationCompleted(true);
             return;
         }
-        
+
         const newGrid = currentGrid.clone();
-        
-       
-        
         const updatedPersons: Person[] = [];
         const updatedSteps = { ...currentSteps };
         const updatedCompleted = { ...completedGoals };
-        
+
         persons.forEach(person => {
             const route = routes.find(r => r.id === person.id);
-            
-            if (route && stepIndex < route.route.length) {
-                const direction = route.route[stepIndex];
+
+            if (!isRouteCompleted(route)) {
                 const newPosition = { ...person.position };
-                
-                switch (direction) {
-                    case 'RIGHT': newPosition.x += 1; break;
-                    case 'LEFT': newPosition.x -= 1; break;
-                    case 'UP': newPosition.y += 1; break;
-                    case 'DOWN': newPosition.y -= 1; break;
-                }
-                
+                transformToNextRouteState(route, newPosition);
                 const targetCell = currentGrid.getCell(newPosition.x, newPosition.y);
                 if (targetCell) {
                     const oldCell = newGrid.getCell(person.position.x, person.position.y);
                     if (oldCell) {
                         oldCell.persons = oldCell.persons.filter(p => p.id !== person.id);
                     }
-                    
+
                     const newPerson = new Person(person.id, newPosition, person.goal, person.reachedGoal);
 
                     if (newPosition.x === person.goal.x && newPosition.y === person.goal.y) {
                         newPerson.reachedGoal = true;
                         updatedCompleted[person.id] = true;
-                        
+
                         const goalCell = newGrid.getCell(person.goal.x, person.goal.y);
                         if (goalCell) {
                             goalCell.removeGoal();
@@ -195,14 +231,14 @@ const App: React.FC = () => {
                 newGrid.addPerson(newPerson);
             }
         });
-        
+
         animationRef.current = setTimeout(() => {
             setGrid(newGrid);
             setCurrentSteps(updatedSteps);
             setCompletedGoals(updatedCompleted);
-            
+
             executeSteps(newGrid, updatedPersons, stepIndex + 1, routes);
-        }, 400);
+        }, 200);
     };
 
 
@@ -220,7 +256,7 @@ const App: React.FC = () => {
                     {isAnimating ? 'Animating...' : 'Start Animation'}
                 </button>
             </div>
-            {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals}  />}
+            {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
         </div>
     );
 };

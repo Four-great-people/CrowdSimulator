@@ -22,6 +22,7 @@ class Point {
     long long cross_product(const Point &other) const noexcept;
     std::vector<Point> get_neighbors() const noexcept;
     long long abs_norm() const noexcept;
+    long long diag_norm_multiplied2() const noexcept;
     Action to_another(const Point &point) const;
 
    private:

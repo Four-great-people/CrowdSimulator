@@ -5,7 +5,7 @@ URL_POST = "http://localhost:8080/route"
 def test_simple_route_good():
     data = '''
 {
-    "_id": 0,
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -28,10 +28,34 @@ def test_simple_route_good():
     assert response.status_code == 200
     assert response.text == result
 
-def test_no_route_good():
+def test_no_type_error():
     data = '''
 {
     "_id": 0,
+    "up_right_point": { "x": 100, "y": 100 },
+    "down_left_point": { "x": 0, "y": 0 },
+    "borders": [
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 10, "y": 0 } },
+        { "first": { "x": 10, "y": 0 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 10 }, "second": { "x": 10, "y": 10 } },
+        { "first": { "x": 0, "y": 0 }, "second": { "x": 0, "y": 10 } }
+    ],
+    "persons": [
+        {
+            "id": 0,
+            "position": { "x": 1, "y": 1 },
+            "goal": { "x": 1, "y": 2 }
+        }
+    ]
+}
+    '''
+    response = requests.post(url=URL_POST, data=data, timeout=10)
+    assert response.status_code == 400
+
+def test_no_route_good():
+    data = '''
+{
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -57,7 +81,7 @@ def test_no_route_good():
 def test_cant_reach_good():
     data = '''
 {
-    "_id": 0,
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -83,7 +107,7 @@ def test_cant_reach_good():
 def test_missed_json_field_bad():
     data = '''
 {
-    "_id": 0,
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -113,7 +137,7 @@ def test_invalid_json_bad():
 def test_complicated_route_good():
     data = '''
 {
-    "_id": 0,
+    "_id": "0",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
