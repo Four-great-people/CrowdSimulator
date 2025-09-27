@@ -49,6 +49,25 @@ curl -X POST http://127.0.0.1:5000/maps \
 ```json
 { "_id": "..." }
 ```
+
+### PUT /maps/{id} — обновить карту
+Обновляет существующую карту в базе по её ID.
+```bash
+curl -X PUT http://127.0.0.1:5000/maps/<id> \
+  -H "Content-Type: application/json" \
+  -d '{
+    "_id": "<id>",
+    "up_right_point": {"x": 20, "y": 20},
+    "down_left_point": {"x": 0, "y": 0},
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+    ]
+  }'
+```
+
 ### GET /maps/<id> — получить карту по ID
 Возвращает карту в «правильном» порядке ключей (как выше).
 ```bash
