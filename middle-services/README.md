@@ -56,7 +56,6 @@ curl -X POST http://127.0.0.1:5000/maps \
 curl -X PUT http://127.0.0.1:5000/maps/<id> \
   -H "Content-Type: application/json" \
   -d '{
-    "_id": "<id>",
     "up_right_point": {"x": 20, "y": 20},
     "down_left_point": {"x": 0, "y": 0},
     "borders": [
