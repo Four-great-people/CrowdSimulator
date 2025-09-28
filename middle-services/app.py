@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc
 from crowd_db.db.repository import MongoMapRepository
+from crowd_db.db.validators import apply_collection_validator
 
 load_dotenv()
 
@@ -20,6 +21,7 @@ app.config['JSON_SORT_KEYS'] = False
 CORS(app)
 
 repo = MongoMapRepository()
+apply_collection_validator()
 
 
 def mapdoc_to_json(m: MapDoc) -> OrderedDict:
