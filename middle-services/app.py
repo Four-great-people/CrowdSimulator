@@ -21,7 +21,6 @@ app.config['JSON_SORT_KEYS'] = False
 CORS(app)
 
 repo = MongoMapRepository()
-apply_collection_validator()
 
 
 def mapdoc_to_json(m: MapDoc) -> OrderedDict:
@@ -112,5 +111,6 @@ def update_map(map_id: str):
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 if __name__ == "__main__":
+    apply_collection_validator()
     app.run(host="0.0.0.0", port=5000, debug=True)
 
