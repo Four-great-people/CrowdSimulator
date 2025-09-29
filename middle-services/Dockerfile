@@ -9,7 +9,8 @@ RUN python3 -m pip config set global.break-system-packages true && \
     pip3 install -r requirements.txt && \
     pip3 install -r crowd_db/requirements.txt
 
-ENV MONGODB_URI=mongodb://localhost:27017
+ENV CPP_BACKEND_URL=http://backend:8080/route
+ENV MONGODB_URI=mongodb://db:27017
 ENV MONGODB_DB=crowdsim
 ENV MONGODB_COLLECTION_MAPS=maps
 

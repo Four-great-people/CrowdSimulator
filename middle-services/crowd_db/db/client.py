@@ -7,7 +7,7 @@ _client: MongoClient | None = None
 def get_client() -> MongoClient:
     global _client
     if _client is None:
-        _client = MongoClient(MONGODB_URI, uuidRepresentation="standard")
+        _client = MongoClient(MONGODB_URI, uuidRepresentation="standard", username="user", password="password")
         try:
             _client.admin.command("ping")
         except ConnectionFailure as e:

@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc
 from crowd_db.db.repository import MongoMapRepository
+from crowd_db.db.validators import apply_collection_validator
 
 load_dotenv()
 
@@ -110,5 +111,6 @@ def update_map(map_id: str):
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 if __name__ == "__main__":
+    apply_collection_validator()
     app.run(host="0.0.0.0", port=5000, debug=True)
 
