@@ -39,7 +39,6 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     return od
 
 
-# ------- 1) Сохранить карту -------
 @app.route("/maps", methods=["POST"])
 def create_map():
     payload = request.get_json(force=True)
@@ -50,7 +49,7 @@ def create_map():
     except Exception as e:
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
-# ------- 1.5) Выдать список карт -------
+
 @app.route("/maps", methods=["GET"])
 def get_maps():
     try:
@@ -60,7 +59,6 @@ def get_maps():
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 
-# ------- 2) Получить карту по id -------
 @app.route("/maps/<map_id>", methods=["GET"])
 def get_map(map_id: str):
     m = repo.get(map_id)
@@ -81,7 +79,6 @@ def get_map(map_id: str):
     )
 
 
-# ------- 3) Запустить симуляцию -------
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
     m = repo.get(map_id)
@@ -105,7 +102,6 @@ def simulate(map_id: str):
     return jsonify(r.json()), 200
 
 
-# ------- 4) Обновить карту по id -------
 @app.route("/maps/<map_id>", methods=["PUT"])
 def update_map(map_id: str):
     payload = request.get_json(force=True)
