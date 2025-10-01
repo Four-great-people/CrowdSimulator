@@ -57,7 +57,7 @@ const App: React.FC = () => {
             if (mapId) {
                 await updateMapInBackend(mapId, grid);
                 alert("Карта обновлена");
-            } 
+            }
 
             else {
                 const generatedMapId = await saveMapToBackend(grid);
@@ -256,7 +256,88 @@ const App: React.FC = () => {
                     {isAnimating ? 'Animating...' : 'Start Animation'}
                 </button>
             </div>
-            {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
+            <div className="body">
+                <div className="grid-wrapper">
+                    {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
+                </div>
+                <div className="map-list-wrapper">
+                    <div className="map-list">
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                        <button className="blue-button">1</button>
+                        <button className="blue-button">2</button>
+                        <button className="blue-button">3</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
