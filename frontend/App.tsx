@@ -30,6 +30,7 @@ const App: React.FC = () => {
             const initialCompleted: { [id: number]: boolean } = {};
             setCurrentSteps(initialSteps);
             setCompletedGoals(initialCompleted);
+            setAnimationCompleted(false);
         } finally {
             setIsLoadingMap(false);
         }
@@ -285,7 +286,9 @@ const App: React.FC = () => {
                     <div className="map-list">
                         {
                             mapList.map(
-                                (mapName) => <button className="blue-button">{mapName}</button>
+                                (mapName) => <button className="blue-button"
+                                onClick={() => {loadMap(mapName); alert(mapName)}}
+                                disabled={isAnimating || isLoadingMap || isLoadingMaps || isSaving}>{mapName}</button>
                             )
                         }
                     </div>
