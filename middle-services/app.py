@@ -50,6 +50,15 @@ def create_map():
     except Exception as e:
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
+# ------- 1.5) Выдать список карт -------
+@app.route("/maps", methods=["GET"])
+def get_maps():
+    try:
+        index_list = list(map(lambda m: m._id,repo.list(limit=1000)))
+        return jsonify(index_list), 200
+    except Exception as e:
+        return jsonify({"error": f"Internal server error: {e}"}), 500
+
 
 # ------- 2) Получить карту по id -------
 @app.route("/maps/<map_id>", methods=["GET"])
