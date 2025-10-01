@@ -3,7 +3,7 @@ import './styles/App.css';
 import GridComponent from './src/components/GridComponent';
 import Grid from './src/models/Grid';
 import Person from './src/models/Person';
-import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend } from './src/services/api';
+import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend, GetMapsFromBackend } from './src/services/api';
 
 
 const App: React.FC = () => {
@@ -15,6 +15,8 @@ const App: React.FC = () => {
     const [animationCompleted, setAnimationCompleted] = useState(false);
     const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
+    const [mapList, setMaps] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const newGrid = new Grid(40, 22);
@@ -241,7 +243,20 @@ const App: React.FC = () => {
         }, 200);
     };
 
-
+    useEffect(
+        () => {
+            const loadMaps = async () => {
+                try {
+                    setIsLoading(true);
+                    const maps = await GetMapsFromBackend();
+                    setMaps(maps);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadMaps()
+        }, []
+    );
 
     return (
         <div className="App">
@@ -262,78 +277,11 @@ const App: React.FC = () => {
                 </div>
                 <div className="map-list-wrapper">
                     <div className="map-list">
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
-                        <button className="blue-button">1</button>
-                        <button className="blue-button">2</button>
-                        <button className="blue-button">3</button>
+                        {
+                            mapList.map(
+                                (mapName) => <button className="blue-button">{mapName}</button>
+                            )
+                        }
                     </div>
                 </div>
             </div>

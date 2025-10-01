@@ -15,18 +15,18 @@ export const saveMapToBackend = async (grid: Grid): Promise<string> => {
 
 
 export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<void> => {
-  try {
-      if (useFakeCalls) {
-          return fakeUpdate(mapId, grid);
-      }
-      return await updateToRealBackend(mapId, grid);
-  } catch (error) {
-      throw error;
-  }
+    try {
+        if (useFakeCalls) {
+            return fakeUpdate(mapId, grid);
+        }
+        return await updateToRealBackend(mapId, grid);
+    } catch (error) {
+        throw error;
+    }
 };
 
 
-export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, route: string[]}[]> => {
+export const GetRoutesFromBackend = async (mapId: string): Promise<{ id: number, route: string[] }[]> => {
     try {
         if (useFakeCalls) {
             return fakeGetRoutes(mapId);
@@ -43,7 +43,7 @@ export const GetMapsFromBackend = async (): Promise<string[]> => {
             return fakeGetMaps();
         }
         return await getMaps();
-    } catch(error) {
+    } catch (error) {
         throw error;
     }
 }
@@ -54,7 +54,7 @@ async function getMaps() {
     return data;
 }
 
-async function getRoutes(mapId: string): Promise<{id: number, route: string[]}[]> {
+async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
     const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", { method: 'POST' });
     const data = await response.json();
     return data;
@@ -64,7 +64,7 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
     const requestData = grid.getDataForBackend();
     const response = await fetch("http://localhost:5000/maps", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
     });
     const data = await response.json();
@@ -72,20 +72,75 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
 }
 
 async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
-  const requestData = grid.getDataForBackend();
-  const response = await fetch(`${BACKEND}/maps/${mapId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestData),
-  });
-  if (!response.ok) {
-      const t = await response.text().catch(() => '');
-      throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
-  }
+    const requestData = grid.getDataForBackend();
+    const response = await fetch(`${BACKEND}/maps/${mapId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+        const t = await response.text().catch(() => '');
+        throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
+    }
 }
 
 function fakeGetMaps() {
     return [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
         "0",
         "1",
         "2",
