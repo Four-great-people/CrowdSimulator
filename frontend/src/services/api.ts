@@ -37,6 +37,23 @@ export const GetRoutesFromBackend = async (mapId: string): Promise<{id: number, 
     }
 };
 
+export const GetMapsFromBackend = async (): Promise<string[]> => {
+    try {
+        if (useFakeCalls) {
+            return fakeGetMaps();
+        }
+        return await getMaps();
+    } catch(error) {
+        throw error;
+    }
+}
+
+async function getMaps() {
+    const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
+    const data = await response.json();
+    return data;
+}
+
 async function getRoutes(mapId: string): Promise<{id: number, route: string[]}[]> {
     const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", { method: 'POST' });
     const data = await response.json();
@@ -65,6 +82,16 @@ async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
       const t = await response.text().catch(() => '');
       throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
   }
+}
+
+function fakeGetMaps() {
+    return [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+    ]
 }
 
 function fakeGetRoutes(mapId: string) {
