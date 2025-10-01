@@ -25,6 +25,19 @@ def test_create_map_returns_id(client):
    
     assert len(data["_id"]) == 24
 
+def test_get_maps(client):
+   
+    resp = client.post("/maps", json=valid_payload())
+    oid = resp.get_json()["_id"]
+
+  
+    resp2 = client.get("/maps")
+    assert resp2.status_code == 200
+
+    json_list = resp2.get_json()
+    assert isinstance(json_list, list)
+    assert oid in json_list
+
 def test_get_map_returns_full_document_in_order(client):
    
     resp = client.post("/maps", json=valid_payload())

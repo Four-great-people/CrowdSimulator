@@ -152,6 +152,19 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
+- Запустить mongosh и добавить соответствующего пользователя
+```
+test> use admin
+switched to db admin
+admin> db.createUser({
+...   user: "user",
+...   pwd: "password",
+...   roles: ["root"]
+... })
+{ ok: 1 }
+admin> exit
+```
+
 - Применить схему и индексы:
 ```bash
 python -m scripts.setup_db

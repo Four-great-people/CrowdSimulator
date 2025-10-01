@@ -54,7 +54,7 @@ def create_map():
 @app.route("/maps", methods=["GET"])
 def get_maps():
     try:
-        index_list = list(map(lambda m: m._id,repo.list(limit=1000)))
+        index_list = list(map(lambda m: str(m._id),repo.list(limit=1000)))
         return jsonify(index_list), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
