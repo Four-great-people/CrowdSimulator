@@ -3,7 +3,7 @@ import './styles/App.css';
 import GridComponent from './src/components/GridComponent';
 import Grid from './src/models/Grid';
 import Person from './src/models/Person';
-import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend, GetMapsFromBackend } from './src/services/api';
+import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend, GetMapsFromBackend, GetMapFromBackend } from './src/services/api';
 
 
 const App: React.FC = () => {
@@ -16,48 +16,32 @@ const App: React.FC = () => {
     const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [mapList, setMaps] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingMaps, setIsLoadingMaps] = useState(false);
+    const [isLoadingMap, setIsLoadingMap] = useState(false);
 
-    useEffect(() => {
-        const newGrid = new Grid(40, 22);
-
-        newGrid.addWall(10, 10, 10, 20);
-        newGrid.addWall(10, 10, 20, 10);
-        newGrid.addWall(10, 19, 20, 19);
-        newGrid.addWall(19, 10, 19, 20);
-
-        const person1 = new Person(1, { x: 15, y: 15 }, { x: 18, y: 15 });
-        const person2 = new Person(2, { x: 14, y: 16 }, { x: 18, y: 17 });
-        const person3 = new Person(3, { x: 13, y: 13 }, { x: 10, y: 12 });
-        newGrid.addPerson(person1);
-        newGrid.addPerson(person2);
-        newGrid.addPerson(person3);
-
-        newGrid.setGoal({ x: 18, y: 15 });
-        newGrid.setGoal({ x: 18, y: 17 });
-        newGrid.setGoal({ x: 10, y: 12 });
-
-        setGrid(newGrid);
-
-        const initialSteps: { [id: number]: number } = {};
-        const initialCompleted: { [id: number]: boolean } = {};
-        setCurrentSteps(initialSteps);
-        setCompletedGoals(initialCompleted);
-
-        return () => {
-            if (animationRef.current) {
-                clearTimeout(animationRef.current);
-            }
-        };
-    }, []);
+    const loadMap = async (mapId: string) => {
+        if (isSaving || isAnimating || isLoadingMap || isLoadingMaps) return;
+        try {
+            setIsLoadingMap(true);
+            let newGrid = await GetMapFromBackend(mapId);
+            setGrid(newGrid);
+            setMapId(mapId);
+            const initialSteps: { [id: number]: number } = {};
+            const initialCompleted: { [id: number]: boolean } = {};
+            setCurrentSteps(initialSteps);
+            setCompletedGoals(initialCompleted);
+        } finally {
+            setIsLoadingMap(false);
+        }
+    }
 
     const loadMaps = async () => {
         try {
-            setIsLoading(true);
+            setIsLoadingMaps(true);
             const maps = await GetMapsFromBackend();
             setMaps(maps);
         } finally {
-            setIsLoading(false);
+            setIsLoadingMaps(false);
         }
     };
 
@@ -256,7 +240,27 @@ const App: React.FC = () => {
 
     useEffect(
         () => {
-            loadMaps()
+            const preparation = async () => {
+                let maps;
+                try {
+                    setIsLoadingMaps(true);
+                    maps = await GetMapsFromBackend();
+                    setMaps(maps);
+                } finally {
+                    setIsLoadingMaps(false);
+                }
+                if (maps.length == 0) {
+                    setGrid(new Grid(40, 22));
+                } else {
+                    await loadMap(maps[0]);
+                }
+            }
+            preparation();
+            return () => {
+                if (animationRef.current) {
+                    clearTimeout(animationRef.current);
+                }
+            };
         }, []
     );
 

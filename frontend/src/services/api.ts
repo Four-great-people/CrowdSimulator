@@ -1,4 +1,5 @@
 import { Grid } from '../models/Grid';
+import Person from '../models/Person';
 
 const useFakeCalls = process.env.MODE ? true : false
 
@@ -48,8 +49,39 @@ export const GetMapsFromBackend = async (): Promise<string[]> => {
     }
 }
 
+export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
+    try {
+        let map;
+        if (useFakeCalls) {
+            map = fakeGetMap(mapId);
+        } else {
+            map = await getMap(mapId);
+        }
+        let width = map["up_right_point"]["x"]
+        let height = map["up_right_point"]["y"]
+        let newGrid = new Grid(width, height);
+        map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
+            newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
+        });
+        map["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number }) => {
+            const p = new Person(person["id"], person["position"], person["goal"]);
+            newGrid.addPerson(p);
+            newGrid.setGoal(person["goal"]);
+        })
+        return newGrid;
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getMaps() {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
+    const data = await response.json();
+    return data;
+}
+
+async function getMap(mapId: string) {
+    const response = await fetch("http://localhost:5000/maps/" + mapId, { method: 'GET' });
     const data = await response.json();
     return data;
 }
@@ -157,6 +189,24 @@ function fakeGetRoutes(mapId: string) {
         { "id": 2, "route": ["RIGHT_UP", "RIGHT", "RIGHT", "RIGHT"] },
         { "id": 3, "route": ["DOWN", "LEFT", "LEFT", "LEFT"] }
     ];
+}
+
+function fakeGetMap(mapId: string) {
+    return {
+        "up_right_point": { "x": 40, "y": 22 },
+        "down_left_point": { "x": 0, "y": 0 },
+        "borders": [
+            { "first": { "x": 10, "y": 10 }, "second": { "x": 10, "y": 20 } },
+            { "first": { "x": 10, "y": 10 }, "second": { "x": 20, "y": 10 } },
+            { "first": { "x": 10, "y": 19 }, "second": { "x": 20, "y": 19 } },
+            { "first": { "x": 19, "y": 10 }, "second": { "x": 19, "y": 20 } }
+        ],
+        "persons": [
+            { "id": 1, "position": { "x": 15, "y": 15 }, "goal": { "x": 18, "y": 15 } },
+            { "id": 2, "position": { "x": 14, "y": 16 }, "goal": { "x": 18, "y": 17 } },
+            { "id": 3, "position": { "x": 13, "y": 13 }, "goal": { "x": 10, "y": 12 } }
+        ]
+    }
 }
 
 function fakeSave(grid: Grid) {
