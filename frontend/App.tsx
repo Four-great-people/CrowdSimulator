@@ -51,6 +51,16 @@ const App: React.FC = () => {
         };
     }, []);
 
+    const loadMaps = async () => {
+        try {
+            setIsLoading(true);
+            const maps = await GetMapsFromBackend();
+            setMaps(maps);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const saveMap = async () => {
         if (!grid || isSaving) return;
 
@@ -87,6 +97,7 @@ const App: React.FC = () => {
             alert("Ошибка при сохранении карты как новой");
         } finally {
             setIsSaving(false);
+            loadMaps();
         }
     };
 
@@ -245,15 +256,6 @@ const App: React.FC = () => {
 
     useEffect(
         () => {
-            const loadMaps = async () => {
-                try {
-                    setIsLoading(true);
-                    const maps = await GetMapsFromBackend();
-                    setMaps(maps);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
             loadMaps()
         }, []
     );
