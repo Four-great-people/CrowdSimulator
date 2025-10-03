@@ -88,3 +88,79 @@ jobs:
         run: |
           cd middle-services
           pytest -q tests_api
+
+  test-crowddb-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          python3 -m pip config set global.break-system-packages true
+
+      - name: Install deps
+        working-directory: middle-services
+        run: |
+          pip3 install -r requirements.txt
+          pip3 install -r crowd_db/requirements.txt
+          pip3 install mongomock
+
+      - name: Run unit tests (mongomock)
+        working-directory: middle-services/crowd_db
+        run: |
+          # конвенция pytest: подхватит tests/ из crowd_db
+          pytest -q tests
+
+  test-crowddb-integration:
+    runs-on: ubuntu-latest
+    needs: [test-crowddb-unit]     
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          python3 -m pip config set global.break-system-packages true
+
+      - name: Install deps
+        working-directory: middle-services
+        run: |
+          pip3 install -r requirements.txt
+          pip3 install -r crowd_db/requirements.txt
+
+      - name: Create .env for integration
+        working-directory: middle-services/crowd_db
+        run: |
+          cat > .env <<'ENV'
+          MONGODB_URI=mongodb://mongo:27017
+          MONGODB_DB=crowdsim_test
+          ENV
+
+      - name: Apply collection validator (optional)
+        working-directory: middle-services
+        run: |
+          python3 -m crowd_db.scripts.setup_db || true
+
+      - name: Run integration tests
+        working-directory: middle-services/crowd_db
+        env:
+          MONGODB_URI: mongodb://mongo:27017
+          MONGODB_DB: crowdsim_test
+        run: |
+          pytest -q tests --integration
+
+
