@@ -117,41 +117,38 @@ jobs:
     services:
       mongo:
         image: mongo:4.4.6
-        ports:
-          - 27017:27017
         env:
           MONGO_INITDB_ROOT_USERNAME: user
           MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+          - 27017:27017
         options: >-
-          --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.adminCommand({ ping: 1 })'"
-          --health-interval 10s
+          --health-cmd "mongosh --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 20
+
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
+      - name: Install deps
+        working-directory: middle-services
         run: |
-          cd middle-services
           pip install -r requirements.txt
           pip install -r crowd_db/requirements.txt
 
-      - name: Apply collection validator (optional)
-        run: |
-          cd middle-services
-          python3 -m crowd_db.scripts.setup_db || true
+      - name: Apply validator
+        working-directory: middle-services
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_DB: crowdsim_test
+        run: python3 -m crowd_db.scripts.setup_db || true
 
       - name: Run integration tests
-        run: |
-          cd middle-services
-          pytest -q crowd_db/tests --integration
+        working-directory: middle-services
         env:
-          MONGODB_URI: mongodb://mongo:27017
-          MONGODB_DB: crowdsim
-          MONGODB_COLLECTION_MAPS: maps 
-
+          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_DB: crowdsim_test
+        run: pytest -q crowd_db/tests --integration 
