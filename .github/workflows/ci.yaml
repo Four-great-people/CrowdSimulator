@@ -110,57 +110,48 @@ jobs:
       - name: Run unit tests (mongomock)
         working-directory: middle-services/crowd_db
         run: |
-          # конвенция pytest: подхватит tests/ из crowd_db
           pytest -q tests
 
   test-crowddb-integration:
     runs-on: ubuntu-latest
-    needs: [test-crowddb-unit]     
     services:
       mongo:
-        image: mongo:7
+        image: mongo:4.4.6
         ports:
           - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: user
+          MONGO_INITDB_ROOT_PASSWORD: password
         options: >-
-          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-
+          --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        run: |
-          sudo apt update
-          sudo apt install -y python3-pip
-          python3 -m pip config set global.break-system-packages true
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-      - name: Install deps
-        working-directory: middle-services
+      - name: Install dependencies
         run: |
-          pip3 install -r requirements.txt
-          pip3 install -r crowd_db/requirements.txt
-
-      - name: Create .env for integration
-        working-directory: middle-services/crowd_db
-        run: |
-          cat > .env <<'ENV'
-          MONGODB_URI=mongodb://mongo:27017
-          MONGODB_DB=crowdsim_test
-          ENV
+          cd middle-services
+          pip install -r requirements.txt
+          pip install -r crowd_db/requirements.txt
 
       - name: Apply collection validator (optional)
-        working-directory: middle-services
         run: |
+          cd middle-services
           python3 -m crowd_db.scripts.setup_db || true
 
       - name: Run integration tests
-        working-directory: middle-services/crowd_db
+        run: |
+          cd middle-services
+          pytest -q crowd_db/tests --integration
         env:
           MONGODB_URI: mongodb://mongo:27017
-          MONGODB_DB: crowdsim_test
-        run: |
-          pytest -q tests --integration
-
+          MONGODB_DB: crowdsim
+          MONGODB_COLLECTION_MAPS: maps 
 
