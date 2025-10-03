@@ -70,6 +70,30 @@ TEST(test_person, calculate_route__diagonal_point__returns_efficient_route) {
     ASSERT_EQ(route.value()[1], Action::RIGHT_UP);
 }
 
+TEST(test_person, calculate_route__forbidden_corner_move_diagonal_open__returns_not_simple_route) {
+    std::vector border{Border(Point(0, 2), Point(2, 2)),
+                       Border(Point(2, 2), Point(2, 0))};
+    Grid grid(border);
+    Person person(0, Point(1, 1), Point(2, 2), &grid);
+    
+    auto route = person.calculate_route();
+
+    ASSERT_TRUE(route.has_value());
+    ASSERT_GT(route.value().size(), 1);
+}
+
+TEST(test_person, calculate_route__forbidden_corner_move_diagonal_close__returns_not_simple_route) {
+    std::vector border{Border(Point(0, 2), Point(2, 2)),
+                       Border(Point(2, 2), Point(2, 0))};
+    Grid grid(border);
+    Person person(0, Point(2, 1), Point(1, 2), &grid);
+    
+    auto route = person.calculate_route();
+
+    ASSERT_TRUE(route.has_value());
+    ASSERT_GT(route.value().size(), 1);
+}
+
 TEST(test_person, calculate_route__not_only_diagonal_point__returns_efficient_route) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(2, 10), Point(10, 10)),
