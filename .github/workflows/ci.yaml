@@ -123,7 +123,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongosh --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
+          --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
