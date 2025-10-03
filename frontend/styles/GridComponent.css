@@ -78,16 +78,23 @@
     gap: 10px;
 }
 
+.maps {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
 .map-list-wrapper {
     flex: 1;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    justify-content: right;
+    justify-content: center;
     min-height: 0; /* КРИТИЧЕСКИ ВАЖНО для Flexbox */
     height: 100%; /* Добавьте это */
     padding: 20px;
+    max-width: 400px;
     border: 2px solid rgb(68, 0, 255);
 }
 

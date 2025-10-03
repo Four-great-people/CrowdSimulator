@@ -29,7 +29,7 @@ const Maps: React.FC = () => {
     );
 
     return (
-        <div className="home">
+        <div className="maps">
             <div className="map-list-wrapper">
                 <div className="map-list">
                     {
