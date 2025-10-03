@@ -35,7 +35,7 @@ const Maps: React.FC = () => {
                     {
                         mapList.map(
                             (mapName) => <button className="blue-button"
-                                onClick={() => { handleMapClick(mapName); alert(mapName) }}
+                                onClick={() => { handleMapClick(mapName) }}
                                 disabled={isLoadingMaps}>{mapName}</button>
                         )
                     }
