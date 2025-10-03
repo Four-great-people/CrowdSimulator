@@ -226,7 +226,7 @@ const MapDetail: React.FC = () => {
                     clearTimeout(animationRef.current);
                 }
             };
-        }, []
+        }, [id]
     );
 
     return (
