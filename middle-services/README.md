@@ -67,6 +67,11 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
   }'
 ```
 
+### GET /maps — получить список из ID всех карт
+```bash
+curl http://127.0.0.1:5000/maps
+```
+
 ### GET /maps/<id> — получить карту по ID
 Возвращает карту в «правильном» порядке ключей (как выше).
 ```bash
@@ -150,6 +155,19 @@ pip install -r requirements.txt
 - Скопировать файл окружения:
 ```bash
 cp .env.example .env
+```
+
+- Запустить mongosh и добавить соответствующего пользователя
+```
+test> use admin
+switched to db admin
+admin> db.createUser({
+...   user: "user",
+...   pwd: "password",
+...   roles: ["root"]
+... })
+{ ok: 1 }
+admin> exit
 ```
 
 - Применить схему и индексы:

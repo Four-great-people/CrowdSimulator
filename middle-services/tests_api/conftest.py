@@ -22,6 +22,9 @@ class FakeRepo:
         self._store[str(oid)] = d
         return oid
 
+    def list(self, limit: int = 50):
+        return list(map(app_module.MapDoc.from_bson, self._store.values()))
+
     def get(self, map_id):
         d = self._store.get(str(map_id))
         if not d:
