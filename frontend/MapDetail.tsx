@@ -1,44 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, redirect } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetMapsFromBackend, GetRoutesFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
+import { GetMapFromBackend, GetRoutesFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
+import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
-import RoundButton from './src/components/SVGRoundButton';
-// import { Card } from '../types/Card';
-
-// // Mock функция для получения карты по ID
-// const getCardById = (id: string): Card | undefined => {
-//   const mockCards: Card[] = [
-//     {
-//       id: '1',
-//       title: 'Продукт 1',
-//       description: 'Полное описание продукта 1. Здесь может быть много текста о характеристиках и преимуществах.',
-//       image: 'https://via.placeholder.com/400x300',
-//       price: 100,
-//       category: 'Категория 1'
-//     },
-//     {
-//       id: '2',
-//       title: 'Продукт 2',
-//       description: 'Полное описание продукта 2. Детальная информация о товаре и его особенностях.',
-//       image: 'https://via.placeholder.com/400x300',
-//       price: 200,
-//       category: 'Категория 2'
-//     },
-//     {
-//       id: '3',
-//       title: 'Продукт 3',
-//       description: 'Полное описание продукта 3. Подробная спецификация и технические характеристики.',
-//       image: 'https://via.placeholder.com/400x300',
-//       price: 300,
-//       category: 'Категория 1'
-//     }
-//   ];
-
-//   return mockCards.find(card => card.id === id);
-// };
 
 const MapDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -54,9 +21,8 @@ const MapDetail: React.FC = () => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
-    const [mapId, setMapId] = useState<string | null>(null);
+    // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
-    const [mapList, setMaps] = useState<string[]>([]);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
 
     const loadMap = async (mapId: string) => {
@@ -65,7 +31,6 @@ const MapDetail: React.FC = () => {
             setIsLoadingMap(true);
             let newGrid = await GetMapFromBackend(mapId);
             setGrid(newGrid);
-            setMapId(mapId);
             const initialSteps: { [id: number]: number } = {};
             const initialCompleted: { [id: number]: boolean } = {};
             setCurrentSteps(initialSteps);
@@ -81,17 +46,8 @@ const MapDetail: React.FC = () => {
 
         setIsSaving(true);
         try {
-            if (mapId) {
-                await updateMapInBackend(mapId, grid);
-                alert("Карта обновлена");
-            }
-
-            else {
-                const generatedMapId = await saveMapToBackend(grid);
-                setMapId(generatedMapId); // TODO: redirect
-                alert("Карта сохранена с новым ID: " + generatedMapId)
-            }
-
+            await updateMapInBackend(id, grid);
+            alert("Карта обновлена");
         } catch (error) {
             console.error(error);
             alert("Ошибка сохранения карты");
@@ -105,8 +61,8 @@ const MapDetail: React.FC = () => {
         setIsSaving(true);
         try {
             const generatedMapId = await saveMapToBackend(grid);
-            setMapId(generatedMapId);  // TODO: redirect
             alert("Карта сохранена как новая с ID: " + generatedMapId);
+            navigate(`/map/${generatedMapId}`);
         } catch (error) {
             console.error(error);
             alert("Ошибка при сохранении карты как новой");
@@ -116,10 +72,6 @@ const MapDetail: React.FC = () => {
     };
 
     const startAnimation = async () => {
-        if (!mapId) {
-            alert("Необходимо сохранить карту");
-            return;
-        }
         if (animationCompleted) {
             alert("Анимация завершена");
             return;
@@ -130,7 +82,7 @@ const MapDetail: React.FC = () => {
         setAnimationCompleted(false);
 
         try {
-            const routesFromBackend = await GetRoutesFromBackend(mapId);
+            const routesFromBackend = await GetRoutesFromBackend(id);
             const gridCopy = grid.clone();
             setGrid(gridCopy);
 
@@ -268,7 +220,7 @@ const MapDetail: React.FC = () => {
 
     useEffect(
         () => {
-            loadMap(mapId as string);
+            loadMap(id as string);
             return () => {
                 if (animationRef.current) {
                     clearTimeout(animationRef.current);
@@ -296,9 +248,9 @@ const MapDetail: React.FC = () => {
                 </div>
             </div>
             <div className="back-button-container">
-                <RoundButton
+                <SVGRoundButton
                     direction="left"
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate("/maps")}
                     className="svg-round-button"
                 />
             </div>

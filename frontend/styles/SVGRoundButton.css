@@ -1,12 +1,11 @@
 .back-button-container {
     display: flex;
-    justify-content: left;
-    padding: 20px;
+    padding: 30px;
+    width: fit-content;
+    height: fit-content;
 }
 
 .svg-round-button {
-  border: none;
-  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/SVGRoundButton.css';
 
 interface SvgRoundButtonProps {
   onClick: () => void;
@@ -33,7 +34,7 @@ const SvgRoundButton: React.FC<SvgRoundButtonProps> = ({
         width: size,
         height: size,
         backgroundColor: color,
-        borderRadius: '50%', // ← ДОБАВЬТЕ ЭТО К КНОПКЕ, а не к SVG!
+        borderRadius: '50%',
       }}
     >
       <svg
