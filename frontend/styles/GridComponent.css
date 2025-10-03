@@ -21,11 +21,13 @@
 }
 
 .cell.horizontal {
-	border-bottom: 3px solid black;
+    border-bottom: 3px solid black;
 }
+
 .cell.vertical {
-	border-left: 3px solid black;
+    border-left: 3px solid black;
 }
+
 .person {
     width: 20px;
     height: 20px;
@@ -46,9 +48,17 @@
 }
 
 @keyframes moveAnimation {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .goal {
@@ -62,8 +72,94 @@
     animation: pulse 2s infinite;
 }
 
+.body {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.maps {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.map-list-wrapper {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    min-height: 0; /* КРИТИЧЕСКИ ВАЖНО для Flexbox */
+    height: 100%; /* Добавьте это */
+    padding: 20px;
+    max-width: 400px;
+    border: 2px solid rgb(68, 0, 255);
+}
+
+.map-list {
+    overflow-y: auto; /* Вертикальная прокрутка */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 10px; /* Место для скроллбара */
+    min-height: 0; /* КРИТИЧЕСКИ ВАЖНО */
+    max-height: 650px; /*Или любое другое значение */
+}
+
+.map-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.map-list::-webkit-scrollbar-track {
+    background: #2afd00;
+    border-radius: 3px;
+}
+
+.map-list::-webkit-scrollbar-thumb {
+    background: #ee0d0d;
+    border-radius: 3px;
+}
+
+.map-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.grid-wrapper {
+    flex: 4;
+    display: flex;
+    justify-content: left;
+}
+
+.blue-button {
+    flex-shrink: 0;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+}
+
+.blue-button:hover {
+    background-color: #1565c0;
+}
+
 @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }

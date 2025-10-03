@@ -1,0 +1,23 @@
+.back-button-container {
+    display: flex;
+    padding: 30px;
+    width: fit-content;
+    height: fit-content;
+}
+
+.svg-round-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.svg-round-button:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+.svg-round-button:active {
+  transform: scale(0.95);
+}
