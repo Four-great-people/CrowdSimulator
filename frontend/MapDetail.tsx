@@ -5,6 +5,7 @@ import { GetMapFromBackend, GetMapsFromBackend, GetRoutesFromBackend, saveMapToB
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import './styles/App.css';
+import RoundButton from './src/components/SVGRoundButton';
 // import { Card } from '../types/Card';
 
 // // Mock функция для получения карты по ID
@@ -276,8 +277,6 @@ const MapDetail: React.FC = () => {
         }, []
     );
 
-    // navigate(-1) back
-
     return (
         <div className="App">
             <div className="controls">
@@ -295,6 +294,13 @@ const MapDetail: React.FC = () => {
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
                 </div>
+            </div>
+            <div className="back-button-container">
+                <RoundButton
+                    direction="left"
+                    onClick={() => navigate(-1)}
+                    className="svg-round-button"
+                />
             </div>
         </div>
     );
