@@ -7,6 +7,7 @@
 #include "grid.h"
 #include "person.h"
 #include "point.h"
+#include "prioritized_planner.h"
 
 using Action::DOWN;
 using Action::LEFT;
@@ -16,6 +17,7 @@ using Action::RIGHT_DOWN;
 using Action::LEFT_DOWN;
 using Action::LEFT_UP;
 using Action::RIGHT_UP;
+using Action::WAIT;
 using nlohmann::json;
 
 NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
@@ -27,6 +29,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
                                          {LEFT_UP, "LEFT_UP"},
                                          {RIGHT_DOWN, "RIGHT_DOWN"},
                                          {LEFT_DOWN, "LEFT_DOWN"},
+                                         {WAIT, "WAIT"}
                                      })
 
 namespace Convertor {
@@ -87,13 +90,25 @@ json ApplicationContext::calculate_route(json input) {
     for (const auto &segment : map.borders) {
         borders.push_back(to_border(segment));
     }
+    
     Grid grid(borders, Point(map.down_left_point.x, map.down_left_point.y),
               Point(map.up_right_point.x, map.up_right_point.y));
-    std::vector<Convertor::RouteResult> results;
-    for (const auto &person : map.persons) {
-        Person p(person.id, to_point(person.position),
-                 to_point(person.goal), &grid);
-        results.push_back(Convertor::RouteResult(p.get_id(), p.calculate_route()));
+    
+    std::vector<Person> persons;
+    for (const auto &person_data : map.persons) {
+        persons.emplace_back(person_data.id, 
+                           to_point(person_data.position), 
+                           to_point(person_data.goal), 
+                           &grid);
     }
+    
+    PrioritizedPlanner planner(persons, &grid);
+    auto all_routes = planner.plan_all_routes();
+    
+    std::vector<Convertor::RouteResult> results;
+    for (size_t i = 0; i < persons.size(); ++i) {
+        results.push_back(Convertor::RouteResult(persons[i].get_id(), all_routes[i]));
+    }
+    
     return static_cast<json>(results);
 }
