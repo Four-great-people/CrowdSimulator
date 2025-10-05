@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/GridComponent.css';
 import Grid from '../models/Grid';
+import Person from '../models/Person';
 
 interface GridProps {
     grid: Grid;
@@ -10,8 +11,12 @@ interface GridProps {
     editable?: boolean
 }
 
-const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false }) => {
+const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false}) => {
+    const [idleState, wallState, personState] = ['idle', 'wall', 'person']
     const [animationKey, setAnimationKey] = useState(0);
+    const [savedX, setSavedX] = useState(0);
+    const [savedY, setSavedY] = useState(0);
+    const [state, setState] = useState('idle');
     const intersectionAreaRatio = 0.2; 
 
     useEffect(() => {
@@ -66,6 +71,46 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         return Math.floor(coord / size + 1);
     }
 
+    const processIdle = (offsetX, offsetY, localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea) => {
+        if (isInside(localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea)) {
+            const cellX = Math.floor(offsetX / localWidth);
+            const cellY = Math.floor(offsetY / localHeight);
+            setSavedX(cellX);
+            setSavedY(cellY);
+            setState(personState);
+        }
+        else {
+            const cornerX = toCorner(offsetX, localWidth, intersectionArea);
+            const cornerY = toCorner(offsetY, localHeight, intersectionArea);
+            setSavedX(cornerX);
+            setSavedY(cornerY);
+            setState(wallState);
+        }
+        console.log(state)
+        console.log(grid);
+    }
+
+    const processWall = (offsetX, offsetY, localWidth, localHeight, intersectionArea) => {
+        const cornerX = toCorner(offsetX, localWidth, intersectionArea);
+        const cornerY = toCorner(offsetY, localHeight, intersectionArea);
+        grid.addWall(savedX, savedY, cornerX, cornerY);
+        setState(idleState);
+        console.log(state)
+        console.log(grid);
+    }
+
+    const processPerson = (offsetX, offsetY, localWidth, localHeight) => {
+        const cellX = Math.floor(offsetX / localWidth);
+        const cellY = Math.floor(offsetY / localHeight);
+        const position = {"x": savedX, "y": savedY};
+        const goal = {"x": cellX, "y": cellY};
+        grid.addPerson(new Person(grid.persons.length, position, goal));
+        grid.setGoal(goal);
+        setState(idleState);
+        console.log(state)
+        console.log(grid);
+    }
+
     const handleOnClcik = (e) => {
         if (!editable) {
             return;
@@ -78,20 +123,25 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         const intersectionArea = Math.floor((Math.min(localWidth, localHeight) * intersectionAreaRatio));
         const height = localHeight * grid.height;
         const offsetX = e.clientX - e.currentTarget.offsetLeft; //Didn't work with scroll
-        // const old_offsetY = e.clientY - e.currentTarget.offsetTop;
+        // const offsetY = e.clientY - e.currentTarget.offsetTop;
         const offsetY = height - (e.clientY - e.currentTarget.offsetTop); // Flip y value, until we have inverted coordinates
         const localOffsetX = offsetX % localWidth;
-        // const old_localOffsetY = offsetY % localHeight;
+        // const localOffsetY = offsetY % localHeight;
         const localOffsetY = localHeight - (offsetY % localHeight); // Flip y value, until we have inverted coordinates
-        if (isInside(localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea)) {
-            const cellX = Math.floor(offsetX / localWidth);
-            const cellY = Math.floor(offsetY / localHeight);
-            console.log("inside", cellX, cellY);
+        if (state == idleState) {
+            console.log(state);
+            processIdle(offsetX, offsetY, localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea);
+        }
+        else if (state == wallState) {
+            console.log(state);
+            processWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
+        }
+        else if (state == personState) {
+            console.log(state);
+            processPerson(offsetX, offsetY, localWidth, localHeight);
         }
         else {
-            const cornerX = toCorner(offsetX, localWidth, intersectionArea);
-            const cornerY = toCorner(offsetY, localHeight, intersectionArea);
-            console.log("outside", cornerX, cornerY);
+            alert("Service incorrect state");
         }
     }
 
