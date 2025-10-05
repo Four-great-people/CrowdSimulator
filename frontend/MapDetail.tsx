@@ -87,7 +87,7 @@ const MapDetail: React.FC = () => {
             </div>
             <div className="body">
                 <div className="grid-wrapper">
-                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} />}
+                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} />}
                 </div>
             </div>
             <div className="back-button-container">
