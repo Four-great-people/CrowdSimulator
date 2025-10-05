@@ -18,6 +18,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     const [savedY, setSavedY] = useState(0);
     const [state, setState] = useState('idle');
     const intersectionAreaRatio = 0.2; 
+    const outsideBordersMessage = "Устанавливайте стены внутри сетки";
 
     useEffect(() => {
         setAnimationKey(prev => prev + 1);
@@ -65,10 +66,15 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     }
 
     const toCorner = (coord, size, intersectionArea) => {
+        console.log(coord, size);
         if (coord % size < intersectionArea) {
             return Math.floor(coord / size);
         }
         return Math.floor(coord / size + 1);
+    }
+
+    const outsideBorders = (cornerX, cornerY) => {
+        return cornerX == 0 || cornerX == grid.width || cornerY == 0 || cornerY == grid.height;
     }
 
     const processIdle = (offsetX, offsetY, localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea) => {
@@ -84,19 +90,26 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             const cornerY = toCorner(offsetY, localHeight, intersectionArea);
             setSavedX(cornerX);
             setSavedY(cornerY);
-            setState(wallState);
+            if (outsideBorders(cornerX, cornerY)) {
+                alert(outsideBordersMessage);
+            }
+            else {
+                setState(wallState);
+            }
         }
-        console.log(state)
-        console.log(grid);
     }
 
     const processWall = (offsetX, offsetY, localWidth, localHeight, intersectionArea) => {
         const cornerX = toCorner(offsetX, localWidth, intersectionArea);
         const cornerY = toCorner(offsetY, localHeight, intersectionArea);
-        grid.addWall(savedX, savedY, cornerX, cornerY);
+        if (outsideBorders(cornerX, cornerY)) {
+            alert(outsideBordersMessage);
+            return;
+        }
+        if (savedX == cornerX || savedY == cornerY) {
+            grid.addWall(savedX, savedY, cornerX, cornerY);
+        }
         setState(idleState);
-        console.log(state)
-        console.log(grid);
     }
 
     const processPerson = (offsetX, offsetY, localWidth, localHeight) => {
@@ -107,8 +120,6 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         grid.addPerson(new Person(grid.persons.length, position, goal));
         grid.setGoal(goal);
         setState(idleState);
-        console.log(state)
-        console.log(grid);
     }
 
     const handleOnClcik = (e) => {
@@ -129,15 +140,12 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         // const localOffsetY = offsetY % localHeight;
         const localOffsetY = localHeight - (offsetY % localHeight); // Flip y value, until we have inverted coordinates
         if (state == idleState) {
-            console.log(state);
             processIdle(offsetX, offsetY, localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea);
         }
         else if (state == wallState) {
-            console.log(state);
             processWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
         }
         else if (state == personState) {
-            console.log(state);
             processPerson(offsetX, offsetY, localWidth, localHeight);
         }
         else {
