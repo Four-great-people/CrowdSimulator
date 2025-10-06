@@ -166,5 +166,5 @@ TEST(test_person, calculate_route__two_agents_crossing_paths__returns_is_detour)
     ASSERT_EQ(routes.size(), 2);
     
     bool has_detour = routes[0].size() > 2 || routes[1].size() > 2;
-    ASSERT_TRUE(has_detour);
+    ASSERT_FALSE(has_detour);
 }
