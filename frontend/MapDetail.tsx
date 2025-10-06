@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link, redirect } from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetRoutesFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
-import Person from './src/models/Person';
+import { GetMapFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
@@ -37,6 +36,9 @@ const MapDetail: React.FC = () => {
                 let newGrid = await GetMapFromBackend(mapId);
                 setGrid(newGrid);
             }
+        } catch (error) {
+            console.log(error);
+            navigate("/maps");
         } finally {
             setIsLoadingMap(false);
         }

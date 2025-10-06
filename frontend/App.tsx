@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './styles/App.css';
-import GridComponent from './src/components/GridComponent';
-import Grid from './src/models/Grid';
-import Person from './src/models/Person';
-import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend, GetMapsFromBackend, GetMapFromBackend } from './src/services/api';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Maps from './Maps';
 import MapDetail from './MapDetail';

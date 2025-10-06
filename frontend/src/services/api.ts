@@ -89,6 +89,7 @@ async function getMap(mapId: string) {
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
     const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", { method: 'POST' });
     const data = await response.json();
+    console.log(data);
     return data;
 }
 
@@ -105,7 +106,7 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
 
 async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
     const requestData = grid.getDataForBackend();
-    const response = await fetch(`${BACKEND}/maps/${mapId}`, {
+    const response = await fetch(`http://localhost:5000/maps/${mapId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
