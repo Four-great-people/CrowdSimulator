@@ -111,16 +111,14 @@ std::optional<std::vector<Action>> Person::calculate_route_with_timesteps(const 
         open.pop();
         
         if (current->position == _goal) {
-            if (ca_table->last_visited(_goal) < current->time) {
-                std::vector<Action> path;
-                auto node = current;
-                while (node->parent != nullptr) {
-                    path.push_back(node->parent->position.to_another(node->position));
-                    node = node->parent;
-                }
-                std::reverse(path.begin(), path.end());
-                return path;
+            std::vector<Action> path;
+            auto node = current;
+            while (node->parent != nullptr) {
+                path.push_back(node->parent->position.to_another(node->position));
+                node = node->parent;
             }
+            std::reverse(path.begin(), path.end());
+            return path;
         }
         
         auto neighbors = get_neighbors_timestep(current->position, current->time, ca_table);
@@ -135,6 +133,9 @@ std::optional<std::vector<Action>> Person::calculate_route_with_timesteps(const 
             }
             
             int move_cost = (neighbor - current->position).diag_norm_multiplied2();
+            if (neighbor == current->position) {
+                move_cost += 3;
+            }
             int new_g = current->g + move_cost;
             int new_time = current->time + 1;
             TimePoint new_tp = {neighbor.get_x(), neighbor.get_y(), new_time};

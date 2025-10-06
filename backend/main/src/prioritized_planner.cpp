@@ -33,10 +33,10 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     CATable ca_table;
     std::vector<std::vector<Action>> results(_persons.size());
     
-    for (int i = 0; i < _persons.size(); ++i) {
+    for (int priority = 0; priority < _persons.size(); ++priority) {
         int agent_id = -1;
         for (int j = 0; j < _persons.size(); ++j) {
-            if (indices[j] == i) {
+            if (indices[j] == priority) {
                 agent_id = j;
                 break;
             }

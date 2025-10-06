@@ -9,12 +9,17 @@ void CATable::add_trajectory(int traj_id, const std::vector<Point>& trajectory) 
         _pos_time_table[tp] = traj_id;
         _last_visit_table[coord] = std::max(t, _last_visit_table[coord]);
     }
+	
 }
 
 bool CATable::check_move(const Point& from, const Point& to, int start_time) const {
+	if (from == to) {
+        return is_cell_available(from.get_x(), from.get_y(), start_time + 1);
+    }
     if (!is_cell_available(to.get_x(), to.get_y(), start_time + 1)) {
         return false;
     }
+
     return is_reverse_move_valid(from, to, start_time, start_time + 1);
 }
 
@@ -32,7 +37,9 @@ bool CATable::is_cell_available(int x, int y, int t) const {
 }
 
 bool CATable::is_reverse_move_valid(const Point& from, const Point& to, int t_start, int t_end) const {
-    bool from_available_at_end = is_cell_available(from.get_x(), from.get_y(), t_end);
-    bool to_available_at_start = is_cell_available(to.get_x(), to.get_y(), t_start);
-    return from_available_at_end || to_available_at_start;
+    bool someone_moving_from_to_to_from = 
+        !is_cell_available(from.get_x(), from.get_y(), t_end) && 
+        !is_cell_available(to.get_x(), to.get_y(), t_start);
+    
+    return !someone_moving_from_to_to_from;
 }
