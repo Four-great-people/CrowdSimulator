@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link, redirect } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetRoutesFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
+import { GetMapFromBackend, GetRoutesFromBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -37,6 +37,9 @@ const AnimationDetail: React.FC = () => {
             setCompletedGoals(initialCompleted);
             setAnimationCompleted(false);
             setIsLoadedMap(true);
+        } catch (error) {
+            console.log(error);
+            navigate("/maps");
         } finally {
             setIsLoadingMap(false);
         }
@@ -150,7 +153,7 @@ const AnimationDetail: React.FC = () => {
 
         persons.forEach(person => {
             const route = routes.find(r => r.id === person.id);
-
+            prepareRoute(route);
             if (!isRouteCompleted(route)) {
                 const newPosition = { ...person.position };
                 transformToNextRouteState(route, newPosition);
