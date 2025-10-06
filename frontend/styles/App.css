@@ -9,3 +9,20 @@
   color: #333;
   margin-bottom: 20px;
 }
+
+.create-map-button-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.create-map-button {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    font-size: 16px;
+    padding: 12px 24px;
+}
+
+.create-map-button:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+}

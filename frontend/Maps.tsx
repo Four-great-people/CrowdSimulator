@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GetMapsFromBackend } from './src/services/api';
 import './styles/App.css';
+import Grid from './src/models/Grid';
 
 const Maps: React.FC = () => {
     const [mapList, setMaps] = useState<string[]>([]);
@@ -22,6 +23,11 @@ const Maps: React.FC = () => {
         navigate(`/map/${mapId}`);
     };
 
+    const createNewMap = () => {
+        const newGrid = new Grid(40, 22);
+        navigate('/map/new');       
+    };
+
     useEffect(
         () => {
             loadMaps()
@@ -31,6 +37,14 @@ const Maps: React.FC = () => {
     return (
         <div className="maps">
             <div className="map-list-wrapper">
+                <div className="create-map-button-container">
+                    <button 
+                        className="blue-button create-map-button"
+                        onClick={createNewMap}
+                    >
+                        + Создать новую карту
+                    </button>
+                </div>
                 <div className="map-list">
                     {
                         mapList.map(

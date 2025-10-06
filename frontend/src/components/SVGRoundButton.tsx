@@ -12,7 +12,7 @@ interface SvgRoundButtonProps {
 const SvgRoundButton: React.FC<SvgRoundButtonProps> = ({
   onClick,
   direction = 'left',
-  size = 60,
+  size = 35,
   color = '#3e6cecff',
   className = ''
 }) => {

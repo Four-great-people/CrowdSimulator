@@ -57,8 +57,8 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
         } else {
             map = await getMap(mapId);
         }
-        let width = map["up_right_point"]["x"]
-        let height = map["up_right_point"]["y"]
+        let width = map["up_right_point"]["x"];
+        let height = map["up_right_point"]["y"];
         let newGrid = new Grid(width, height);
         map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
@@ -196,10 +196,10 @@ function fakeGetMap(mapId: string) {
         "up_right_point": { "x": 40, "y": 22 },
         "down_left_point": { "x": 0, "y": 0 },
         "borders": [
-            { "first": { "x": 10, "y": 10 }, "second": { "x": 10, "y": 20 } },
-            { "first": { "x": 10, "y": 10 }, "second": { "x": 20, "y": 10 } },
-            { "first": { "x": 10, "y": 19 }, "second": { "x": 20, "y": 19 } },
-            { "first": { "x": 19, "y": 10 }, "second": { "x": 19, "y": 20 } }
+            { "first": { "x": 10, "y": 10 }, "second": { "x": 10, "y": 19 } },
+            { "first": { "x": 10, "y": 10 }, "second": { "x": 19, "y": 10 } },
+            { "first": { "x": 10, "y": 19 }, "second": { "x": 19, "y": 19 } },
+            { "first": { "x": 19, "y": 10 }, "second": { "x": 19, "y": 19 } }
         ],
         "persons": [
             { "id": 1, "position": { "x": 15, "y": 15 }, "goal": { "x": 18, "y": 15 } },
