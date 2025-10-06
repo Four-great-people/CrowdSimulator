@@ -40,7 +40,7 @@ TEST(test_person, random_test) {
             finish = neighbors[direction_index];
         }
         Person person(0, start, finish, &grid);
-        auto route = person.calculate_route();
+        auto route = person.calculate_route_with_timesteps(nullptr);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
         for (auto action : route.value()) {

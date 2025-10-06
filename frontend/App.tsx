@@ -7,6 +7,7 @@ import { saveMapToBackend, updateMapInBackend, GetRoutesFromBackend, GetMapsFrom
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Maps from './Maps';
 import MapDetail from './MapDetail';
+import AnimationDetail from './AnimationDetail';
 
 
 const App: React.FC = () => {
@@ -17,6 +18,7 @@ const App: React.FC = () => {
                     <Routes>
                         <Route path="/maps" element={<Maps />} />
                         <Route path="/map/:id" element={<MapDetail />} />
+                        <Route path="/animation/:id" element={<AnimationDetail />} />
                     </Routes>
                 </main>
             </div>

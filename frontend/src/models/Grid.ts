@@ -69,13 +69,13 @@ export class Grid {
 
         if (x1 === x2) {
             const [startY, endY] = y1 < y2 ? [y1, y2] : [y2, y1];
-            for (let y = startY; y < endY - 1; y++) {
+            for (let y = startY; y < endY; y++) {
                 this.cells[y][x1].isWall = true;
                 this.cells[y][x1].addWallDirection("vertical");
             }
         } else if (y1 === y2) {
             const [startX, endX] = x1 < x2 ? [x1, x2] : [x2, x1];
-            for (let x = startX; x < endX - 1; x++) {
+            for (let x = startX; x < endX; x++) {
                 this.cells[y1][x].isWall = true;
                 this.cells[y1][x].addWallDirection("horizontal");
             }
@@ -99,7 +99,7 @@ export class Grid {
 
     getDataForBackend() {
         return {
-            up_right_point: { x: this.width - 1, y: this.height - 1 },
+            up_right_point: { x: this.width, y: this.height },
             down_left_point: { x: 0, y: 0 },
             borders: this.walls.map(wall => wall.toJSON()),
             persons: this.persons.map(person => ({
