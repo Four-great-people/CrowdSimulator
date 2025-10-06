@@ -99,7 +99,7 @@ export class Grid {
 
     getDataForBackend() {
         return {
-            up_right_point: { x: this.width - 1, y: this.height - 1 },
+            up_right_point: { x: this.width, y: this.height },
             down_left_point: { x: 0, y: 0 },
             borders: this.walls.map(wall => wall.toJSON()),
             persons: this.persons.map(person => ({
