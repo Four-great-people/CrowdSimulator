@@ -17,16 +17,26 @@ const MapDetail: React.FC = () => {
 
     const [grid, setGrid] = useState<Grid | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isNewMap, setIsNewMap] = useState(false);
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
 
+    const createNewGrid = () => {
+        return new Grid(40, 22);
+    };
+
     const loadMap = async (mapId: string) => {
         if (isSaving || isLoadingMap) return;
         try {
-            setIsLoadingMap(true);
-            let newGrid = await GetMapFromBackend(mapId);
-            setGrid(newGrid);
+            if (mapId =='new') {
+                setIsNewMap(true);
+                setGrid(createNewGrid());
+            } else {
+                setIsLoadingMap(true);
+                let newGrid = await GetMapFromBackend(mapId);
+                setGrid(newGrid);
+            }
         } finally {
             setIsLoadingMap(false);
         }
@@ -37,8 +47,15 @@ const MapDetail: React.FC = () => {
 
         setIsSaving(true);
         try {
-            await updateMapInBackend(id, grid);
-            alert("Карта обновлена");
+            if (isNewMap) {
+                const generatedMapId = await saveMapToBackend(grid);
+                alert("Новая карта сохранена с ID: " + generatedMapId);
+                setIsNewMap(false);
+                navigate(`/map/${generatedMapId}`);
+            } else {
+                await updateMapInBackend(id, grid);
+                alert("Карта обновлена");
+            }
         } catch (error) {
             console.error(error);
             alert("Ошибка сохранения карты");
@@ -63,8 +80,23 @@ const MapDetail: React.FC = () => {
     };
 
     const goToAnimation = async() => {
-        await saveMap();
-        navigate("/animation/" + String(id));
+        if (isNewMap) {
+            setIsSaving(true);
+            try {
+                if (!grid) return;
+                const generatedMapId = await saveMapToBackend(grid);
+                alert("Карта сохранена с ID: " + generatedMapId);
+                navigate("/animation/" + generatedMapId);
+            } catch (error) {
+                console.error(error);
+                alert("Ошибка сохранения карты");
+            } finally {
+                setIsSaving(false);
+            }
+        } else {
+            await saveMap();
+            navigate("/animation/" + String(id));
+        }
     }
 
     useEffect(

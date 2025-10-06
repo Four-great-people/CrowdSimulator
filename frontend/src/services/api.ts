@@ -57,8 +57,8 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
         } else {
             map = await getMap(mapId);
         }
-        let width = map["up_right_point"]["x"]
-        let height = map["up_right_point"]["y"]
+        let width = map["up_right_point"]["x"] + 1;
+        let height = map["up_right_point"]["y"] + 1;
         let newGrid = new Grid(width, height);
         map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
