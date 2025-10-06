@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PRIORITIZED_PLANNER_H
+#define PRIORITIZED_PLANNER_H
+
 #include "person.h"
 #include "catable.h"
 #include <vector>
@@ -16,3 +18,5 @@ private:
     std::vector<int> get_priorities_shortest_first() const;
     int calculate_distance(const Person& person) const;
 };
+
+#endif // PRIORITIZED_PLANNER_H

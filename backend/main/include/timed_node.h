@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TIMED_NODE_H
+#define TIMED_NODE_H
+
 #include "point.h"
 #include <memory>
 
@@ -19,3 +21,5 @@ struct TimedNode {
         }
     };
 };
+
+#endif // TIMED_NODE_H

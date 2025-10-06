@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CATABLE_H
+#define CATABLE_H
+
 #include "point.h"
 #include <unordered_map>
 #include <vector>
@@ -36,3 +38,5 @@ private:
     bool is_cell_available(int x, int y, int t) const;
     bool is_reverse_move_valid(const Point& from, const Point& to, int t_start, int t_end) const;
 };
+
+#endif // CATABLE_H

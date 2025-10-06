@@ -13,7 +13,6 @@
 #include "segment.h"
 #include "catable.h"
 #include "timed_node.h"
-#include <iostream>
 
 Person::Person(int id, Point position, Point goal, Grid *grid)
     : _id(id), _position(position), _goal(goal), _personal_grid(grid) {}
