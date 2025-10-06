@@ -75,11 +75,15 @@ const AnimationDetail: React.FC = () => {
     };
 
     const isRouteCompleted = (route: any): boolean => {
+        if (route) {    
+            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) //
+        }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
 
     const getTimeToWait = (direction: any): number => {
         switch (direction) {
+            case 'WAIT':
             case 'RIGHT':
             case 'LEFT':
             case 'UP':
@@ -89,7 +93,16 @@ const AnimationDetail: React.FC = () => {
             case 'RIGHT_DOWN':
             case 'LEFT_DOWN': return 2;
             default:
-                throw new Error("Unsupported direction!");
+                throw new Error(`Unsupported direction ${direction}!`);
+        }
+    }
+
+    const prepareRoute = (route: any) => {
+        if (route !== undefined && route.animationIndex === undefined) {
+            route.animationIndex = 0
+            if (route.route.length > 0) {
+                route.tactToWait = getTimeToWait(route.route[route.animationIndex])
+            }
         }
     }
 
@@ -97,10 +110,6 @@ const AnimationDetail: React.FC = () => {
         x: number;
         y: number;
     }) => {
-        if (route.animationIndex === undefined) {
-            route.animationIndex = 0
-            route.tactToWait = getTimeToWait(route.route[route.animationIndex]) - 1
-        }
         if (route.tactToWait == 0) {
             const direction = route.route[route.animationIndex];
             route.animationIndex += 1;
@@ -124,6 +133,7 @@ const AnimationDetail: React.FC = () => {
     const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
+            prepareRoute(route);
             return isRouteCompleted(route);
         });
 
