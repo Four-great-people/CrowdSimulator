@@ -17,8 +17,10 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     const [savedX, setSavedX] = useState(0);
     const [savedY, setSavedY] = useState(0);
     const [state, setState] = useState('idle');
-    const intersectionAreaRatio = 0.2; 
+    const intersectionAreaRatio = 0.35; 
     const outsideBordersMessage = "Устанавливайте стены внутри сетки";
+    const diagonalBoardMessage = "Диагональные стены не поддерживаются";
+    const sameCellMessage = "Человек и цель не могут находиться в одной клетке";
 
     useEffect(() => {
         setAnimationKey(prev => prev + 1);
@@ -109,17 +111,24 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         if (savedX == cornerX || savedY == cornerY) {
             grid.addWall(savedX, savedY, cornerX, cornerY);
         }
+        else {
+            alert(diagonalBoardMessage);
+        }
         setState(idleState);
     }
 
     const processPerson = (offsetX, offsetY, localWidth, localHeight) => {
         const cellX = Math.floor(offsetX / localWidth);
         const cellY = Math.floor(offsetY / localHeight);
+        setState(idleState);
+        if (cellX == savedX && cellY == savedY) {
+            alert(sameCellMessage);
+            return;
+        }
         const position = {"x": savedX, "y": savedY};
         const goal = {"x": cellX, "y": cellY};
         grid.addPerson(new Person(grid.persons.length, position, goal));
         grid.setGoal(goal);
-        setState(idleState);
     }
 
     const handleOnClcik = (e) => {
