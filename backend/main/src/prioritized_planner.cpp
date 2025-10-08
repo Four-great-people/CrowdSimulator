@@ -2,7 +2,7 @@
 #include <algorithm>
 
 PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, Grid* grid)
-    : _persons(persons), _grid(grid) {}
+    : Planner(persons, grid) {}
 
 std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;

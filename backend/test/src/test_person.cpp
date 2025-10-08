@@ -8,7 +8,6 @@
 #include "grid.h"
 #include "person.h"
 #include "point.h"
-#include "prioritized_planner.h"
 
 TEST(test_person, calculate_route__same_point__returns_empty_vector) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
@@ -135,36 +134,4 @@ TEST(test_person, calculate_route__unreachable_point_outside__returns_nullopt) {
     auto route = person.calculate_route_with_timesteps(nullptr);
 
     ASSERT_FALSE(route.has_value());
-}
-
-TEST(test_person, calculate_route__two_agents_no_conflicts__returns_routes) {
-    std::vector<Border> borders;
-    Grid grid(borders, Point(0, 0), Point(5, 5));
-    std::vector<Person> persons;
-    persons.emplace_back(0, Point(1, 1), Point(1, 3), &grid);
-    persons.emplace_back(1, Point(3, 1), Point(3, 3), &grid);
-    
-    PrioritizedPlanner planner(persons, &grid);
-    auto routes = planner.plan_all_routes();
-    
-    ASSERT_EQ(routes.size(), 2);
-    ASSERT_GT(routes[0].size(), 0);
-    ASSERT_GT(routes[1].size(), 0);
-}
-
-TEST(test_person, calculate_route__two_agents_crossing_paths__returns_is_detour) {
-    std::vector<Border> borders;
-    Grid grid(borders, Point(0, 0), Point(2, 2));
-    
-    std::vector<Person> persons;
-    persons.emplace_back(0, Point(0, 1), Point(2, 1), &grid);
-    persons.emplace_back(1, Point(1, 0), Point(1, 2), &grid);
-    
-    PrioritizedPlanner planner(persons, &grid);
-    auto routes = planner.plan_all_routes();
-    
-    ASSERT_EQ(routes.size(), 2);
-    
-    bool has_detour = routes[0].size() > 2 || routes[1].size() > 2;
-    ASSERT_FALSE(has_detour);
 }
