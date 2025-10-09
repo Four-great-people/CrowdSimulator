@@ -81,13 +81,13 @@ def get_map(map_id: str):
 
 def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> int:
     result = requests.post(
-            f"{CPP_BACKEND_URL}/dense",
+            f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
             headers=headers,
             timeout=30,
         )
     result.raise_for_status()
-    result.json()
+    return max(map(lambda person: sum(map(lambda direction: 10 if "_" in direction else 15, person["route"])), result.json()))
 
 
 @app.route("/maps/<map_id>/statistics", methods=["GET"])
@@ -95,22 +95,15 @@ def get_statistics(map_id: str):
     m = repo.get(map_id)
     if not m:
         return jsonify({"error": "map not found"}), 400
-
     od = mapdoc_to_json(m)
     payload = json.dumps(od, ensure_ascii=False)
     headers = {"Content-Type": "application/json"}
     try:
-        dense_result = requests.post(
-            f"{CPP_BACKEND_URL}/dense",
-            data=payload,
-            headers=headers,
-            timeout=30,
-        )
-        dense_result.raise_for_status()
+        dense_result = calculate_statistics_for_endpoint("dense", payload, headers)
+        simple_result = calculate_statistics_for_endpoint("simple", payload, headers)
     except requests.RequestException as e:
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
-
-    return jsonify(dense_result.json()), 200
+    return jsonify({"valid": dense_result, "ideal": simple_result}), 200
 
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
