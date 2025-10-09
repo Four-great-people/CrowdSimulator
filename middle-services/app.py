@@ -88,7 +88,7 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
         )
     result.raise_for_status()
     def extract_person(person) -> Optional[int]:
-        return sum(map(lambda direction: 10 if "_" in direction else 15, person["route"])) if person is not None else None
+        return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"])) if person["route"] is not None else None
     personal_values = list(map(extract_person, result.json()))
     return max(personal_values) if None not in personal_values else None # type: ignore
 
