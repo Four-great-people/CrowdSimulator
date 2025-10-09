@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import json
-from typing import Dict
+from typing import Dict, Optional
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -79,7 +79,7 @@ def get_map(map_id: str):
         mimetype="application/json"
     )
 
-def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> int:
+def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Optional[int]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -87,7 +87,10 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
             timeout=30,
         )
     result.raise_for_status()
-    return max(map(lambda person: sum(map(lambda direction: 10 if "_" in direction else 15, person["route"])), result.json()))
+    def extract_person(person) -> Optional[int]:
+        return sum(map(lambda direction: 10 if "_" in direction else 15, person["route"])) if person is not None else None
+    personal_values = list(map(extract_person, result.json()))
+    return max(personal_values) if None not in personal_values else None # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics", methods=["GET"])

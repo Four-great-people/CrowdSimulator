@@ -85,6 +85,25 @@ curl http://127.0.0.1:5000/maps/<id>
 ```bash
 curl -X POST http://127.0.0.1:5000/maps/<id>/simulate
 ```
+```
+[
+    {
+        "id": 0,
+        "route": [
+            "UP",
+            "LEFT",
+            "UP",
+            "RIGHT",
+            "DOWN",
+            "RIGHT",
+        ]
+    }
+]
+```
+Пустой маршрут тоже возможен. Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
 
 ## Тесты
 ```bash
