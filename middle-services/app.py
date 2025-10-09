@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 import json
+from typing import Dict
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -78,6 +79,38 @@ def get_map(map_id: str):
         mimetype="application/json"
     )
 
+def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> int:
+    result = requests.post(
+            f"{CPP_BACKEND_URL}/dense",
+            data=payload,
+            headers=headers,
+            timeout=30,
+        )
+    result.raise_for_status()
+    result.json()
+
+
+@app.route("/maps/<map_id>/statistics", methods=["GET"])
+def get_statistics(map_id: str):
+    m = repo.get(map_id)
+    if not m:
+        return jsonify({"error": "map not found"}), 400
+
+    od = mapdoc_to_json(m)
+    payload = json.dumps(od, ensure_ascii=False)
+    headers = {"Content-Type": "application/json"}
+    try:
+        dense_result = requests.post(
+            f"{CPP_BACKEND_URL}/dense",
+            data=payload,
+            headers=headers,
+            timeout=30,
+        )
+        dense_result.raise_for_status()
+    except requests.RequestException as e:
+        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
+
+    return jsonify(dense_result.json()), 200
 
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
