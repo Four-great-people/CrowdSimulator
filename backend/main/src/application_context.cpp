@@ -98,8 +98,7 @@ json ApplicationContext::calculate_route(json input) {
     for (const auto &person_data : map.persons) {
         persons.emplace_back(person_data.id, 
                            to_point(person_data.position), 
-                           to_point(person_data.goal), 
-                           &grid);
+                           to_point(person_data.goal));
     }
     
     PrioritizedPlanner planner(persons, &grid);

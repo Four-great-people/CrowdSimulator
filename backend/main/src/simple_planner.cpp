@@ -11,7 +11,7 @@ std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes;
     routes.reserve(_persons.size());
     for (auto person: _persons) {
-        auto route = person.calculate_route();
+        auto route = calculate_route(person);
         if (route) {
             routes.push_back(route.value());
         }

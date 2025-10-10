@@ -17,8 +17,8 @@ std::vector<std::vector<Action>> helper_no_conflicts_test(PlannerSetting setting
     std::vector<Border> borders;
     Grid grid(borders, Point(0, 0), Point(5, 5));
     std::vector<Person> persons;
-    persons.emplace_back(0, Point(1, 1), Point(1, 3), &grid);
-    persons.emplace_back(1, Point(3, 1), Point(3, 3), &grid);
+    persons.emplace_back(0, Point(1, 1), Point(1, 3));
+    persons.emplace_back(1, Point(3, 1), Point(3, 3));
 
 
     std::vector<std::vector<Action>> routes;
@@ -39,8 +39,8 @@ std::vector<std::vector<Action>> helper_crossing_routes_test(PlannerSetting sett
     Grid grid(borders, Point(0, 0), Point(2, 2));
     
     std::vector<Person> persons;
-    persons.emplace_back(0, Point(0, 1), Point(2, 1), &grid);
-    persons.emplace_back(1, Point(1, 0), Point(1, 2), &grid);
+    persons.emplace_back(0, Point(0, 1), Point(2, 1));
+    persons.emplace_back(1, Point(1, 0), Point(1, 2));
 
 
     std::vector<std::vector<Action>> routes;

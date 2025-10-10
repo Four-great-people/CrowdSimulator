@@ -6,6 +6,7 @@
 #include "person.h"
 #include "point.h"
 #include "segment.h"
+#include "simple_planner.h"
 
 TEST(test_person, random_test) {
     std::random_device device;
@@ -39,8 +40,9 @@ TEST(test_person, random_test) {
             }
             finish = neighbors[direction_index];
         }
-        Person person(0, start, finish, &grid);
-        auto route = person.calculate_route_with_timesteps(nullptr);
+        Person person(0, start, finish);
+        SimplePlanner planner({person}, &grid);
+        auto route = planner.calculate_route(person);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
         for (auto action : route.value()) {
