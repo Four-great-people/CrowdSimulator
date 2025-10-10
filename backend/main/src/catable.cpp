@@ -43,3 +43,17 @@ bool CATable::is_reverse_move_valid(const Point& from, const Point& to, int t_st
     
     return !someone_moving_from_to_to_from;
 }
+
+std::vector<Point> CATable::get_neighbors_timestep(const Point& point, int time) const {
+    auto neighbors = point.get_neighbors();
+    neighbors.push_back(point);
+    
+    std::vector<Point> valid_neighbors;
+    for (const auto& neighbor : neighbors) {
+        if (check_move(point, neighbor, time)) {
+            valid_neighbors.push_back(neighbor);
+        }
+    }
+    
+    return valid_neighbors;
+}
