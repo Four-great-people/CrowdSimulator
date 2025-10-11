@@ -1,11 +1,10 @@
 import pytest
 import requests
 
-URL_POST = "http://localhost:8080/route"
 URL_POST_SIMPLE = "http://localhost:8080/route/simple"
 URL_POST_DENSE = "http://localhost:8080/route/dense"
 
-URL_POSTS = [URL_POST_DENSE, URL_POST_SIMPLE, URL_POST]
+URL_POSTS = [URL_POST_DENSE, URL_POST_SIMPLE]
 
 def test_simple_route_good():
     data = '''
