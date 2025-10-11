@@ -6,8 +6,7 @@ RUN apt-get update
 RUN apt-get install -y python3-pip
 EXPOSE 5000
 RUN python3 -m pip config set global.break-system-packages true && \
-    pip3 install -r requirements.txt && \
-    pip3 install -r crowd_db/requirements.txt
+    pip3 install -r requirements.txt
 
 ENV CPP_BACKEND_URL=http://backend:8080/route
 ENV MONGODB_URI=mongodb://db:27017

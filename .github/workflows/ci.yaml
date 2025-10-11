@@ -82,7 +82,6 @@ jobs:
           python3 -m pip config set global.break-system-packages true
           cd middle-services
           pip3 install -r requirements.txt
-          pip3 install -r crowd_db/requirements.txt
 
       - name: mock-tests
         run: |
@@ -104,7 +103,6 @@ jobs:
         working-directory: middle-services
         run: |
           pip3 install -r requirements.txt
-          pip3 install -r crowd_db/requirements.txt
           pip3 install mongomock
 
       - name: Run unit tests (mongomock)
@@ -137,7 +135,6 @@ jobs:
         working-directory: middle-services
         run: |
           pip install -r requirements.txt
-          pip install -r crowd_db/requirements.txt
 
       - name: Apply validator
         working-directory: middle-services
