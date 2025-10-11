@@ -33,6 +33,7 @@ public:
     bool check_move(const Point& from, const Point& to, int start_time) const;
     int last_visited(const Point& point) const;
 	bool has_agents_nearby(const Point& point, int radius = 1) const;
+    std::vector<Point> get_neighbors_timestep(const Point& point, int time) const;
     
 private:
     bool is_cell_available(int x, int y, int t) const;
