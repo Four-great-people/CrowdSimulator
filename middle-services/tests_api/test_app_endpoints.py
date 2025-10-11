@@ -91,6 +91,18 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
 
     assert 0 <= i_id < i_up < i_down < i_borders < i_persons, packed
 
+def test_simulate_calls_cpp_with_statistics(client, mock_requests):
+    
+    resp = client.post("/maps", json=valid_payload())
+    oid = resp.get_json()["_id"]
+
+    resp2 = client.get(f"/maps/{oid}/statistics")
+    assert resp2.status_code == 200
+    statistics = resp2.get_json()
+    assert statistics == {"ideal": 35, "valid": None, "routes": [{"id": 1,"route": None}]}
+
+    assert len(mock_requests["calls"]) == 2
+
 def test_create_map_bad_payload_400(client):
     bad = {"persons": []}  
     resp = client.post("/maps", json=bad)

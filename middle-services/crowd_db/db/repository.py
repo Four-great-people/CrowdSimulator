@@ -1,5 +1,6 @@
 from typing import List, Optional
 from bson import ObjectId
+from bson.errors import InvalidId
 from pymongo.collection import Collection
 from .client import get_db
 from .config import MAPS_COLLECTION
@@ -15,7 +16,10 @@ class MongoMapRepository:
         return doc["_id"]
 
     def get(self, map_id: str | ObjectId) -> Optional[MapDoc]:
-        oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
+        try:
+            oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
+        except InvalidId:
+            return None
         d = _col().find_one({"_id": oid})
         return MapDoc.from_bson(d) if d else None
 

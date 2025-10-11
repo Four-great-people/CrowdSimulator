@@ -70,6 +70,10 @@ def mock_requests(monkeypatch):
         json_body = kwargs.get("json")
         headers = kwargs.get("headers", {})
         sent["calls"].append({"url": url, "body_text": body_text, "json_body": json_body, "headers": headers})
+        if "simple" in url:
+            return FakeResp([{"id": 1, "route": ["UP", "RIGHT", "LEFT_DOWN"]}], status_code=200)
+        if "dense" in url:
+            return FakeResp([{"id": 1, "route": None}], status_code=200)
         return FakeResp([{"id": 1, "route": ["UP", "RIGHT"]}], status_code=200)
 
     monkeypatch.setattr(app_module.requests, "post", fake_post)
