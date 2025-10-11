@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import json
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -79,7 +79,7 @@ def get_map(map_id: str):
         mimetype="application/json"
     )
 
-def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Optional[int]:
+def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Tuple[Optional[int], Any]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -87,10 +87,11 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
             timeout=30,
         )
     result.raise_for_status()
+    j = result.json()
     def extract_person(person) -> Optional[int]:
         return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"])) if person["route"] is not None else None
-    personal_values = list(map(extract_person, result.json()))
-    return max(personal_values) if None not in personal_values else None # type: ignore
+    personal_values = list(map(extract_person, j))
+    return (max(personal_values) if None not in personal_values else None), j # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics", methods=["GET"])
@@ -102,11 +103,11 @@ def get_statistics(map_id: str):
     payload = json.dumps(od, ensure_ascii=False)
     headers = {"Content-Type": "application/json"}
     try:
-        dense_result = calculate_statistics_for_endpoint("dense", payload, headers)
-        simple_result = calculate_statistics_for_endpoint("simple", payload, headers)
+        dense_result, route = calculate_statistics_for_endpoint("dense", payload, headers)
+        simple_result, _ = calculate_statistics_for_endpoint("simple", payload, headers)
     except requests.RequestException as e:
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
-    return jsonify({"valid": dense_result, "ideal": simple_result}), 200
+    return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
 
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
