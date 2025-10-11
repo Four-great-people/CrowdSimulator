@@ -1,5 +1,7 @@
 #include "application_context.h"
 
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -8,6 +10,7 @@
 #include "person.h"
 #include "point.h"
 #include "prioritized_planner.h"
+#include "simple_planner.h"
 
 using Action::DOWN;
 using Action::LEFT;
@@ -83,31 +86,36 @@ Border to_border(const Convertor::Segment &s) {
     return Border(to_point(s.first), to_point(s.second));
 }
 
-json ApplicationContext::calculate_route(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
+json ApplicationContext::calculate_route(json input, std::function<std::unique_ptr<Planner>(const std::vector<Person> &, Grid *)> planner_factory) {
     auto map = input.template get<Convertor::Map>();
     std::vector<Border> borders;
     for (const auto &segment : map.borders) {
         borders.push_back(to_border(segment));
     }
-    
     Grid grid(borders, Point(map.down_left_point.x, map.down_left_point.y),
               Point(map.up_right_point.x, map.up_right_point.y));
-    
     std::vector<Person> persons;
     for (const auto &person_data : map.persons) {
         persons.emplace_back(person_data.id, 
                            to_point(person_data.position), 
                            to_point(person_data.goal));
     }
-    
-    PrioritizedPlanner planner(persons, &grid);
-    auto all_routes = planner.plan_all_routes();
-    
+    std::unique_ptr<Planner> planner = planner_factory(persons, &grid);
+    auto all_routes = planner->plan_all_routes();
     std::vector<Convertor::RouteResult> results;
     for (size_t i = 0; i < persons.size(); ++i) {
         results.push_back(Convertor::RouteResult(persons[i].get_id(), all_routes[i]));
     }
     
     return static_cast<json>(results);
+}
+
+json ApplicationContext::calculate_route_dense(json input) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return calculate_route(input, [](const std::vector<Person> &ps, Grid *g){ return std::make_unique<PrioritizedPlanner>(ps, g); });
+}
+
+json ApplicationContext::calculate_route_simple(json input) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return calculate_route(input, [](const std::vector<Person> &ps, Grid *g){ return std::make_unique<SimplePlanner>(ps, g); });
 }

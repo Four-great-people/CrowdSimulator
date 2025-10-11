@@ -16,7 +16,7 @@ int main(int argc, const char** argv) {
             crow::HTTPMethod::Post)([&context](const crow::request& request) {
             try {
                 auto input = nlohmann::json::parse(request.body);
-                auto result = context.calculate_route(input);
+                auto result = context.calculate_route_dense(input);
                 std::stringstream s;
                 s << result;
                 return crow::response(s.str());
