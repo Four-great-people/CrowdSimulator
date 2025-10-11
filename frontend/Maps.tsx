@@ -15,7 +15,7 @@ const Maps: React.FC = () => {
             const maps = await GetMapsFromBackend();
             setMaps(maps);
         } catch (error) {
-            alert("Error while load maps!")
+            alert("Ошибка при загрузке карт!")
         } finally {
             setIsLoadingMaps(false);
         }
