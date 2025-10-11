@@ -115,7 +115,7 @@ const MapDetail: React.FC = () => {
                     {isSaving ? "Сохраняется..." : "Сохранить карту"}
                 </button>
                 <button onClick={saveMapAs} disabled={isSaving}>
-                    {isSaving ? "Сохраняется..." : "Копировать карту"}
+                    {isSaving ? "Сохраняется..." : "Сохранить как"}
                 </button>
                 <button onClick={goToAnimation}>Начать анимацию</button>
             </div>
