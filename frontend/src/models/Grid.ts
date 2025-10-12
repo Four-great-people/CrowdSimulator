@@ -8,6 +8,7 @@ export class Grid {
     cells: Cell[][];
     persons: Person[];
     walls: Wall[];
+    allTicks: number;
 
     constructor(width: number, height: number) {
         this.width = width;
@@ -15,6 +16,7 @@ export class Grid {
         this.cells = this.createGrid();
         this.persons = [];
         this.walls = [];
+        this.allTicks = 0;
     }
 
     private createGrid(): Cell[][] {
@@ -51,6 +53,8 @@ export class Grid {
             }
             return person.clone();
         });
+
+        newGrid.allTicks = this.allTicks;
         
         return newGrid;
     }
@@ -108,6 +112,22 @@ export class Grid {
                 goal: person.goal
             }))
         };
+    }
+
+    markCell(x: number, y: number) {
+        const cell = this.getCell(x, this.cells.length - 1 - y); // Inverted y for now, needs to be refactored
+        if (cell) {
+            cell.mark();
+        }
+    }
+
+    addTick() {
+        this.allTicks += 1;
+    }
+
+    reset() {
+        this.cells.forEach(row => row.forEach(cell => cell.reset()));
+        this.allTicks = 0;
     }
 }
 
