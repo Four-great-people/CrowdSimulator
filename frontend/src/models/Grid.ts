@@ -31,6 +31,98 @@ export class Grid {
         return grid;
     }
 
+    private _removeDirFromCell(cell: any, dir: 'vertical'|'horizontal') {
+        const v = (cell as any).directionOfWall;
+        if (Array.isArray(v)) {
+          (cell as any).directionOfWall = v.filter((d: string) => d !== dir);
+        } else if (typeof v === 'string') {
+          const parts = v.split(' ').filter(Boolean).filter((d: string) => d !== dir);
+          (cell as any).directionOfWall = parts.join(' ');
+        } else {
+          (cell as any).directionOfWall = '';
+        }
+    }
+
+    removeWall(x1: number, y1: number, x2: number, y2: number) {
+        const isVertical = x1 === x2;
+        const isHorizontal = y1 === y2;
+        if (!isVertical && !isHorizontal) return;
+
+        if (isVertical && y2 < y1) [y1, y2] = [y2, y1];
+        if (isHorizontal && x2 < x1) [x1, x2] = [x2, x1];
+
+        if (isVertical) {
+            for (let y = y1; y < y2; y++) {
+                const cell = this.getCell(x1, y);
+                if (cell) this._removeDirFromCell(cell, 'vertical');
+            }
+        } else {
+          for (let x = x1; x < x2; x++) {
+              const cell = this.getCell(x, y1);
+              if (cell) this._removeDirFromCell(cell, 'horizontal');
+          }
+        }
+
+        const newWalls: any[] = [];
+        for (const w of this.walls) {
+            const wVert = w.first.x === w.second.x;
+            const wHoriz = w.first.y === w.second.y;
+
+            if (isVertical && wVert && w.first.x === x1) {
+                const ws = Math.min(w.first.y, w.second.y);
+                const we = Math.max(w.first.y, w.second.y);
+                const s = Math.max(ws, y1);
+                const e = Math.min(we, y2);
+                if (s < e) {
+                    if (ws < y1) newWalls.push(new Wall({ x: x1, y: ws }, { x: x1, y: y1 }));
+                    if (y2 < we) newWalls.push(new Wall({ x: x1, y: y2 }, { x: x1, y: we }));
+                    continue;                 }
+            } else if (isHorizontal && wHoriz && w.first.y === y1) {
+                const ws = Math.min(w.first.x, w.second.x);
+                const we = Math.max(w.first.x, w.second.x);
+                const s = Math.max(ws, x1);
+                const e = Math.min(we, x2);
+                if (s < e) {
+                    if (ws < x1) newWalls.push(new Wall({ x: ws, y: y1 }, { x: x1, y: y1 }));
+                    if (x2 < we) newWalls.push(new Wall({ x: x2, y: y1 }, { x: we, y: y1 }));
+                    continue;
+                }
+            }
+  
+        newWalls.push(w);
+      }
+      this.walls = newWalls;
+    }
+removePersonOrGoalAt(x: number, y: number) {
+    const cell = this.getCell(x, y);
+    if (!cell) return;
+
+    if (cell.persons.length > 0) {
+
+        const person = cell.persons[0];
+
+        cell.persons = cell.persons.filter(p => p.id !== person.id);
+
+        this.persons = this.persons.filter(p => p.id !== person.id);
+
+        const goalCell = this.getCell(person.goal.x, person.goal.y);
+        if (goalCell) goalCell.removeGoal();
+        return;
+    }
+
+
+    if (typeof cell.hasGoal === 'function' && cell.hasGoal()) {
+        const person = this.persons.find(p => p.goal.x === x && p.goal.y === y);
+        cell.removeGoal();
+        if (person) {
+            const personCell = this.getCell(person.position.x, person.position.y);
+            if (personCell) {
+                personCell.persons = personCell.persons.filter(p => p.id !== person.id);
+            }
+            this.persons = this.persons.filter(p => p.id !== person.id);
+        }
+    }
+}
 
     clone(): Grid {
         const newGrid = new Grid(this.width, this.height);
