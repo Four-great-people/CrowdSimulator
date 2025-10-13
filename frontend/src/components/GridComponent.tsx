@@ -158,7 +158,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             processPerson(offsetX, offsetY, localWidth, localHeight);
         }
         else {
-            alert("Service incorrect state");
+            alert("Некорректное состояние сервиса");
         }
     }
 
