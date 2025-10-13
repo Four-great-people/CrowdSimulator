@@ -1,4 +1,5 @@
 #include <crow.h>
+#include <crow/common.h>
 #include <crow/middlewares/cors.h>
 
 #include <sstream>
@@ -11,12 +12,19 @@ int main(int argc, const char** argv) {
     crow::App<crow::CORSHandler> app;
     ApplicationContext context;
 
-    CROW_ROUTE(app, "/route")
-        .methods(
-            crow::HTTPMethod::Post)([&context](const crow::request& request) {
+    CROW_ROUTE(app, "/route/<string>").methods(crow::HTTPMethod::Post)
+        ([&context](const crow::request& request, const std::string &algorithm_name)
+        {
             try {
                 auto input = nlohmann::json::parse(request.body);
-                auto result = context.calculate_route(input);
+                nlohmann::json result;
+                if (algorithm_name == "simple") {
+                    result = context.calculate_route_simple(input);
+                } else if (algorithm_name == "dense") {
+                    result = context.calculate_route_dense(input);
+                } else {
+                    return crow::response(crow::status::BAD_REQUEST, "Unsupported algorithm");
+                }
                 std::stringstream s;
                 s << result;
                 return crow::response(s.str());
