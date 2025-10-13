@@ -112,12 +112,12 @@ const MapDetail: React.FC = () => {
         <div className="App">
             <div className="controls">
                 <button onClick={saveMap} disabled={isSaving}>
-                    {isSaving ? "Saving..." : "Save Map"}
+                    {isSaving ? "Сохраняется..." : "Сохранить карту"}
                 </button>
                 <button onClick={saveMapAs} disabled={isSaving}>
-                    {isSaving ? "Saving..." : "Save Map As"}
+                    {isSaving ? "Сохраняется..." : "Сохранить как"}
                 </button>
-                <button onClick={goToAnimation}>Start animation</button>
+                <button onClick={goToAnimation}>Начать анимацию</button>
             </div>
             <div className="body">
                 <div className="grid-wrapper">

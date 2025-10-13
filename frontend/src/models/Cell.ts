@@ -7,6 +7,7 @@ class Cell {
     directionOfWall: string[];
     persons: Person[];
     goal: { x: number, y: number } | null;
+    usedTicks: number;
 
     constructor(x: number, y: number, isWall: boolean = false, goal: { x: number, y: number } | null = null) {
         this.x = x;
@@ -15,6 +16,7 @@ class Cell {
         this.persons = [];
         this.goal = goal;
         this.directionOfWall = [];
+        this.usedTicks = 0;
     }
 
     addPerson(person: Person) {
@@ -61,7 +63,25 @@ class Cell {
         const newCell = new Cell(this.x, this.y, this.isWall, this.goal ? { ...this.goal } : null);
         newCell.directionOfWall = [...this.directionOfWall];
         newCell.persons = this.persons.map(person => person.clone());
+        newCell.usedTicks = this.usedTicks;
         return newCell;
+    }
+
+    mark() {
+        this.usedTicks += 1;
+    }
+
+    reset() {
+        this.usedTicks = 0;
+    }
+
+    getColorString(allTicks: number) {
+        if (allTicks == 0) {
+            return "#FFFFFF";
+        }
+        const maxEffect = 128;
+        const notBlueComponent = 255 - Math.floor(this.usedTicks / allTicks * maxEffect);
+        return "#" + notBlueComponent.toString(16) + notBlueComponent.toString(16) + "FF";
     }
 }
 

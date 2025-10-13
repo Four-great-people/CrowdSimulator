@@ -57,6 +57,7 @@ const AnimationDetail: React.FC = () => {
 
         try {
             const routesFromBackend = await GetRoutesFromBackend(id);
+            grid.reset();
             const gridCopy = grid.clone();
             setGrid(gridCopy);
 
@@ -147,6 +148,7 @@ const AnimationDetail: React.FC = () => {
         }
 
         const newGrid = currentGrid.clone();
+        newGrid.addTick();
         const updatedPersons: Person[] = [];
         const updatedSteps = { ...currentSteps };
         const updatedCompleted = { ...completedGoals };
@@ -174,6 +176,9 @@ const AnimationDetail: React.FC = () => {
                         if (goalCell) {
                             goalCell.removeGoal();
                         }
+                    }
+                    else {
+                        newGrid.markCell(newPosition.x, newPosition.y);
                     }
 
                     updatedPersons.push(newPerson);
