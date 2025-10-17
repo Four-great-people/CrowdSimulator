@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GetMapsFromBackend, GetAnimationsFromBackend } from './src/services/api';
 import './styles/App.css';
 import Grid from './src/models/Grid';
@@ -10,6 +10,7 @@ const Maps: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'maps' | 'animations'>('maps');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation()
 
     const loadMaps = async () => {
         try {
@@ -48,6 +49,12 @@ const Maps: React.FC = () => {
         navigate('/map/new');       
     };
 
+    useEffect(() => {
+        if (location.state && location.state.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location.state]);
+    
     useEffect(() => {
         if (activeTab === 'maps') {
             loadMaps();

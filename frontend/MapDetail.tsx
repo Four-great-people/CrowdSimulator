@@ -127,7 +127,7 @@ const MapDetail: React.FC = () => {
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => navigate("/maps")}
+                    onClick={() => navigate("/maps", { state: { activeTab: "maps" } })}
                     className="svg-round-button"
                 />
             </div>
