@@ -51,6 +51,45 @@ class PersonSpec:
             goal=Point.from_bson(d["goal"]),
         )
 
+@dataclass
+class AnimationPersonSpec(PersonSpec):
+    reachedGoal: bool = False
+
+    def to_bson(self) -> Dict[str, Any]:
+        doc = super().to_bson()
+        doc["reachedGoal"] = self.reachedGoal
+        return doc
+
+    @staticmethod
+    def from_bson(d: Dict[str, Any]) -> "AnimationPersonSpec":
+        base_person = PersonSpec.from_bson(d)
+        return AnimationPersonSpec(
+            id=base_person.id,
+            position=base_person.position,
+            goal=base_person.goal,
+            reachedGoal=d.get("reachedGoal", False)
+        )
+
+@dataclass
+class Hotspot:
+    x: int
+    y: int
+    usedTicks: int
+
+    def to_bson(self) -> Dict[str, Any]:
+        return {
+            "x": self.x,
+            "y": self.y, 
+            "usedTicks": self.usedTicks
+        }
+
+    @staticmethod
+    def from_bson(d: Dict[str, Any]) -> "Hotspot":
+        return Hotspot(
+            x=int(d["x"]),
+            y=int(d["y"]),
+            usedTicks=int(d["usedTicks"])
+        )
 
 @dataclass
 class MapDoc:
@@ -77,4 +116,39 @@ class MapDoc:
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
             _id=d.get("_id"),
+        )
+
+@dataclass
+class AnimationDoc:
+    up_right_point: Point
+    down_left_point: Point
+    borders: List[Segment] = field(default_factory=list)
+    persons: List[AnimationPersonSpec] = field(default_factory=list)
+    hotspots: List[Hotspot] = field(default_factory=list)
+    totalTicks: int = 0
+    _id: Optional[ObjectId] = None
+
+    def to_bson(self) -> Dict[str, Any]:
+        doc = {
+            "up_right_point": self.up_right_point.to_bson(),
+            "down_left_point": self.down_left_point.to_bson(),
+            "borders": [s.to_bson() for s in self.borders],
+            "persons": [p.to_bson() for p in self.persons],
+            "hotspots": [h.to_bson() for h in self.hotspots],
+            "totalTicks": self.totalTicks
+        }
+        if self._id:
+            doc["_id"] = self._id
+        return doc
+
+    @staticmethod
+    def from_bson(d: Dict[str, Any]) -> "AnimationDoc":
+        return AnimationDoc(
+            up_right_point=Point.from_bson(d["up_right_point"]),
+            down_left_point=Point.from_bson(d["down_left_point"]),
+            borders=[Segment.from_bson(s) for s in d.get("borders", [])],
+            persons=[AnimationPersonSpec.from_bson(p) for p in d.get("persons", [])],
+            hotspots=[Hotspot.from_bson(h) for h in d.get("hotspots", [])],
+            totalTicks=d.get("totalTicks", 0),
+            _id=d.get("_id")
         )
