@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-<<<<<<< HEAD
-import { GetMapFromBackend, GetStatisticsFromBackend } from './src/services/api';
-=======
-import { GetMapFromBackend, GetRoutesFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
->>>>>>> 23054a9 (valid frontend and db animation saving)
+import { GetMapFromBackend, GetStatisticsFromBackend, saveAnimationToBackend, GetAnimationFromBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -113,13 +109,8 @@ const AnimationDetail: React.FC = () => {
     };
 
     const isRouteCompleted = (route: any): boolean => {
-<<<<<<< HEAD
-        if (route) {
-            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) //
-=======
         if (route) {    
             console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) 
->>>>>>> 23054a9 (valid frontend and db animation saving)
         }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
@@ -305,7 +296,7 @@ const AnimationDetail: React.FC = () => {
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => isSavedAnimation ? navigate("/maps") : navigate("/map/" + String(id))}
+                    onClick={() => isSavedAnimation ? navigate("/maps", { state: { activeTab: "animations" } }) : navigate("/map/" + String(id))}
                     className="svg-round-button"
                 />
             </div>

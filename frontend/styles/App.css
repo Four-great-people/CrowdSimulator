@@ -26,7 +26,6 @@
     border-color: #1e7e34 !important;
 }
 
-<<<<<<< HEAD
 .map-row {
   display: flex;
   align-items: center;
@@ -50,7 +49,6 @@
 .icon-button.delete:hover {
   filter: brightness(0.9);
 }
-=======
 .tabs {
     display: flex;
     flex-direction: column;
@@ -131,4 +129,3 @@
     background-color: #6c757d;
     cursor: not-allowed;
 }
->>>>>>> e56f862 (valid frontend and db animation saving)

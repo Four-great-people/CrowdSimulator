@@ -74,14 +74,15 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
     }
 }
 
-<<<<<<< HEAD
 export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
     try {
         if (useFakeCalls) {
             return fakeDelete(mapId);
         }
-        return await deleteFromRealBackend(mapId);
-=======
+        return await deleteFromRealBackend(mapId);} catch (error) {
+        throw error;
+    }
+};
 export const GetAnimationFromBackend = async (animationId: string): Promise<Grid> => {
     try {
         let animationMap = await getAnimation(animationId);
@@ -128,7 +129,6 @@ export const saveAnimationToBackend = async (grid: Grid): Promise<string> => {
 export const updateAnimationInBackend = async (animationId: string, grid: Grid): Promise<void> => {
     try {
         return await updateAnimationRealBackend(animationId, grid);
->>>>>>> e56f862 (valid frontend and db animation saving)
     } catch (error) {
         throw error;
     }

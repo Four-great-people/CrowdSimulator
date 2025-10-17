@@ -121,8 +121,6 @@ def get_statistics(map_id: str):
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
 
-<<<<<<< HEAD
-=======
 @app.route("/maps/<map_id>/simulate", methods=["POST"])
 def simulate(map_id: str):
     m = repo.get(map_id)
@@ -146,7 +144,6 @@ def simulate(map_id: str):
     return jsonify(r.json()), 200
 
 
->>>>>>> 13b34f4 (valid frontend and db animation saving)
 @app.route("/maps/<map_id>", methods=["PUT"])
 def update_map(map_id: str):
     payload = request.get_json(force=True)

@@ -139,7 +139,7 @@ const MapDetail: React.FC = () => {
 
                 {id !== 'new' && (
                     <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
-                        Delete map
+                        Удалить карту
                     </button>
                 )}
             </div>
@@ -151,7 +151,7 @@ const MapDetail: React.FC = () => {
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => navigate("/maps")}
+                    onClick={() => navigate("/maps", { state: { activeTab: "maps" } })}
                     className="svg-round-button"
                 />
             </div>

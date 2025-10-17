@@ -225,11 +225,6 @@ removePersonOrGoalAt(x: number, y: number) {
     }
 
     getAnimationDataForBackend() {
-        const hotspots = this.cells.flatMap((row, y) => 
-        row.map((cell, x) => ({x, y, usedTicks: cell.usedTicks }))
-           .filter(cell => cell.usedTicks > 0)
-        );
-
         return {
             up_right_point: { x: this.width, y: this.height },
             down_left_point: { x: 0, y: 0 },
