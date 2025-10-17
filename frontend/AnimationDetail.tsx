@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
+<<<<<<< HEAD
 import { GetMapFromBackend, GetStatisticsFromBackend } from './src/services/api';
+=======
+import { GetMapFromBackend, GetRoutesFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
+>>>>>>> 23054a9 (valid frontend and db animation saving)
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -10,16 +14,18 @@ import './styles/App.css';
 const AnimationDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
 
     if (!id) {
         return <div>ID карты не указан</div>;
     }
-
+    
     const [grid, setGrid] = useState<Grid | null>(null);
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
     const [completedGoals, setCompletedGoals] = useState<{ [id: number]: boolean }>({});
     const [isAnimating, setIsAnimating] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
@@ -28,18 +34,26 @@ const AnimationDetail: React.FC = () => {
     const [validTime, setValidTime] = useState(undefined);
     const [participantsNumber, setParticipantsNumber] = useState(undefined);
 
-    const loadMap = async (mapId: string) => {
+    const loadContent = async (contentId: string) => {
         if (isAnimating || isLoadingMap) return;
         try {
             setIsLoadingMap(true);
-            let newGrid = await GetMapFromBackend(mapId);
-            setGrid(newGrid);
-            const initialSteps: { [id: number]: number } = {};
-            const initialCompleted: { [id: number]: boolean } = {};
-            setCurrentSteps(initialSteps);
-            setCompletedGoals(initialCompleted);
-            setAnimationCompleted(false);
-            setIsLoadedMap(true);
+            
+            if (isSavedAnimation) {
+                const animationGrid = await GetAnimationFromBackend(contentId);
+                setGrid(animationGrid);
+                setAnimationCompleted(true);
+                setIsAnimating(false);
+            } else {
+                let newGrid = await GetMapFromBackend(contentId);
+                setGrid(newGrid);
+                const initialSteps: { [id: number]: number } = {};
+                const initialCompleted: { [id: number]: boolean } = {};
+                setCurrentSteps(initialSteps);
+                setCompletedGoals(initialCompleted);
+                setAnimationCompleted(false);
+                setIsLoadedMap(true);
+            }
         } catch (error) {
             console.log(error);
             navigate("/maps");
@@ -83,9 +97,29 @@ const AnimationDetail: React.FC = () => {
         }
     };
 
+    const saveAnimation = async () => {
+        if (!grid || isSaving) return;
+        
+        setIsSaving(true);
+        try {
+            const animationId = await saveAnimationToBackend(grid);
+            alert(`Анимация сохранена с ID: ${animationId}`);
+        } catch (error) {
+            console.error('Ошибка сохранения анимации:', error);
+            alert('Ошибка сохранения анимации');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const isRouteCompleted = (route: any): boolean => {
+<<<<<<< HEAD
         if (route) {
             console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) //
+=======
+        if (route) {    
+            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) 
+>>>>>>> 23054a9 (valid frontend and db animation saving)
         }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
@@ -214,7 +248,7 @@ const AnimationDetail: React.FC = () => {
 
     useEffect(
         () => {
-            loadMap(id as string);
+            loadContent(id as string);
             return () => {
                 if (animationRef.current) {
                     clearTimeout(animationRef.current);
@@ -239,6 +273,20 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
+            {!isSavedAnimation && (
+                <div className="animation-controls">
+                    {animationCompleted && (
+                        <button 
+                            onClick={saveAnimation} 
+                            disabled={isSaving}
+                            className="save-animation-btn"
+                        >
+                            {isSaving ? "Сохраняется..." : "Сохранить анимацию"}
+                        </button>
+                    )}
+                </div>
+            )}
+
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
@@ -253,10 +301,11 @@ const AnimationDetail: React.FC = () => {
                     </div>}
                 </div>
             </div>
+            
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => navigate("/map/" + String(id))}
+                    onClick={() => isSavedAnimation ? navigate("/maps") : navigate("/map/" + String(id))}
                     className="svg-round-button"
                 />
             </div>

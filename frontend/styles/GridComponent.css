@@ -82,9 +82,10 @@
 
 .maps {
     display: flex;
-    justify-content: center;
-    padding: 20px;
+    align-items:flex-start;
+    flex-direction: row;
 }
+
 
 .map-list-wrapper {
     flex: 1;
@@ -92,12 +93,14 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    justify-content: center;
+    justify-self: center;
+    align-self: center;
     min-height: 0; /* КРИТИЧЕСКИ ВАЖНО для Flexbox */
     height: 100%; /* Добавьте это */
     padding: 20px;
     max-width: 400px;
     border: 2px solid rgb(68, 0, 255);
+    margin: 0 auto;
 }
 
 .map-list {

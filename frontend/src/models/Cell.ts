@@ -26,6 +26,7 @@ class Cell {
     setGoal(goal: { x: number, y: number }) {
         this.goal = goal;
     }
+
     addWallDirection(direction: "horizontal" | "vertical") {
         if (!this.directionOfWall.includes(direction)) {
             this.directionOfWall.push(direction);

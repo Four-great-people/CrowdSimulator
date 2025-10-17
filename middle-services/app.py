@@ -12,6 +12,8 @@ from collections import OrderedDict
 from crowd_db.db.models import MapDoc
 from crowd_db.db.repository import MongoMapRepository
 from crowd_db.db.validators import apply_collection_validator
+from crowd_db.db.config import MAPS_COLLECTION, ANIMATIONS_COLLECTION
+from crowd_db.db.client import get_db
 
 load_dotenv()
 
@@ -119,6 +121,32 @@ def get_statistics(map_id: str):
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
 
+<<<<<<< HEAD
+=======
+@app.route("/maps/<map_id>/simulate", methods=["POST"])
+def simulate(map_id: str):
+    m = repo.get(map_id)
+    if not m:
+        return jsonify({"error": "map not found"}), 400
+
+    od = mapdoc_to_json(m)
+    payload = json.dumps(od, ensure_ascii=False)
+    headers = {"Content-Type": "application/json"}
+    try:
+        r = requests.post(
+            f"{CPP_BACKEND_URL}/dense",
+            data=payload,
+            headers=headers,
+            timeout=30,
+        )
+        r.raise_for_status()
+    except requests.RequestException as e:
+        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
+
+    return jsonify(r.json()), 200
+
+
+>>>>>>> 13b34f4 (valid frontend and db animation saving)
 @app.route("/maps/<map_id>", methods=["PUT"])
 def update_map(map_id: str):
     payload = request.get_json(force=True)
@@ -131,6 +159,53 @@ def update_map(map_id: str):
         return jsonify({"message": "map updated"}), 200
     except Exception as e:
         return jsonify({"error": f"invalid map payload: {e}"}), 400
+
+
+@app.route("/animations", methods=["POST"])
+def create_animation():
+    payload = request.get_json(force=True)
+    try:
+        animation_id = repo.create_animation(payload)
+        return jsonify({"_id": str(animation_id)}), 201
+    except Exception as e:
+        return jsonify({"error": f"invalid animation payload: {e}"}), 400
+
+@app.route("/animations", methods=["GET"])
+def get_animations():
+    try:
+        col = get_db()[ANIMATIONS_COLLECTION]
+        
+        cursor = col.find({}, {"_id": 1})
+        animation_ids = [str(doc["_id"]) for doc in cursor]
+        
+        return jsonify(animation_ids), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route("/animations/<animation_id>", methods=["GET"])
+def get_animation(animation_id: str):
+    try:
+        animation = repo.get_animation(animation_id)
+        animation_data = animation.to_bson()
+
+        if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
+            animation_data['_id'] = str(animation_data['_id'])
+        
+        return jsonify(animation_data), 200
+    except Exception as e:
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route("/animations/<animation_id>", methods=["PUT"])
+def update_animation(animation_id: str):
+    payload = request.get_json(force=True)
+    try:
+        ok = repo.update_animation(animation_id, payload)
+        if not ok:
+            return jsonify({"error": "animation not found"}), 404
+        return jsonify({"message": "animation updated"}), 200
+    except Exception as e:
+        return jsonify({"error": f"invalid animation payload: {e}"}), 400
 
 if __name__ == "__main__":
     apply_collection_validator()
