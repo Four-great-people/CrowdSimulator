@@ -14,7 +14,8 @@ const App: React.FC = () => {
                     <Routes>
                         <Route path="/maps" element={<Maps />} />
                         <Route path="/map/:id" element={<MapDetail />} />
-                        <Route path="/animation/:id" element={<AnimationDetail />} />
+                        <Route path="/animation/new/:id" element={<AnimationDetail />} />
+                        <Route path="/animation/saved/:id" element={<AnimationDetail />} />
                     </Routes>
                 </main>
             </div>
