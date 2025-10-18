@@ -90,7 +90,7 @@ jobs:
             kill -9 $SERVER_PID 2>/dev/null || true
           }
           trap cleanup EXIT
-          time 5
+          sleep 5
           cd ../backend/integration_tests
           timeout 300 pytest -q test_web_server
           cleanup
