@@ -69,7 +69,6 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cd backend/build
           make backend
 
       - name: make python environment
