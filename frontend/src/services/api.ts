@@ -27,7 +27,7 @@ export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<voi
 };
 
 
-export const GetRoutesFromBackend = async (mapId: string): Promise<{ id: number, route: string[] }[]> => {
+export const GetStatisticsFromBackend = async (mapId: string): Promise<any> => {
     try {
         if (useFakeCalls) {
             return fakeGetRoutes(mapId);
@@ -87,7 +87,7 @@ async function getMap(mapId: string) {
 }
 
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
-    const response = await fetch("http://localhost:5000/maps/" + mapId + "/simulate", { method: 'POST' });
+    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics", { method: 'GET' });
     const data = await response.json();
     console.log(data);
     return data;
@@ -185,11 +185,14 @@ function fakeGetMaps() {
 }
 
 function fakeGetRoutes(mapId: string) {
-    return [
+    return {
+    "ideal": null,
+    "valid": 25,
+    "routes": [
         { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
         { "id": 2, "route": ["RIGHT_UP", "RIGHT", "RIGHT", "RIGHT"] },
         { "id": 3, "route": ["DOWN", "LEFT", "LEFT", "LEFT"] }
-    ];
+    ]};
 }
 
 function fakeGetMap(mapId: string) {

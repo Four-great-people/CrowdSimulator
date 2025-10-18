@@ -114,7 +114,7 @@ export const SendGridDataToBackend = async (grid: Grid): Promise<void> => {
   // Реализовать вызов к бэкенду
 };
 
-export const GetRoutesFromBackend = async (): Promise<RouteResponse[]> => {
+export const GetStatisticsFromBackend = async (): Promise<any> => {
   // Реализовать получение маршрутов
 };
 ```

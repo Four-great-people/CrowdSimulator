@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetRoutesFromBackend } from './src/services/api';
+import { GetMapFromBackend, GetStatisticsFromBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -24,6 +24,8 @@ const AnimationDetail: React.FC = () => {
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isLoadedMap, setIsLoadedMap] = useState(false);
+    const [idealTime, setIdealTime] = useState(undefined);
+    const [validTime, setValidTime] = useState(undefined)
 
     const loadMap = async (mapId: string) => {
         if (isAnimating || isLoadingMap) return;
@@ -56,7 +58,7 @@ const AnimationDetail: React.FC = () => {
         setAnimationCompleted(false);
 
         try {
-            const routesFromBackend = await GetRoutesFromBackend(id);
+            const statisticsFromBackend = await GetStatisticsFromBackend(id);
             grid.reset();
             const gridCopy = grid.clone();
             setGrid(gridCopy);
@@ -69,8 +71,9 @@ const AnimationDetail: React.FC = () => {
                     }
                 });
             });
-
-            executeSteps(gridCopy, persons, 0, routesFromBackend);
+            setIdealTime(statisticsFromBackend["ideal"])
+            setValidTime(statisticsFromBackend["valid"])
+            executeSteps(gridCopy, persons, 0, statisticsFromBackend["routes"]);
 
         } catch (error) {
             console.error('Ошибка при работе с бэкендом:', error);
@@ -79,7 +82,7 @@ const AnimationDetail: React.FC = () => {
     };
 
     const isRouteCompleted = (route: any): boolean => {
-        if (route) {    
+        if (route) {
             console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) //
         }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
@@ -219,18 +222,33 @@ const AnimationDetail: React.FC = () => {
     );
 
     useEffect(
-            () => {
-                if (isLoadedMap) {
-                    startAnimation();
-                }
-            }, [id, isLoadedMap]
-        );
+        () => {
+            if (isLoadedMap) {
+                startAnimation();
+            }
+        }, [id, isLoadedMap]
+    );
+
+    const statisticsFormatString = (n: any) => {
+        if (n == null)
+            return "маршрут невозможно построить"
+        return `${n} с`
+    }
 
     return (
         <div className="App">
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
+                </div>
+                <div className="text-table-wrapper">
+                    {animationCompleted && <div className="text-table">
+                        <div className="text-table__title">Время движения</div>
+                        <ul className="text-table__list">
+                            <li>{`Маршрут с возможностью пересечения людей: ${statisticsFormatString(idealTime)}`}</li>
+                            <li>{`Маршрут без возможности пересечения людей: ${statisticsFormatString(validTime)}`}</li>
+                        </ul>
+                    </div>}
                 </div>
             </div>
             <div className="back-button-container">
