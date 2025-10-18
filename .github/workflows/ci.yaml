@@ -92,7 +92,7 @@ jobs:
           trap cleanup EXIT
           sleep 5
           cd ../backend/integration_tests
-          timeout 300 pytest -q test_web_server
+          timeout 300 pytest -q test_web_server.py
           cleanup
 
   build-frontend:
