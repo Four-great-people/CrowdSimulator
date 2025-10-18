@@ -50,6 +50,52 @@ jobs:
           make backend_test_tsan
           ./backend_test_tsan
 
+  build-integration-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make cpp environment
+        run: |
+          sudo apt update
+          sudo apt install -y wget cmake g++
+          sudo apt install -y libasio-dev zlib1g-dev libssl-dev libgtest-dev libgmock-dev
+          wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+          sudo dpkg -i Crow-1.2.1-Linux.deb
+      
+      - name: set cmake and build
+        run: |
+          cd backend
+          mkdir build
+          cd build
+          cmake ..
+          cd backend/build
+          make backend
+
+      - name: make python environment
+        run: |
+          sudo apt install python3-pip
+          python3 -m pip config set global.break-system-packages true
+          cd backend/integration_tests
+          pip3 install -r requirements.txt
+      
+      - name: run server and test
+        run: |
+          cd backend/build
+          ./backend &
+          SERVER_PID=$!
+          cleanup() {
+            echo "Cleaning up..."
+            kill $SERVER_PID 2>/dev/null || true
+            sleep 2
+            kill -9 $SERVER_PID 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          time 5
+          cd ../backend/integration_tests
+          timeout 300 pytest -q test_web_server
+          cleanup
+
   build-frontend:
     runs-on: ubuntu-latest
     steps:
