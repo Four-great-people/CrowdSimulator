@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 from bson import ObjectId
+import pytest
 
 def valid_payload():
     return {
@@ -68,13 +69,13 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
     oid = resp.get_json()["_id"]
 
  
-    resp2 = client.post(f"/maps/{oid}/simulate")
+    resp2 = client.get(f"/maps/{oid}/statistics")
     assert resp2.status_code == 200
-    routes = resp2.get_json()
-    assert routes == [{"id": 1, "route": ["UP", "RIGHT"]}]
+    statistics_resp = resp2.get_json()
+    assert statistics_resp == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
 
    
-    assert len(mock_requests["calls"]) == 1
+    assert len(mock_requests["calls"]) == 2
     call = mock_requests["calls"][0]
 
    
