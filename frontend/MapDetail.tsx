@@ -20,6 +20,7 @@ const MapDetail: React.FC = () => {
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -102,11 +103,11 @@ const MapDetail: React.FC = () => {
     }
     
     const deleteMap = async () => {
-        if (!id || id === 'new') return; 
+        if (!id || id === 'new') return;
         if (!confirm('Удалить эту карту? Это действие необратимо.')) return;
 
         try {
-            setIsSaving(true);
+            setIsDeleting(true);
             await deleteMapFromBackend(id);
             alert('Карта удалена');
             navigate('/maps');
@@ -114,7 +115,7 @@ const MapDetail: React.FC = () => {
             console.error(err);
             alert('Ошибка удаления карты');
         } finally {
-            setIsSaving(false);
+            setIsDeleting(false);
         }
     };
 
@@ -137,7 +138,7 @@ const MapDetail: React.FC = () => {
                 <button onClick={goToAnimation}>Начать анимацию</button>
 
                 {id !== 'new' && (
-                    <button onClick={deleteMap} disabled={isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
+                    <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
                         Delete map
                     </button>
                 )}
