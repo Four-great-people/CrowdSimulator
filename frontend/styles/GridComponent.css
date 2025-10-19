@@ -4,7 +4,7 @@
     grid-template-rows: repeat(22, 30px);
     width: fit-content;
     height: fit-content;
-    margin: 0 auto;
+    margin: 0;
     gap: 0;
     border: 1px solid black;
 }
@@ -74,7 +74,10 @@
 .body {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 10px; /* Добавляем небольшой отступ */
+    align-items: flex-start;
+    padding: 0px;
+    width: 100%; /* Добавляем ширину */
 }
 
 .maps {
@@ -126,9 +129,8 @@
 }
 
 .grid-wrapper {
-    flex: 4;
-    display: flex;
-    justify-content: left;
+    flex: 2.5; /* 90% ширины */
+    min-width: 0; /* Важно для ограничения содержимого */
 }
 
 .blue-button {
@@ -147,6 +149,48 @@
 
 .blue-button:hover {
     background-color: #1565c0;
+}
+
+.text-table-wrapper {
+    flex: 1; /* 10% ширины */
+    padding: 0px;
+}
+
+.text-table {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  padding: 0px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.text-table__title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.text-table__list {
+  margin: 0;
+  padding-left: 15px;
+}
+
+.text-table__list li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  white-space: pre-line;
 }
 
 @keyframes pulse {

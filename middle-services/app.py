@@ -88,7 +88,7 @@ def get_map(map_id: str):
         mimetype="application/json"
     )
 
-def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Tuple[Optional[int], Any]:
+def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Tuple[Any, Any]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -100,7 +100,8 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
     def extract_person(person) -> Optional[int]:
         return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"])) if person["route"] is not None else None
     personal_values = list(map(extract_person, j))
-    return (max(personal_values) if None not in personal_values else None), j # type: ignore
+    count_of_none = len(list(filter(lambda x: x is None, personal_values)))
+    return { "value": (max(filter(lambda x: x is not None, personal_values)) if count_of_none != len(personal_values) else None), "problematic": count_of_none }, j # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics", methods=["GET"])

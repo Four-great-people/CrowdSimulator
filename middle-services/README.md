@@ -95,8 +95,14 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics
 ```
 ```
 {
-    "ideal": null,
-    "valid": 25,
+    "ideal": {
+      "value": null,
+      "problematic": 2,
+    },
+    "valid": {
+      "value": 25,
+      "problematic": 3,
+    },
     "routes": [
       {
           "id": 0,
