@@ -109,29 +109,6 @@ def get_statistics(map_id: str):
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
 
-@app.route("/maps/<map_id>/simulate", methods=["POST"])
-def simulate(map_id: str):
-    m = repo.get(map_id)
-    if not m:
-        return jsonify({"error": "map not found"}), 400
-
-    od = mapdoc_to_json(m)
-    payload = json.dumps(od, ensure_ascii=False)
-    headers = {"Content-Type": "application/json"}
-    try:
-        r = requests.post(
-            CPP_BACKEND_URL,
-            data=payload,
-            headers=headers,
-            timeout=30,
-        )
-        r.raise_for_status()
-    except requests.RequestException as e:
-        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
-
-    return jsonify(r.json()), 200
-
-
 @app.route("/maps/<map_id>", methods=["PUT"])
 def update_map(map_id: str):
     payload = request.get_json(force=True)
