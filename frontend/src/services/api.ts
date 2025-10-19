@@ -186,8 +186,14 @@ function fakeGetMaps() {
 
 function fakeGetRoutes(mapId: string) {
     return {
-    "ideal": null,
-    "valid": 25,
+    "ideal": {
+        "value": null,
+        "problematic": 10,
+    },
+    "valid": {
+        "value": 25,
+        "problematic": 2,
+    },
     "routes": [
         { "id": 1, "route": ["RIGHT", "RIGHT", "RIGHT"] },
         { "id": 2, "route": ["RIGHT_UP", "RIGHT", "RIGHT", "RIGHT"] },

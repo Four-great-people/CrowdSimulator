@@ -25,7 +25,8 @@ const AnimationDetail: React.FC = () => {
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isLoadedMap, setIsLoadedMap] = useState(false);
     const [idealTime, setIdealTime] = useState(undefined);
-    const [validTime, setValidTime] = useState(undefined)
+    const [validTime, setValidTime] = useState(undefined);
+    const [participantsNumber, setParticipantsNumber] = useState(undefined);
 
     const loadMap = async (mapId: string) => {
         if (isAnimating || isLoadingMap) return;
@@ -71,6 +72,7 @@ const AnimationDetail: React.FC = () => {
                     }
                 });
             });
+            setParticipantsNumber(statisticsFromBackend["routes"].length)
             setIdealTime(statisticsFromBackend["ideal"])
             setValidTime(statisticsFromBackend["valid"])
             executeSteps(gridCopy, persons, 0, statisticsFromBackend["routes"]);
@@ -230,9 +232,9 @@ const AnimationDetail: React.FC = () => {
     );
 
     const statisticsFormatString = (n: any) => {
-        if (n == null)
+        if (n["value"] == null)
             return "маршрут невозможно построить"
-        return `${n} с`
+        return `${n["value"]} с\nне дошло ${n["problematic"]} из ${participantsNumber}`
     }
 
     return (
@@ -245,8 +247,8 @@ const AnimationDetail: React.FC = () => {
                     {animationCompleted && <div className="text-table">
                         <div className="text-table__title">Время движения</div>
                         <ul className="text-table__list">
-                            <li>{`Маршрут с возможностью пересечения людей: ${statisticsFormatString(idealTime)}`}</li>
-                            <li>{`Маршрут без возможности пересечения людей: ${statisticsFormatString(validTime)}`}</li>
+                            <li>Оптимальное время: {statisticsFormatString(idealTime)}</li>
+                            <li>Фактическое время: {statisticsFormatString(validTime)}</li>
                         </ul>
                     </div>}
                 </div>

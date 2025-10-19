@@ -190,6 +190,7 @@
 .text-table__list li {
   margin-bottom: 5px;
   font-size: 14px;
+  white-space: pre-line;
 }
 
 @keyframes pulse {
