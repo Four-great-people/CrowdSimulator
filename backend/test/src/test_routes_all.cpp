@@ -57,21 +57,21 @@ std::vector<std::vector<Action>> helper_crossing_routes_test(PlannerSetting sett
 }
 
 
-TEST(test_person, calculate_route__two_agents_no_conflicts_simple__returns_routes) {
+TEST(test_routes, calculate_route__two_agents_no_conflicts_simple__returns_routes) {
     auto routes = helper_no_conflicts_test(PlannerSetting::SIMPLE);
     ASSERT_EQ(routes.size(), 2);
     ASSERT_EQ(routes[0].size(), 2);
     ASSERT_EQ(routes[1].size(), 2);
 }
 
-TEST(test_person, calculate_route__two_agents_no_conflicts_prioritized__returns_routes) {
+TEST(test_routes, calculate_route__two_agents_no_conflicts_prioritized__returns_routes) {
     auto routes = helper_no_conflicts_test(PlannerSetting::PRIORITIZED);
     ASSERT_EQ(routes.size(), 2);
     ASSERT_EQ(routes[0].size(), 2);
     ASSERT_EQ(routes[1].size(), 2);
 }
 
-TEST(test_person, calculate_route__two_agents_crossing_paths_prioritized__returns_no_detour) {
+TEST(test_routes, calculate_route__two_agents_crossing_paths_prioritized__returns_no_detour) {
     auto routes = helper_crossing_routes_test(PlannerSetting::PRIORITIZED);
     
     ASSERT_EQ(routes.size(), 2);
@@ -80,10 +80,51 @@ TEST(test_person, calculate_route__two_agents_crossing_paths_prioritized__return
     ASSERT_FALSE(has_detour);
 }
 
-TEST(test_person, calculate_route__two_agents_crossing_paths_simple__returns_is_detour) {
+TEST(test_routes, calculate_route__two_agents_crossing_paths_simple__returns_is_detour) {
     auto routes = helper_crossing_routes_test(PlannerSetting::SIMPLE);
     
     ASSERT_EQ(routes.size(), 2);
     ASSERT_EQ(routes[0].size(), 2);
     ASSERT_EQ(routes[1].size(), 2);
+}
+
+TEST(test_routes, calculate_route__no_swap_route) {
+    std::vector<Border> borders = {
+        Border{Point{1, 1}, Point{1, 5}},
+        Border{Point{1, 5}, Point{2, 5}},
+        Border{Point{2, 5}, Point{2, 1}},
+        Border{Point{2, 1}, Point{1, 1}},
+    };
+    Grid grid(borders, Point(0, 0), Point(5, 5));
+    std::vector<Person> persons;
+    persons.emplace_back(0, Point(1, 2), Point(1, 4));
+    persons.emplace_back(1, Point(1, 3), Point(1, 1));
+
+    PrioritizedPlanner planner(persons, &grid);
+    auto routes = planner.plan_all_routes();
+    ASSERT_EQ(routes.size(), 2);
+    ASSERT_EQ(routes[0].size(), 0);
+    ASSERT_EQ(routes[1].size(), 0);
+}
+
+TEST(test_routes, calculate_route__no_multiple_swap_route) {
+    std::vector<Border> borders = {
+        Border{Point{1, 1}, Point{1, 7}},
+        Border{Point{1, 7}, Point{2, 7}},
+        Border{Point{2, 7}, Point{2, 1}},
+        Border{Point{2, 1}, Point{1, 1}},
+    };
+    Grid grid(borders, Point(0, 0), Point(5, 5));
+    std::vector<Person> persons;
+    persons.emplace_back(0, Point(1, 2), Point(1, 5));
+    persons.emplace_back(1, Point(1, 3), Point(1, 6));
+    persons.emplace_back(2, Point(1, 4), Point(1, 1));
+
+    PrioritizedPlanner planner(persons, &grid);
+    auto routes = planner.plan_all_routes();
+    ASSERT_EQ(routes.size(), 3);
+    ASSERT_EQ(routes[0].size(), 0);
+    ASSERT_EQ(routes[1].size(), 0);
+    ASSERT_EQ(routes[2].size(), 0);
+
 }

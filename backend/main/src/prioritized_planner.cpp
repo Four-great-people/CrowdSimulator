@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <queue>
 #include <algorithm>
+#include <iostream>
 
 PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, Grid* grid)
     : Planner(persons, grid) {}
@@ -25,7 +26,7 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     for (int i = 0; i < data.size(); ++i) {
         int length = data[i].first;
         int pos = data[i].second;
-        indices[pos] = i;
+        indices[i] = pos;
     }
     
     return indices;
@@ -35,38 +36,51 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     auto indices = get_priorities_shortest_first();
     
     ca_table = CATable();
+    stops.clear();
     std::vector<std::vector<Action>> results(_persons.size());
-    
-    for (int priority = 0; priority < _persons.size(); ++priority) {
-        int agent_id = -1;
-        for (int j = 0; j < _persons.size(); ++j) {
-            if (indices[j] == priority) {
-                agent_id = j;
-                break;
-            }
-        }
-        
-        auto route = calculate_route(_persons[agent_id]);
-        
-        if (route) {
-            results[agent_id] = *route;
+    bool changed = true;
+    while (changed) {
+        fill(results.begin(), results.end(), std::vector<Action>());
+        for (int priority = 0; priority < _persons.size(); ++priority) {
+            int agent_id = indices[priority];
             
-            std::vector<Point> trajectory;
-            Point current = _persons[agent_id].get_position();
-            trajectory.push_back(current);
+            auto route = calculate_route(_persons[agent_id]);
             
-            for (const auto& action : *route) {
-                current = current + action;
+            if (route) {
+                results[agent_id] = *route;
+                
+                std::vector<Point> trajectory;
+                Point current = _persons[agent_id].get_position();
                 trajectory.push_back(current);
+                
+                for (const auto& action : *route) {
+                    current = current + action;
+                    trajectory.push_back(current);
+                }
+                
+                ca_table.add_trajectory(agent_id, trajectory);
+            } else {
+                results[agent_id] = std::vector<Action>{};
             }
-            
-            ca_table.add_trajectory(agent_id, trajectory);
-        } else {
-            results[agent_id] = std::vector<Action>{};
         }
+        changed = validate_results(results);
     }
     
     return results;
+}
+
+bool PrioritizedPlanner::validate_results(std::vector<std::vector<Action>>& results) {
+    bool changed = false;
+    for (int agent_id = 0; agent_id < results.size(); ++agent_id) {
+        if (results[agent_id].size() == 0) {
+            auto position = _persons[agent_id].get_position();
+            if (stops.find(position) == stops.end()) {
+                stops.insert(position);
+                changed = true;
+            }
+        }
+    }
+    return changed;
 }
 
 std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Person& person) const {
@@ -109,9 +123,10 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
         for (const auto& neighbor : neighbors) {
             if (_grid->is_intersecting(Segment(current->position, neighbor)) ||
                 neighbor.get_x() > _grid->get_upper_right().get_x() ||
-                neighbor.get_x() < _grid->get_lower_left().get_x() ||
+                neighbor.get_x() < _grid->get_lower_left().get_x()  ||
                 neighbor.get_y() > _grid->get_upper_right().get_y() ||
-                neighbor.get_y() < _grid->get_lower_left().get_y()) {
+                neighbor.get_y() < _grid->get_lower_left().get_y()  ||
+                stops.find(current->position) != stops.end()) {
                 continue;
             }
             

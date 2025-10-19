@@ -4,6 +4,7 @@
 #include "planner.h"
 #include "catable.h"
 #include <vector>
+#include <unordered_set>
 
 class PrioritizedPlanner : public Planner {
 public:
@@ -13,7 +14,9 @@ public:
 private:
     std::vector<int> get_priorities_shortest_first() const;
     int calculate_distance(const Person& person) const;
+    bool validate_results(std::vector<std::vector<Action>>& results);
     CATable ca_table;
+    std::unordered_set<Point> stops;
 };
 
 #endif // PRIORITIZED_PLANNER_H

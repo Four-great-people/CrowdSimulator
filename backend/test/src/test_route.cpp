@@ -11,7 +11,7 @@
 #include "prioritized_planner.h"
 #include "simple_planner.h"
 
-TEST(test_person, calculate_route__same_point__returns_empty_vector) {
+TEST(test_route, calculate_route__same_point__returns_empty_vector) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(0, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -29,7 +29,7 @@ TEST(test_person, calculate_route__same_point__returns_empty_vector) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_person, calculate_route__another_point__returns_route) {
+TEST(test_route, calculate_route__another_point__returns_route) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(0, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -48,7 +48,7 @@ TEST(test_person, calculate_route__another_point__returns_route) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_person, calculate_route__far_away_point__returns_route) {
+TEST(test_route, calculate_route__far_away_point__returns_route) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(2, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -69,7 +69,7 @@ TEST(test_person, calculate_route__far_away_point__returns_route) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_person, calculate_route__diagonal_point__returns_efficient_route) {
+TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(2, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -89,7 +89,7 @@ TEST(test_person, calculate_route__diagonal_point__returns_efficient_route) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_person, calculate_route__forbidden_corner_move_diagonal_open__returns_not_simple_route) {
+TEST(test_route, calculate_route__forbidden_corner_move_diagonal_open__returns_not_simple_route) {
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
@@ -106,7 +106,7 @@ TEST(test_person, calculate_route__forbidden_corner_move_diagonal_open__returns_
     ASSERT_GT(prioritized_route.value().size(), 1);
 }
 
-TEST(test_person, calculate_route__forbidden_corner_move_diagonal_close__returns_not_simple_route) {
+TEST(test_route, calculate_route__forbidden_corner_move_diagonal_close__returns_not_simple_route) {
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
@@ -123,7 +123,7 @@ TEST(test_person, calculate_route__forbidden_corner_move_diagonal_close__returns
     ASSERT_GT(prioritized_route.value().size(), 1);
 }
 
-TEST(test_person, calculate_route__not_only_diagonal_point__returns_efficient_route) {
+TEST(test_route, calculate_route__not_only_diagonal_point__returns_efficient_route) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(2, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -144,7 +144,7 @@ TEST(test_person, calculate_route__not_only_diagonal_point__returns_efficient_ro
     ASSERT_THAT(prioritized_route.value(), ::testing::Contains(Action::RIGHT_UP));
 }
 
-TEST(test_person, calculate_route__unreachable_point_inside__returns_nullopt) {
+TEST(test_route, calculate_route__unreachable_point_inside__returns_nullopt) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(0, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
@@ -161,7 +161,7 @@ TEST(test_person, calculate_route__unreachable_point_inside__returns_nullopt) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_person, calculate_route__unreachable_point_outside__returns_nullopt) {
+TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
     std::vector border{Border(Point(0, 0), Point(0, 10)),
                        Border(Point(0, 10), Point(10, 10)),
                        Border(Point(10, 10), Point(10, 0)),
