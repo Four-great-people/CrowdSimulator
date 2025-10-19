@@ -99,7 +99,7 @@ def test_simulate_calls_cpp_with_statistics(client, mock_requests):
     resp2 = client.get(f"/maps/{oid}/statistics")
     assert resp2.status_code == 200
     statistics = resp2.get_json()
-    assert statistics == {"ideal": 35, "valid": None, "routes": [{"id": 1,"route": None}]}
+    assert statistics == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
 
     assert len(mock_requests["calls"]) == 2
 
