@@ -59,6 +59,15 @@ def get_maps():
     except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
+@app.route("/maps/<map_id>", methods=["DELETE"])
+def delete_map(map_id: str):
+    try:
+        ok = repo.delete(map_id)
+        if not ok:
+            return jsonify({"error": "map not found"}), 400
+        return jsonify({"message": "map deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": f"delete failed: {e}"}), 400
 
 @app.route("/maps/<map_id>", methods=["GET"])
 def get_map(map_id: str):
