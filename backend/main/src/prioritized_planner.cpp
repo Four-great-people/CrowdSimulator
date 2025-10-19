@@ -90,7 +90,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
         return std::vector<Action>{};
     }
 
-    const int MAX_TIME = 1000;
+    const int MAX_TIME = 50000;
     
     using NodeQueue = std::priority_queue<std::shared_ptr<TimedNode>, 
                                          std::vector<std::shared_ptr<TimedNode>>, 

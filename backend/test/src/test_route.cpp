@@ -177,3 +177,22 @@ TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
     ASSERT_FALSE(simple_route.has_value());
     ASSERT_EQ(prioritized_route, simple_route);
 }
+
+
+TEST(test_route, calculate_long_route) {
+    std::vector border{Border(Point(1, 0), Point(1, 30))};
+    Grid grid(border);
+    Person person(0, Point(0, 15), Point(1, 15));
+    
+    SimplePlanner simple_planner({person}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, &grid);
+    auto simple_route = simple_planner.calculate_route(person);
+    auto prioritized_route = prioritized_planner.calculate_route(person);
+
+    ASSERT_TRUE(simple_route.has_value());
+    ASSERT_EQ(simple_route->size(), 31);
+
+    ASSERT_TRUE(prioritized_route.has_value());
+    ASSERT_EQ(prioritized_route->size(), 31);
+
+}
