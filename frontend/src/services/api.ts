@@ -83,28 +83,27 @@ export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
         throw error;
     }
 };
-export const GetAnimationFromBackend = async (animationId: string): Promise<Grid> => {
+
+export const GetAnimationFromBackend = async (animationId: string): Promise<{grid: Grid, routes: any[], statistics: any}> => {
     try {
-        let animationMap = await getAnimation(animationId);
+        const animationMap = await getAnimation(animationId);
         let width = animationMap["up_right_point"]["x"];
         let height = animationMap["up_right_point"]["y"];
         let newGrid = new Grid(width, height);
         animationMap["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
         });
-        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number; reachedGoal: boolean }) => {
-            const p = new Person(person["id"], person["position"], person["goal"], person["reachedGoal"]);
+        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number}) => {
+            const p = new Person(person["id"], person["position"], person["goal"]);
             newGrid.addPerson(p);
             newGrid.setGoal(person["goal"]);
         })
-        animationMap["hotspots"].forEach((hotspot: { x: number; y: number; usedTicks:  number}) => {
-            const cell = newGrid.getCell(hotspot.x, hotspot.y);
-                if (cell) {
-                    cell.usedTicks = hotspot.usedTicks;
-                }
-        })
-        newGrid.allTicks = animationMap["totalTicks"] || 0;
-        return newGrid;
+
+        return {
+            grid: newGrid,
+            routes: animationMap["routes"] || [],
+            statistics: animationMap["statistics"] || {}
+        };
     } catch (error) {
         throw error;
     }
@@ -118,17 +117,9 @@ export const GetAnimationsFromBackend = async (): Promise<string[]> => {
     }
 }
 
-export const saveAnimationToBackend = async (grid: Grid): Promise<string> => {
+export const saveAnimationToBackend = async (grid: Grid, routes: any[], statistics: any): Promise<string> => {
     try {
-        return await saveAnimationToRealBackend(grid);
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const updateAnimationInBackend = async (animationId: string, grid: Grid): Promise<void> => {
-    try {
-        return await updateAnimationRealBackend(animationId, grid);
+        return await saveAnimationToRealBackend(grid, routes, statistics);
     } catch (error) {
         throw error;
     }
@@ -158,8 +149,8 @@ async function getAnimation(animationId: string) {
     return data;
 } 
 
-async function saveAnimationToRealBackend(grid: Grid): Promise<string> {
-    const animationData = grid.getAnimationDataForBackend();
+async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics: any): Promise<string> {
+    const animationData = grid.getAnimationDataForBackend(routes, statistics);
     const response = await fetch("http://localhost:5000/animations", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -167,18 +158,6 @@ async function saveAnimationToRealBackend(grid: Grid): Promise<string> {
     });
     const data = await response.json();
     return data._id;
-}
-
-async function updateAnimationRealBackend(animationId: string, grid: Grid): Promise<void> {
-    const animationData = grid.getAnimationDataForBackend();
-    const response = await fetch(`http://localhost:5000/animations/${animationId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(animationData),
-    });
-    if (!response.ok) {
-        throw new Error(`Ошибка обновления анимации: ${response.status}`);
-    }
 }
 
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {

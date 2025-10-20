@@ -47,8 +47,20 @@ def apply_collection_validator():
     statistics = {
         "bsonType": "object",
         "properties": {
-            "valid": {"bsonType": ["int", "null"]},
-            "ideal": {"bsonType": ["int", "null"]}
+            "valid": {
+                "bsonType": "object",
+                "properties": {
+                    "value": {"bsonType": ["int", "null"]},
+                    "problematic": {"bsonType": "int"}
+                }
+            },
+            "ideal": {
+                "bsonType": "object", 
+                "properties": {
+                    "value": {"bsonType": ["int", "null"]},
+                    "problematic": {"bsonType": "int"}
+                }
+            }
         },
         "additionalProperties": True
     }

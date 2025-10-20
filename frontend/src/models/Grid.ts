@@ -224,7 +224,11 @@ removePersonOrGoalAt(x: number, y: number) {
         };
     }
 
-    getAnimationDataForBackend() {
+    getAnimationDataForBackend(routes: any[], statistics: any) {
+        const cleanRoutes = routes.map(route => ({
+            id: route.id,
+            route: route.route
+        }));
         return {
             up_right_point: { x: this.width, y: this.height },
             down_left_point: { x: 0, y: 0 },
@@ -233,10 +237,9 @@ removePersonOrGoalAt(x: number, y: number) {
                 id: person.id,
                 position: person.position,
                 goal: person.goal,
-                reachedGoal: person.reachedGoal
             })),
-            hotspots: hotspots,
-            totalTicks: this.allTicks || 0 
+            routes: cleanRoutes,
+            statistics: statistics
         };
     }
 
