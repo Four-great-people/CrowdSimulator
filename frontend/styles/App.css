@@ -26,3 +26,27 @@
     background-color: #218838 !important;
     border-color: #1e7e34 !important;
 }
+
+.map-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-row__title {
+  flex: 1;
+  text-align: left;
+}
+
+.icon-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px 8px;
+}
+
+.icon-button.delete:hover {
+  filter: brightness(0.9);
+}

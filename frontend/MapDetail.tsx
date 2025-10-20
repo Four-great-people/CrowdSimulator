@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, saveMapToBackend, updateMapInBackend } from './src/services/api';
+import { GetMapFromBackend, saveMapToBackend, updateMapInBackend, deleteMapFromBackend } from './src/services/api';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
@@ -20,6 +20,7 @@ const MapDetail: React.FC = () => {
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -100,6 +101,23 @@ const MapDetail: React.FC = () => {
             navigate("/animation/" + String(id));
         }
     }
+    
+    const deleteMap = async () => {
+        if (!id || id === 'new') return;
+        if (!confirm('Удалить эту карту? Это действие необратимо.')) return;
+
+        try {
+            setIsDeleting(true);
+            await deleteMapFromBackend(id);
+            alert('Карта удалена');
+            navigate('/maps');
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка удаления карты');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     useEffect(
         () => {
@@ -118,6 +136,12 @@ const MapDetail: React.FC = () => {
                     {isSaving ? "Сохраняется..." : "Сохранить как"}
                 </button>
                 <button onClick={goToAnimation}>Начать анимацию</button>
+
+                {id !== 'new' && (
+                    <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
+                        Delete map
+                    </button>
+                )}
             </div>
             <div className="body">
                 <div className="grid-wrapper">

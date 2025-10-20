@@ -74,6 +74,17 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
     }
 }
 
+export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
+    try {
+        if (useFakeCalls) {
+            return fakeDelete(mapId);
+        }
+        return await deleteFromRealBackend(mapId);
+    } catch (error) {
+        throw error;
+    }
+};
+
 async function getMaps() {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
     const data = await response.json();
@@ -114,6 +125,14 @@ async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
     if (!response.ok) {
         const t = await response.text().catch(() => '');
         throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
+    }
+}
+
+async function deleteFromRealBackend(mapId: string): Promise<void> {
+    const res = await fetch(`http://localhost:5000/maps/${mapId}`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) {
+        const t = await res.text().catch(() => '');
+        throw new Error(`Не удалось удалить карту: ${res.status} ${t}`);
     }
 }
 
@@ -230,5 +249,10 @@ function fakeSave(grid: Grid) {
 function fakeUpdate(mapId: string, grid: Grid): void {
     const payload = grid.getDataForBackend();
     console.log('[FAKE updateMapInBackend] mapId:', mapId, 'payload:', payload);
+}
+
+function fakeDelete(mapId: string): void {
+  const idx = fakeMapList.indexOf(mapId);
+  if (idx !== -1) fakeMapList.splice(idx, 1);
 }
 
