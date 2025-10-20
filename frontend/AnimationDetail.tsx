@@ -361,7 +361,7 @@ const AnimationDetail: React.FC = () => {
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => isSavedAnimation ? navigate("/maps", { state: { activeTab: "animations" } }) : navigate("/map/" + String(id))}
+                    onClick={() => isSavedAnimation ? navigate("/maps", { state: { activeTab: "animations" } }) : navigate("/map/" + String(id), { state: { activeTab: "maps" } })}
                     className="svg-round-button"
                 />
             </div>

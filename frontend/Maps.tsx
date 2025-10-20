@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GetMapsFromBackend, deleteMapFromBackend, GetAnimationsFromBackend } from './src/services/api';
 import './styles/App.css';
 import Grid from './src/models/Grid';
@@ -9,10 +9,17 @@ const Maps: React.FC = () => {
     const [isLoadingMaps, setIsLoadingMaps] = useState(false);
     const [busyId, setBusyId] = useState<string | null>(null);
     const [animationList, setAnimations] = useState<string[]>([]);
-    const [activeTab, setActiveTab] = useState<'maps' | 'animations'>('maps');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    
 
+    const activeTab = location.state?.activeTab || 'maps';
+
+    const setActiveTab = (tab: 'maps' | 'animations') => {
+        navigate(location.pathname, { state: { activeTab: tab } });
+    };
+    
     const loadMaps = async () => {
         try {
             setIsLoading(true);
@@ -47,7 +54,7 @@ const Maps: React.FC = () => {
 
     const createNewMap = () => {
         const newGrid = new Grid(40, 22);
-        navigate('/map/new');       
+        navigate('/map/new', { state: { activeTab: "maps" } });       
     };
       
     const deleteMap = async (e: React.MouseEvent, mapId: string) => {
