@@ -181,15 +181,33 @@ removePersonOrGoalAt(x: number, y: number) {
     addPerson(person: Person) {
         const cell = this.getCell(person.position.x, person.position.y);
         if (cell) {
+            cell.persons = cell.persons.filter(p => p.id !== person.id);
             cell.addPerson(person);
+        
+            this.persons = this.persons.filter(p => p.id !== person.id);
             this.persons.push(person);
         }
     }   
 
     setGoal(goal: { x: number, y: number }) {
-        const cell = this.getCell(goal.x, goal.y);
-        if (cell) {
+    const cell = this.getCell(goal.x, goal.y);
+    if (cell) {
+        const personReachedThisGoal = cell.persons.find(p => 
+            p.reachedGoal && p.goal.x === goal.x && p.goal.y === goal.y
+        );
+        
+        if (!personReachedThisGoal) {
             cell.setGoal(goal);
+        } else {
+            cell.removeGoal();
+        }
+    }
+    }
+
+    setHotspots (hotspot: { x: number, y: number, usedTicks: number }) {
+        const cell = this.getCell(hotspot.x, hotspot.y);
+        if (cell) {
+            cell.usedTicks = hotspot.usedTicks;
         }
     }
 
@@ -203,6 +221,25 @@ removePersonOrGoalAt(x: number, y: number) {
                 position: person.position,
                 goal: person.goal
             }))
+        };
+    }
+
+    getAnimationDataForBackend(routes: any[], statistics: any) {
+        const cleanRoutes = routes.map(route => ({
+            id: route.id,
+            route: route.route
+        }));
+        return {
+            up_right_point: { x: this.width, y: this.height },
+            down_left_point: { x: 0, y: 0 },
+            borders: this.walls.map(wall => wall.toJSON()),
+            persons: this.persons.map(person => ({
+                id: person.id,
+                position: person.position,
+                goal: person.goal,
+            })),
+            routes: cleanRoutes,
+            statistics: statistics
         };
     }
 
@@ -221,6 +258,7 @@ removePersonOrGoalAt(x: number, y: number) {
         this.cells.forEach(row => row.forEach(cell => cell.reset()));
         this.allTicks = 0;
     }
+
 }
 
 export default Grid;

@@ -79,7 +79,47 @@ export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
         if (useFakeCalls) {
             return fakeDelete(mapId);
         }
-        return await deleteFromRealBackend(mapId);
+        return await deleteFromRealBackend(mapId);} catch (error) {
+        throw error;
+    }
+};
+
+export const GetAnimationFromBackend = async (animationId: string): Promise<{grid: Grid, routes: any[], statistics: any}> => {
+    try {
+        const animationMap = await getAnimation(animationId);
+        let width = animationMap["up_right_point"]["x"];
+        let height = animationMap["up_right_point"]["y"];
+        let newGrid = new Grid(width, height);
+        animationMap["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
+            newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
+        });
+        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number}) => {
+            const p = new Person(person["id"], person["position"], person["goal"]);
+            newGrid.addPerson(p);
+            newGrid.setGoal(person["goal"]);
+        })
+
+        return {
+            grid: newGrid,
+            routes: animationMap["routes"] || [],
+            statistics: animationMap["statistics"] || {}
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const GetAnimationsFromBackend = async (): Promise<string[]> => {
+    try {
+        return await getAnimations();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const saveAnimationToBackend = async (grid: Grid, routes: any[], statistics: any): Promise<string> => {
+    try {
+        return await saveAnimationToRealBackend(grid, routes, statistics);
     } catch (error) {
         throw error;
     }
@@ -95,6 +135,29 @@ async function getMap(mapId: string) {
     const response = await fetch("http://localhost:5000/maps/" + mapId, { method: 'GET' });
     const data = await response.json();
     return data;
+}
+
+async function getAnimations() {
+    const response = await fetch("http://localhost:5000/animations", { method: 'GET' });
+    const data = await response.json();
+    return data;
+}
+
+async function getAnimation(animationId: string) {
+    const response = await fetch("http://localhost:5000/animations/" + animationId, { method: 'GET' });
+    const data = await response.json();
+    return data;
+} 
+
+async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics: any): Promise<string> {
+    const animationData = grid.getAnimationDataForBackend(routes, statistics);
+    const response = await fetch("http://localhost:5000/animations", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(animationData)
+    });
+    const data = await response.json();
+    return data._id;
 }
 
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {

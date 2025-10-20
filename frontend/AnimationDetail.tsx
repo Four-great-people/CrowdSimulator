@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetStatisticsFromBackend } from './src/services/api';
+import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -10,36 +10,64 @@ import './styles/App.css';
 const AnimationDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
 
     if (!id) {
         return <div>ID карты не указан</div>;
     }
-
+    
     const [grid, setGrid] = useState<Grid | null>(null);
+    const [originalGrid, setOriginalGrid] = useState<Grid | null>(null);
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
     const [completedGoals, setCompletedGoals] = useState<{ [id: number]: boolean }>({});
     const [isAnimating, setIsAnimating] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isLoadedMap, setIsLoadedMap] = useState(false);
     const [idealTime, setIdealTime] = useState(undefined);
     const [validTime, setValidTime] = useState(undefined);
-    const [participantsNumber, setParticipantsNumber] = useState(undefined);
+    const [participantsNumber, setParticipantsNumber] = useState<number>(0);
+    const [routes, setRoutes] = useState<any[]>([]);
+    const [showStatistics, setShowStatistics] = useState(false);
+    const [isAnimationSaved, setIsAnimationSaved] = useState(false);
 
-    const loadMap = async (mapId: string) => {
+    useEffect(() => {
+        loadContent(id);
+    }, [id]);
+
+    const loadContent = async (contentId: string) => {
         if (isAnimating || isLoadingMap) return;
         try {
             setIsLoadingMap(true);
-            let newGrid = await GetMapFromBackend(mapId);
-            setGrid(newGrid);
-            const initialSteps: { [id: number]: number } = {};
-            const initialCompleted: { [id: number]: boolean } = {};
-            setCurrentSteps(initialSteps);
-            setCompletedGoals(initialCompleted);
-            setAnimationCompleted(false);
-            setIsLoadedMap(true);
+            
+            if (isSavedAnimation) {
+                const { grid: animationGrid, routes: animationRoutes, statistics: animationStats } = await GetAnimationFromBackend(contentId);
+                setGrid(animationGrid);
+                setOriginalGrid(animationGrid.clone());
+                setRoutes(animationRoutes || []);
+                setIdealTime(animationStats?.ideal);
+                setValidTime(animationStats?.valid);
+                setParticipantsNumber(animationRoutes.length);
+                setShowStatistics(true);
+                setIsAnimationSaved(true);
+
+                startSavedAnimation(animationGrid, animationRoutes, animationStats);
+            } else {
+                let newGrid = await GetMapFromBackend(contentId);
+                setGrid(newGrid);
+                setOriginalGrid(newGrid.clone());
+                const initialSteps: { [id: number]: number } = {};
+                const initialCompleted: { [id: number]: boolean } = {};
+                setCurrentSteps(initialSteps);
+                setCompletedGoals(initialCompleted);
+                setAnimationCompleted(false);
+                setShowStatistics(false);
+                setIsLoadedMap(true);
+                setIsAnimationSaved(false);
+            }
         } catch (error) {
             console.log(error);
             navigate("/maps");
@@ -57,9 +85,11 @@ const AnimationDetail: React.FC = () => {
 
         setIsAnimating(true);
         setAnimationCompleted(false);
+        setShowStatistics(false);
 
         try {
             const statisticsFromBackend = await GetStatisticsFromBackend(id);
+            setRoutes(statisticsFromBackend.routes || []);
             grid.reset();
             const gridCopy = grid.clone();
             setGrid(gridCopy);
@@ -83,9 +113,66 @@ const AnimationDetail: React.FC = () => {
         }
     };
 
+    const saveAnimation = async () => {
+        if (!originalGrid || !grid || isSaving || !idealTime || !validTime || !routes || routes.length === 0) return;
+
+        if (isAnimationSaved) {
+                alert("Анимация уже сохранена");
+                return;
+        }
+
+        setIsSaving(true);
+        try {
+            const statistics = {
+                valid: validTime,
+                ideal: idealTime
+            };
+            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics);
+            alert(`Анимация сохранена с ID: ${animationId}`);
+            setIsAnimationSaved(true);
+        } catch (error) {
+            console.error('Ошибка сохранения анимации:', error);
+            alert('Ошибка сохранения анимации');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const startSavedAnimation = async (savedGrid: Grid, savedRoutes: any[], savedStatistics: any) => {
+        if (!savedGrid || isAnimating) return;
+
+        setIsAnimating(true);
+        setAnimationCompleted(false);
+
+        try {
+            savedGrid.reset();
+            const gridCopy = savedGrid.clone();
+            setGrid(gridCopy);
+
+            const persons: Person[] = [];
+            gridCopy.cells.forEach(row => {
+                row.forEach(cell => {
+                    if (cell.persons.length > 0) {
+                        persons.push(...cell.persons);
+                    }
+                });
+            });
+            
+            setParticipantsNumber(savedRoutes.length);
+            setIdealTime(savedStatistics.ideal);
+            setValidTime(savedStatistics.valid);
+            
+            executeSteps(gridCopy, persons, 0, savedRoutes);
+
+        } catch (error) {
+            console.error('Ошибка при воспроизведении анимации:', error);
+            setIsAnimating(false);
+        }
+    };
+
     const isRouteCompleted = (route: any): boolean => {
         if (route) {
-            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`) //
+            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`)
         }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
@@ -149,6 +236,9 @@ const AnimationDetail: React.FC = () => {
         if (allRoutesCompleted) {
             setIsAnimating(false);
             setAnimationCompleted(true);
+            if (!isSavedAnimation) {
+                setShowStatistics(true);
+            }
             return;
         }
 
@@ -212,16 +302,13 @@ const AnimationDetail: React.FC = () => {
         }, 200);
     };
 
-    useEffect(
-        () => {
-            loadMap(id as string);
-            return () => {
-                if (animationRef.current) {
-                    clearTimeout(animationRef.current);
-                }
-            };
-        }, [id]
-    );
+    useEffect(() => {
+        return () => {
+            if (animationRef.current) {
+            clearTimeout(animationRef.current);
+            }
+        };
+    }, []);
 
     useEffect(
         () => {
@@ -231,6 +318,8 @@ const AnimationDetail: React.FC = () => {
         }, [id, isLoadedMap]
     );
 
+
+
     const statisticsFormatString = (n: any) => {
         if (n["value"] == null)
             return "маршрут невозможно построить"
@@ -239,12 +328,27 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
+            {!isSavedAnimation && (
+                <div className="animation-controls">
+                    {animationCompleted && (
+                        <button 
+                            onClick={saveAnimation} 
+                            disabled={isSaving}
+                            className="save-animation-btn"
+                        >
+                            {isSaving ? "Сохраняется..." :
+                            isAnimationSaved ? "Анимация сохранена" : "Сохранить анимацию"}
+                        </button>
+                    )}
+                </div>
+            )}
+
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
                 </div>
                 <div className="text-table-wrapper">
-                    {animationCompleted && <div className="text-table">
+                    {showStatistics && <div className="text-table">
                         <div className="text-table__title">Время движения</div>
                         <ul className="text-table__list">
                             <li>Оптимальное время: {statisticsFormatString(idealTime)}</li>
@@ -253,10 +357,11 @@ const AnimationDetail: React.FC = () => {
                     </div>}
                 </div>
             </div>
+            
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
-                    onClick={() => navigate("/map/" + String(id))}
+                    onClick={() => isSavedAnimation ? navigate("/maps", { state: { activeTab: "animations" } }) : navigate("/map/" + String(id), { state: { activeTab: "maps" } })}
                     className="svg-round-button"
                 />
             </div>
