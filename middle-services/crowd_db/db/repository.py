@@ -65,7 +65,7 @@ class MongoMapRepository:
             return False
         
         result = _animations_col().replace_one({"_id": oid}, animation_doc.to_bson())
-        return result.modified_count == 1
+        return result.matched_count == 1
 
     def delete_animation(self, animation_id: str | ObjectId) -> bool:
         try:
@@ -75,6 +75,3 @@ class MongoMapRepository:
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
     
-    def list_animations(self, limit: int = 1000) -> List[str]:
-        cursor = _animations_col().find({}, {"_id": 1}).limit(limit)
-        return [str(doc["_id"]) for doc in cursor]
