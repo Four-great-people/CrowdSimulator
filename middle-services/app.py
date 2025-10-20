@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from collections import OrderedDict
 
-from crowd_db.db.models import MapDoc
+from crowd_db.db.models import MapDoc, AnimationDoc
 from crowd_db.db.repository import MongoMapRepository
 from crowd_db.db.validators import apply_collection_validator
 from crowd_db.db.config import MAPS_COLLECTION, ANIMATIONS_COLLECTION
@@ -162,7 +162,8 @@ def update_map(map_id: str):
 def create_animation():
     payload = request.get_json(force=True)
     try:
-        animation_id = repo.create_animation(payload)
+        animation_doc = AnimationDoc.from_bson(payload)
+        animation_id = repo.create_animation(animation_doc.to_bson())
         return jsonify({"_id": str(animation_id)}), 201
     except Exception as e:
         return jsonify({"error": f"invalid animation payload: {e}"}), 400
@@ -170,15 +171,11 @@ def create_animation():
 @app.route("/animations", methods=["GET"])
 def get_animations():
     try:
-        col = get_db()[ANIMATIONS_COLLECTION]
-        
-        cursor = col.find({}, {"_id": 1})
-        animation_ids = [str(doc["_id"]) for doc in cursor]
-        
+        animations = repo.get_animations(limit=1000)
+        animation_ids = [str(anim._id) for anim in animations if anim._id]
         return jsonify(animation_ids), 200
-        
     except Exception as e:
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+        return jsonify({"error": f"Internal server error: {e}"}), 500
 
 @app.route("/animations/<animation_id>", methods=["GET"])
 def get_animation(animation_id: str):
@@ -193,18 +190,4 @@ def get_animation(animation_id: str):
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
-@app.route("/animations/<animation_id>", methods=["PUT"])
-def update_animation(animation_id: str):
-    payload = request.get_json(force=True)
-    try:
-        ok = repo.update_animation(animation_id, payload)
-        if not ok:
-            return jsonify({"error": "animation not found"}), 404
-        return jsonify({"message": "animation updated"}), 200
-    except Exception as e:
-        return jsonify({"error": f"invalid animation payload: {e}"}), 400
-
-if __name__ == "__main__":
-    apply_collection_validator()
-    app.run(host="0.0.0.0", port=5000, debug=True)
 

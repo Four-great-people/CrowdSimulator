@@ -35,27 +35,22 @@ def apply_collection_validator():
         "additionalProperties": False,
     }
 
-    animation_person = {
-    "bsonType": "object",
-    "required": ["position", "goal"],
-    "properties": {
-        "id": {"bsonType": ["int", "string", "null"]},
-        "position": point,
-        "goal": point,
-        "reachedGoal": {"bsonType": "bool"}
-    },
-    "additionalProperties": False,
+    route_person = {
+        "bsonType": "object",
+        "properties": {
+            "id": {"bsonType": ["int", "string", "null"]},
+            "route": {"bsonType": "array", "items": {"bsonType": "string"}},
+        },
+        "additionalProperties": True
     }
 
-    hotspot = {
-    "bsonType": "object",
-    "required": ["x", "y", "usedTicks"],
-    "properties": {
-        "x": {"bsonType": "int"},
-        "y": {"bsonType": "int"},
-        "usedTicks": {"bsonType": "int"}
-    },
-    "additionalProperties": False
+    statistics = {
+        "bsonType": "object",
+        "properties": {
+            "valid": {"bsonType": ["int", "null"]},
+            "ideal": {"bsonType": ["int", "null"]}
+        },
+        "additionalProperties": True
     }
 
     schema = {
@@ -76,15 +71,15 @@ def apply_collection_validator():
     animation_schema = {
         "$jsonSchema": {
         "bsonType": "object",
-        "required": ["up_right_point", "down_left_point", "borders", "persons", "hotspots", "totalTicks"],
+        "required": ["up_right_point", "down_left_point", "borders", "persons", "routes", "statistics"],
         "properties": {
             "_id": {},
             "up_right_point": point,
             "down_left_point": point,
             "borders": {"bsonType": "array", "items": segment},
-            "persons": {"bsonType": "array", "items": animation_person},
-            "hotspots": {"bsonType": "array", "items": hotspot},
-            "totalTicks": {"bsonType": "int"}
+            "persons": {"bsonType": "array", "items": person},
+            "routes": {"bsonType": "array", "items": route_person},
+                "statistics": statistics
         },
         "additionalProperties": False
         }

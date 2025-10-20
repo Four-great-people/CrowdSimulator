@@ -74,3 +74,7 @@ class MongoMapRepository:
             return False
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
+    
+    def list_animations(self, limit: int = 1000) -> List[str]:
+        cursor = _animations_col().find({}, {"_id": 1}).limit(limit)
+        return [str(doc["_id"]) for doc in cursor]
