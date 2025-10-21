@@ -3,8 +3,17 @@
 #include <limits>
 
 void CATable::add_trajectory(int traj_id, const std::vector<Point>& trajectory) {
-    for (int t = 0; t < trajectory.size(); ++t) {
-        const Point& coord = trajectory[t];
+    if (trajectory.size() == 0) {
+        return;
+    }
+    int t = 0;
+    Point last_point = trajectory[0];
+    TimePoint tp = {last_point.get_x(), last_point.get_y(), t};
+    _pos_time_table[tp] = traj_id;
+    _last_visit_table[last_point] = std::max(t, _last_visit_table[last_point]);
+    for (int i = 1; i < trajectory.size(); ++i) {
+        const Point& coord = trajectory[i];
+        t += (coord - last_point).diag_norm_multiplied2();
         TimePoint tp = {coord.get_x(), coord.get_y(), t};
         _pos_time_table[tp] = traj_id;
         _last_visit_table[coord] = std::max(t, _last_visit_table[coord]);
@@ -13,14 +22,15 @@ void CATable::add_trajectory(int traj_id, const std::vector<Point>& trajectory) 
 }
 
 bool CATable::check_move(const Point& from, const Point& to, int start_time) const {
+    int new_time = start_time + (to - from).diag_norm_multiplied2();
 	if (from == to) {
-        return is_cell_available(from.get_x(), from.get_y(), start_time + 1);
+        return is_cell_available(from.get_x(), from.get_y(), new_time);
     }
-    if (!is_cell_available(to.get_x(), to.get_y(), start_time + 1)) {
+    if (!is_cell_available(to.get_x(), to.get_y(), new_time)) {
         return false;
     }
 
-    return is_reverse_move_valid(from, to, start_time, start_time + 1);
+    return is_reverse_move_valid(from, to, start_time, new_time);
 }
 
 int CATable::last_visited(const Point& point) const {
