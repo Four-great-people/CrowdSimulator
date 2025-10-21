@@ -76,8 +76,10 @@
     flex-direction: row;
     gap: 10px; /* Добавляем небольшой отступ */
     align-items: flex-start;
+    justify-content: space-between;
     padding: 0px;
     width: 100%; /* Добавляем ширину */
+    padding: 0 20px;
 }
 
 .maps {
@@ -134,6 +136,8 @@
 .grid-wrapper {
     flex: 2.5; /* 90% ширины */
     min-width: 0; /* Важно для ограничения содержимого */
+    margin-right: 20px;
+    margin-left: 20px;
 }
 
 .blue-button {
@@ -156,6 +160,7 @@
 
 .text-table-wrapper {
     flex: 1; /* 10% ширины */
+    max-width: 300px;
     padding: 0px;
 }
 
@@ -166,7 +171,7 @@
   font-family: Arial, sans-serif;
   box-sizing: border-box;
   padding: 0px;
-  animation: fadeIn 0.8s ease-in-out;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
