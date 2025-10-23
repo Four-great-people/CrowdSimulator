@@ -36,6 +36,7 @@ const MapDetail: React.FC = () => {
                 setIsLoadingMap(true);
                 let newGrid = await GetMapFromBackend(mapId);
                 setGrid(newGrid);
+                setIsNewMap(false);
             }
         } catch (error) {
             console.log(error);
@@ -73,6 +74,7 @@ const MapDetail: React.FC = () => {
         try {
             const generatedMapId = await saveMapToBackend(grid);
             alert("Карта сохранена как новая с ID: " + generatedMapId);
+            setIsNewMap(false);
             navigate(`/map/${generatedMapId}`);
         } catch (error) {
             console.error(error);
