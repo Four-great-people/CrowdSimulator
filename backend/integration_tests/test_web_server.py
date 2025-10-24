@@ -165,8 +165,8 @@ def test_complicated_route_good():
         },
         {
             "id": 1,
-            "position": { "x": 1, "y": 1 },
-            "goal": { "x": 2, "y": 1 }
+            "position": { "x": 2, "y": 2 },
+            "goal": { "x": 3, "y": 2 }
         }
     ]
 }

@@ -5,6 +5,8 @@
 #include "person.h"
 #include <vector>
 #include <optional>
+#include <string>
+#include <unordered_map>
 
 class Planner {
 protected:
@@ -20,6 +22,21 @@ public:
     virtual ~Planner() = default;
     virtual std::vector<std::vector<Action>> plan_all_routes() = 0;
     virtual std::optional<std::vector<Action>> calculate_route(const Person& person) const = 0;
+
+    static std::string action_to_string(Action action) {
+        std::unordered_map<Action, std::string> strings = {
+            {Action::UP, "Up"},
+            {Action::DOWN, "Down"},
+            {Action::LEFT, "Left"},
+            {Action::RIGHT, "Right"},
+            {Action::WAIT, "Wait"},
+            {Action::LEFT_UP, "Left_up"},
+            {Action::RIGHT_UP, "Right_up"},
+            {Action::LEFT_DOWN, "Left_down"},
+            {Action::RIGHT_DOWN, "Right_down"}
+        };
+        return strings[action];
+    }
 };
 
 #endif // PLANNER_H

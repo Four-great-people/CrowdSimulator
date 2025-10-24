@@ -3,6 +3,7 @@
 
 #include "point.h"
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 struct TimePoint {
@@ -25,7 +26,7 @@ struct TimePointHash {
 
 class CATable {
 private:
-    std::unordered_map<TimePoint, int, TimePointHash> _pos_time_table;
+    std::unordered_set<TimePoint, TimePointHash> _pos_time_table;
     std::unordered_map<Point, int> _last_visit_table;
 
 public:
@@ -34,10 +35,13 @@ public:
     int last_visited(const Point& point) const;
 	bool has_agents_nearby(const Point& point, int radius = 1) const;
     std::vector<Point> get_neighbors_timestep(const Point& point, int time) const;
+
+    const static int wait_cost = 2;
     
 private:
     bool is_cell_available(int x, int y, int t) const;
     bool is_reverse_move_valid(const Point& from, const Point& to, int t_start, int t_end) const;
+    void add_time_point(int x, int y, int t);
 };
 
 #endif // CATABLE_H
