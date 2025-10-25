@@ -121,11 +121,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
         auto neighbors = ca_table.get_neighbors_timestep(current->position, current->time);
         
         for (const auto& neighbor : neighbors) {
-            if (_grid->is_intersecting(Segment(current->position, neighbor)) ||
-                neighbor.get_x() > _grid->get_upper_right().get_x() ||
-                neighbor.get_x() < _grid->get_lower_left().get_x()  ||
-                neighbor.get_y() > _grid->get_upper_right().get_y() ||
-                neighbor.get_y() < _grid->get_lower_left().get_y()  ||
+            if (_grid->is_incorrect_move(Segment(current->position, neighbor))||
                 stops.find(current->position) != stops.end()) {
                 continue;
             }

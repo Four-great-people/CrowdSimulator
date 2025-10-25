@@ -38,7 +38,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
                 continue;
             }
             const auto& person = _persons[ind];
-            const auto &current_position = current_positions[ind];
+            const auto& current_position = current_positions[ind];
             auto new_position_option =
                 plan_next_action(person, current_position);
             if (!new_position_option.has_value()) {
@@ -46,13 +46,15 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
                 continue;
             }
             auto new_position = new_position_option.value();
-            if (busy_positions.contains(new_position) || next_busy_positions.contains(new_position)) {
+            if (busy_positions.contains(new_position) ||
+                next_busy_positions.contains(new_position)) {
                 routes[ind].push_back(Action::WAIT);
-                next_time_to_move[ind] += 2;
+                next_time_to_move[ind] += get_cost(Action::WAIT);
                 continue;
             }
-            routes[ind].push_back(current_position.to_another(new_position));
-            next_time_to_move[ind] += 2; // TODO
+            auto action = current_position.to_another(new_position);
+            routes[ind].push_back(action);
+            next_time_to_move[ind] += get_cost(action);
             next_busy_positions.insert(new_position);
             current_positions[ind] = new_position;
             if (new_position == person.get_goal()) {
@@ -74,12 +76,7 @@ std::optional<Point> RandomPlanner::plan_next_action(
         probable_neighbors.begin(), probable_neighbors.end(),
         std::back_insert_iterator(next_positions),
         [this, &current_position](const auto& position) {
-            return _grid->is_intersecting(
-                       Segment(current_position, position)) ||
-                   position.get_x() > _grid->get_upper_right().get_x() ||
-                   position.get_x() < _grid->get_lower_left().get_x() ||
-                   position.get_y() > _grid->get_upper_right().get_y() ||
-                   position.get_y() < _grid->get_lower_left().get_y();
+            return _grid->is_incorrect_move(Segment(current_position, position));
         });
     if (next_positions.empty()) {
         return std::nullopt;

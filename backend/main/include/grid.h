@@ -19,6 +19,7 @@ class Grid {
     ~Grid() noexcept = default;
 
     bool is_intersecting(const Segment &route) const noexcept;
+    bool is_incorrect_move(const Segment &route) const noexcept;
     Point get_lower_left() const noexcept;
     Point get_upper_right() const noexcept;
 
