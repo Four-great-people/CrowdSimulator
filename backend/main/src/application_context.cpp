@@ -10,6 +10,7 @@
 #include "person.h"
 #include "point.h"
 #include "prioritized_planner.h"
+#include "random_planner.h"
 #include "simple_planner.h"
 
 using Action::DOWN;
@@ -106,7 +107,6 @@ json ApplicationContext::calculate_route(json input, std::function<std::unique_p
     for (size_t i = 0; i < persons.size(); ++i) {
         results.push_back(Convertor::RouteResult(persons[i].get_id(), all_routes[i]));
     }
-    
     return static_cast<json>(results);
 }
 
@@ -118,4 +118,9 @@ json ApplicationContext::calculate_route_dense(json input) {
 json ApplicationContext::calculate_route_simple(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps, Grid *g){ return std::make_unique<SimplePlanner>(ps, g); });
+}
+
+json ApplicationContext::calculate_route_random(json input) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return calculate_route(input, [](const std::vector<Person> &ps, Grid *g){ return std::make_unique<RandomPlanner>(ps, g); });
 }
