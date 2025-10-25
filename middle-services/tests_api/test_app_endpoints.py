@@ -69,7 +69,7 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
     oid = resp.get_json()["_id"]
 
  
-    resp2 = client.get(f"/maps/{oid}/statistics")
+    resp2 = client.get(f"/maps/{oid}/statistics/dense")
     assert resp2.status_code == 200
     statistics_resp = resp2.get_json()
     assert statistics_resp == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
@@ -97,10 +97,34 @@ def test_simulate_calls_cpp_with_statistics(client, mock_requests):
     resp = client.post("/maps", json=valid_payload())
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}/statistics")
+    resp2 = client.get(f"/maps/{oid}/statistics/dense")
     assert resp2.status_code == 200
     statistics = resp2.get_json()
     assert statistics == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
+
+    assert len(mock_requests["calls"]) == 2
+
+def test_simulate_calls_cpp_with_statistics_and_simple_routes(client, mock_requests):
+    
+    resp = client.post("/maps", json=valid_payload())
+    oid = resp.get_json()["_id"]
+
+    resp2 = client.get(f"/maps/{oid}/statistics/simple")
+    assert resp2.status_code == 200
+    statistics = resp2.get_json()
+    assert statistics == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": 35, "problematic": 0}, "routes": [{"id": 1, "route": ["UP", "RIGHT", "LEFT_DOWN"]}]}
+
+    assert len(mock_requests["calls"]) == 1
+
+def test_simulate_calls_cpp_with_statistics_and_random_routes(client, mock_requests):
+    
+    resp = client.post("/maps", json=valid_payload())
+    oid = resp.get_json()["_id"]
+
+    resp2 = client.get(f"/maps/{oid}/statistics/random")
+    assert resp2.status_code == 200
+    statistics = resp2.get_json()
+    assert statistics == {"ideal": {"value": 35, "problematic": 0}, "valid": {"value": 20, "problematic": 0}, "routes": [{"id": 1, "route": ["UP", "RIGHT"]}]}
 
     assert len(mock_requests["calls"]) == 2
 
