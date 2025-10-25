@@ -4,9 +4,6 @@
 #include "grid.h"
 #include "person.h"
 #include <vector>
-#include <optional>
-#include <string>
-#include <unordered_map>
 
 class Planner {
 public:

@@ -1,7 +1,9 @@
 #ifndef RANDOM_PLANNER_H
 #define RANDOM_PLANNER_H
 
+#include <optional>
 #include <random>
+
 #include "actions.h"
 #include "planner.h"
 

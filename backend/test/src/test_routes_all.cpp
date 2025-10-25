@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <iostream>
 #include "actions.h"
 #include "grid.h"
 #include "person.h"

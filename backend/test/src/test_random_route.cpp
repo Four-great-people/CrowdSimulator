@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
-#include <iterator>
 #include <random>
 #include <vector>
 
@@ -9,7 +7,6 @@
 #include "person.h"
 #include "point.h"
 #include "prioritized_planner.h"
-#include "random_planner.h"
 #include "segment.h"
 #include "simple_planner.h"
 
@@ -94,6 +91,39 @@ TEST(test_person, random_test_prioritized_planner) {
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
         for (auto action : route.value()) {
+            Point next_point = current_point + action;
+            ASSERT_FALSE(
+                grid.is_intersecting(Segment(current_point, next_point)));
+            current_point = next_point;
+        }
+        ASSERT_EQ(current_point, finish);
+    }
+}
+
+TEST(test_person, random_test_random_planner) {
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<std::mt19937::result_type> distribution(0,
+                                                                          50);
+    std::uniform_int_distribution<std::mt19937::result_type>
+        direction_distribution(0, 3);
+    for (int i = 0; i < 1000; ++i) {
+        std::vector<Border> border;
+        int border_size = distribution(generator);
+        for (int j = 0; j < border_size; ++j) {
+            border.push_back(Border(
+                Point(distribution(generator), distribution(generator)),
+                Point(distribution(generator), distribution(generator))));
+        }
+        Grid grid(border);
+        Point start(distribution(generator), distribution(generator));
+        int try_steps = distribution(generator);
+        Point finish = random_move(try_steps, generator, start, grid);
+        Person person(0, start, finish);
+        PrioritizedPlanner planner({person}, &grid);
+        auto route = planner.plan_all_routes()[0];
+        Point current_point = start;
+        for (auto action : route) {
             Point next_point = current_point + action;
             ASSERT_FALSE(
                 grid.is_intersecting(Segment(current_point, next_point)));

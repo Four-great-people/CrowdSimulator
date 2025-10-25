@@ -4,7 +4,6 @@
 #include <unordered_set>
 #include <queue>
 #include <algorithm>
-#include <iostream>
 
 PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, Grid* grid)
     : Planner(persons, grid) {}

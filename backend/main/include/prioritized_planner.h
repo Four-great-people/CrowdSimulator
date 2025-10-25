@@ -3,6 +3,8 @@
 
 #include "planner.h"
 #include "catable.h"
+
+#include <optional>
 #include <vector>
 #include <unordered_set>
 

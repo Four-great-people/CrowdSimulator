@@ -1,9 +1,10 @@
 #ifndef SIMPLE_PLANNER_H
 #define SIMPLE_PLANNER_H
 
-#include "planner.h"
-#include "catable.h"
+#include <optional>
 #include <vector>
+
+#include "planner.h"
 
 class SimplePlanner : public Planner {
 public:
