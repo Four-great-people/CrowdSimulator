@@ -32,6 +32,9 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
         busy_positions.insert(_persons[i].get_position());
     }
     for (int t = 0; t < MAX_ITERATION_NUMBER; ++t) {
+        if (moving_positions.empty()) {
+            break;
+        }
         std::unordered_set<int> current_moving_positions = moving_positions;
         for (int ind : current_moving_positions) {
             if (next_time_to_move[ind] != t) {
@@ -39,6 +42,9 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             }
             const auto& person = _persons[ind];
             const auto& current_position = current_positions[ind];
+            if (current_position == person.get_goal()) {
+                moving_positions.erase(ind);
+            }
             auto new_position_option =
                 plan_next_action(person, current_position);
             if (!new_position_option.has_value()) {
