@@ -41,7 +41,7 @@ dpkg -i Crow-1.2.1-Linux.deb
 Формат запросов:
 ```
 POST /route/{route name}
-Сейчас поддерживается simple и dense
+Сейчас поддерживается simple, dense и random
 ```
 Request:
 ```

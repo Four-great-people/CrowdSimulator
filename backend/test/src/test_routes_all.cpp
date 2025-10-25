@@ -126,5 +126,4 @@ TEST(test_routes, calculate_route__no_multiple_swap_route) {
     ASSERT_EQ(routes[0].size(), 0);
     ASSERT_EQ(routes[1].size(), 0);
     ASSERT_EQ(routes[2].size(), 0);
-
 }
