@@ -178,7 +178,6 @@ TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-
 TEST(test_route, calculate_long_route) {
     std::vector border{Border(Point(1, 0), Point(1, 30))};
     Grid grid(border);
