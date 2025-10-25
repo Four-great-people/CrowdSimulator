@@ -22,6 +22,8 @@ int main(int argc, const char** argv) {
                     result = context.calculate_route_simple(input);
                 } else if (algorithm_name == "dense") {
                     result = context.calculate_route_dense(input);
+                } else if (algorithm_name == "random") {
+                    result = context.calculate_route_random(input);
                 } else {
                     return crow::response(crow::status::BAD_REQUEST, "Unsupported algorithm");
                 }

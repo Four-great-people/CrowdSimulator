@@ -1,6 +1,5 @@
 #include "catable.h"
 #include <algorithm>
-#include <limits>
 
 void CATable::add_trajectory(int traj_id, const std::vector<Point>& trajectory) {
     if (trajectory.size() == 0) {

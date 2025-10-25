@@ -3,6 +3,7 @@
 
 #include <functional>
 #include "actions.h"
+
 class Point {
    public:
     Point(int x, int y);

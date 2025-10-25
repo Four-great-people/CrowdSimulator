@@ -1,8 +1,8 @@
 #include "simple_planner.h"
+
 #include <algorithm>
 #include <map>
 #include <unordered_map>
-
 
 SimplePlanner::SimplePlanner(const std::vector<Person>& persons, Grid* grid)
     : Planner(persons, grid) {}
@@ -10,19 +10,19 @@ SimplePlanner::SimplePlanner(const std::vector<Person>& persons, Grid* grid)
 std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes;
     routes.reserve(_persons.size());
-    for (auto person: _persons) {
+    for (auto person : _persons) {
         auto route = calculate_route(person);
         if (route) {
             routes.push_back(route.value());
-        }
-        else {
+        } else {
             routes.push_back(std::vector<Action>{});
         }
     }
     return routes;
 }
 
-std::optional<std::vector<Action>> SimplePlanner::calculate_route(const Person& person) const {
+std::optional<std::vector<Action>> SimplePlanner::calculate_route(
+    const Person& person) const {
     auto start_position = person.get_position();
     auto goal = person.get_goal();
     if (start_position == goal) {
@@ -45,16 +45,12 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(const Person& 
         if (current_position == goal) {
             break;
         }
-        for (const auto &position : current_position.get_neighbors()) {
-            if (_grid->is_intersecting(
-                    Segment(current_position, position)) ||
-                position.get_x() > _grid->get_upper_right().get_x() ||
-                position.get_x() < _grid->get_lower_left().get_x() ||
-                position.get_y() > _grid->get_upper_right().get_y() ||
-                position.get_y() < _grid->get_lower_left().get_y()) {
+        for (const auto& position : current_position.get_neighbors()) {
+            if (_grid->is_incorrect_move(Segment(current_position, position))) {
                 continue;
             }
-            int new_g = current_f + (position - current_position).diag_norm_multiplied2();
+            int new_g = current_f +
+                        (position - current_position).diag_norm_multiplied2();
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;
@@ -62,8 +58,7 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(const Person& 
                 if (point_to_iterator.contains(position)) {
                     f_to_point.erase(point_to_iterator[position]);
                 }
-                auto multimap_iterator =
-                    f_to_point.emplace(f, position);
+                auto multimap_iterator = f_to_point.emplace(f, position);
                 point_to_iterator[position] = multimap_iterator;
                 previous_in_route.insert_or_assign(position, current_position);
             }

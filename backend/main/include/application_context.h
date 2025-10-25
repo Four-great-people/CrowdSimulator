@@ -15,6 +15,7 @@ public:
 
     nlohmann::json calculate_route_dense(nlohmann::json input);
     nlohmann::json calculate_route_simple(nlohmann::json input);
+    nlohmann::json calculate_route_random(nlohmann::json input);
 
 private:
     std::mutex _mutex;
