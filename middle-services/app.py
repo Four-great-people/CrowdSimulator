@@ -11,9 +11,6 @@ from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc, AnimationDoc
 from crowd_db.db.repository import MongoMapRepository
-from crowd_db.db.validators import apply_collection_validator
-from crowd_db.db.config import MAPS_COLLECTION, ANIMATIONS_COLLECTION
-from crowd_db.db.client import get_db
 
 load_dotenv()
 
@@ -181,6 +178,8 @@ def get_animations():
 def get_animation(animation_id: str):
     try:
         animation = repo.get_animation(animation_id)
+        if animation is None:
+            return jsonify({"error": "Animation was not found"}), 400
         animation_data = animation.to_bson()
 
         if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
