@@ -83,15 +83,16 @@ curl http://127.0.0.1:5000/maps
 ```bash
 curl http://127.0.0.1:5000/maps/<id>
 ```
-### GET /maps/\<id\>/statistics — получить статистику по маршрутам
+### GET /maps/\<id\>/statistics/{algo name} — получить статистику по маршрутам
+"algo name" - это одно из simple, dense, random
 - Достаёт карту из БД,
 - формирует JSON в нужном порядке ключей,
-- отправляет на C++ POST CPP_BACKEND_URL/simple и CPP_BACKEND_URL/dense (2 вида алгоритмов),
+- отправляет на C++ POST CPP_BACKEND_URL/simple и CPP_BACKEND_URL/{algo name} (1 раз, если "algo name" == simple),
 - вычисляет статистику (ideal - без пересечений маршрутов, обычный А*, valid - текущая реализация).
 - считает один шаг за 10 секунд, диагональ - 15 секунд, возвращает ответ в секундах и маршрут valid
 - null - отсутствие маршрута
 ```bash
-curl -X GET http://127.0.0.1:5000/maps/<id>/statistics
+curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 ```
 ```
 {

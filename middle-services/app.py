@@ -11,9 +11,6 @@ from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc, AnimationDoc
 from crowd_db.db.repository import MongoMapRepository
-from crowd_db.db.validators import apply_collection_validator
-from crowd_db.db.config import MAPS_COLLECTION, ANIMATIONS_COLLECTION
-from crowd_db.db.client import get_db
 
 load_dotenv()
 
@@ -106,8 +103,10 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
     return { "value": (max(filter(lambda x: x is not None, personal_values)) if count_of_none != len(personal_values) else None), "problematic": count_of_none }, j # type: ignore
 
 
-@app.route("/maps/<map_id>/statistics", methods=["GET"])
-def get_statistics(map_id: str):
+@app.route("/maps/<map_id>/statistics/<algo>", methods=["GET"])
+def get_statistics(map_id: str, algo: str):
+    if algo not in {"dense", "simple", "random"}:
+        return jsonify({"error": "invalid algorithm"}), 400
     m = repo.get(map_id)
     if not m:
         return jsonify({"error": "map not found"}), 400
@@ -115,33 +114,14 @@ def get_statistics(map_id: str):
     payload = json.dumps(od, ensure_ascii=False)
     headers = {"Content-Type": "application/json"}
     try:
-        dense_result, route = calculate_statistics_for_endpoint("dense", payload, headers)
-        simple_result, _ = calculate_statistics_for_endpoint("simple", payload, headers)
+        dense_result, route = calculate_statistics_for_endpoint(algo, payload, headers)
+        if algo != "simple":
+            simple_result, _ = calculate_statistics_for_endpoint("simple", payload, headers)
+        else:
+            simple_result = dense_result
     except requests.RequestException as e:
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
-
-@app.route("/maps/<map_id>/simulate", methods=["POST"])
-def simulate(map_id: str):
-    m = repo.get(map_id)
-    if not m:
-        return jsonify({"error": "map not found"}), 400
-
-    od = mapdoc_to_json(m)
-    payload = json.dumps(od, ensure_ascii=False)
-    headers = {"Content-Type": "application/json"}
-    try:
-        r = requests.post(
-            f"{CPP_BACKEND_URL}/dense",
-            data=payload,
-            headers=headers,
-            timeout=30,
-        )
-        r.raise_for_status()
-    except requests.RequestException as e:
-        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
-
-    return jsonify(r.json()), 200
 
 
 @app.route("/maps/<map_id>", methods=["PUT"])
@@ -181,6 +161,8 @@ def get_animations():
 def get_animation(animation_id: str):
     try:
         animation = repo.get_animation(animation_id)
+        if animation is None:
+            return jsonify({"error": "Animation was not found"}), 400
         animation_data = animation.to_bson()
 
         if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
@@ -189,5 +171,4 @@ def get_animation(animation_id: str):
         return jsonify(animation_data), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
-
 
