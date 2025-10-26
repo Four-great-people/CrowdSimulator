@@ -56,6 +56,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
                 next_busy_positions.contains(new_position)) {
                 routes[ind].push_back(Action::WAIT);
                 next_time_to_move[ind] += get_cost(Action::WAIT);
+                next_busy_positions.insert(current_position);
                 continue;
             }
             auto action = current_position.to_another(new_position);

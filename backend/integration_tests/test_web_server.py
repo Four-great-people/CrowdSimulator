@@ -1,12 +1,12 @@
-import pytest
 import requests
 
 URL_POST_SIMPLE = "http://localhost:8080/route/simple"
 URL_POST_DENSE = "http://localhost:8080/route/dense"
-URL_POST_RANDOM = "http://localhost:8080/route/dense"
+URL_POST_RANDOM = "http://localhost:8080/route/random"
 
 URL_POSTS = [URL_POST_DENSE, URL_POST_SIMPLE]
-URL_POSTS_INACCURATE = URL_POSTS.append(URL_POST_RANDOM)
+URL_POSTS_INACCURATE = URL_POSTS[:]
+URL_POSTS_INACCURATE.append(URL_POST_RANDOM)
 
 def test_simple_route_good():
     data = '''
