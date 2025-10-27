@@ -1,13 +1,16 @@
 .App {
   text-align: center;
-  padding: 20px;
+  padding: 0.5vw;
   max-width: 1800px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .App h1 {
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 1.2vw;
+  font-size: min(2.5vw, 32px);
 }
 
 .create-map-button-container {
@@ -17,8 +20,9 @@
 .create-map-button {
     background-color: #28a745 !important;
     border-color: #28a745 !important;
-    font-size: 16px;
-    padding: 12px 24px;
+    font-size: min(1.4vw, 18px);
+    padding: min(1vw, 12px) min(2vw, 24px);
+    border-radius: 4px;
 }
 
 .create-map-button:hover {
@@ -29,26 +33,30 @@
 .map-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: min(0.8vw, 12px);
+  margin-bottom: min(1vw, 6px);
 }
 
 .map-row__title {
   flex: 1;
   text-align: left;
+  font-size: min(1.2vw, 16px);
 }
 
 .icon-button {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 18px;
+  font-size: min(1.5vw, 20px);
   line-height: 1;
-  padding: 6px 8px;
+  padding: min(0.5vw, 8px) min(0.7vw, 10px);
+  min-width: min(2.5vw, 35px);
 }
 
 .icon-button.delete:hover {
   filter: brightness(0.9);
 }
+
 .tabs {
     display: flex;
     flex-direction: column;
@@ -56,26 +64,28 @@
     align-items: center;
     background: white;
     border-radius: 8px;
-    padding: 10px 0;
+    padding: min(1.5vw, 20px) 0;
     border-right: 2px solid #eee;
     width: fit-content;
     height: 100vh;
     align-self: flex-start;
     margin: 0;
+    position: sticky;
+    top: 0;
 }
 
 .tab-button {
-    padding: 12px 24px;
+    padding: min(1vw, 15px) min(2vw, 24px);
     background: none;
     border: none;
     border-right: 3px solid transparent;
     cursor: pointer;
-    font-size: 16px;
+    font-size: min(1.2vw, 16px);
     transition: color 0.3s ease, background-color 0.3s ease, border-bottom-color 0.3s ease;
     color: #666;
-    /* width: 100%; */
-    width: 220px;
+    width: min(18vw, 220px);
     flex-shrink: 0;
+    text-align: center;
 }
 
 .tab-button.active {
@@ -89,36 +99,42 @@
 }
 
 .animation-list {
-    overflow-y: auto; /* Вертикальная прокрутка */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-right: 10px; /* Место для скроллбара */
-    min-height: 0; /* КРИТИЧЕСКИ ВАЖНО */
-    max-height: 650px; /*Или любое другое значение */
+    gap: min(1vw, 15px);
+    padding-right: min(1vw, 15px);
+    min-height: 0;
+    max-height: min(70vh, 650px);
+    width: 100%;
 }
 
 .empty-state {
     text-align: center;
     color: #666;
     font-style: italic;
+    padding: min(2vw, 25px);
+    font-size: min(1.2vw, 16px);
 }
 
 .loading {
     text-align: center;
-    padding: 20px;
+    padding: min(2vw, 25px);
     color: #666;
+    font-size: min(1.2vw, 16px);
 }
 
 .blue-button {
     background-color: #3e6cec;
     color: white;
-    padding: 10px 20px;
+    padding: min(0.8vw, 12px) min(1.5vw, 20px);
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: min(1.1vw, 14px);
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .blue-button:hover {
@@ -128,4 +144,26 @@
 .blue-button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+.map-row .blue-button {
+    min-width: fit-content;
+    font-size: min(1.1vw, 14px);
+    padding: min(0.6vw, 8px) min(1.2vw, 16px);
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .tab-button {
+        width: min(25vw, 200px);
+        font-size: min(1.5vw, 14px);
+    }
+    
+    .animation-list {
+        max-height: min(60vh, 500px);
+    }
 }
