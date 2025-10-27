@@ -8,7 +8,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 .not-found-background {
@@ -17,18 +17,18 @@
     align-items: center;
     text-align: center;
     color: white;
-    padding: 40px;
-    max-width: 800px;
-    margin-top: -50px;
+    padding: min(4vw, 40px);
+    max-width: min(80vw, 800px);
+    margin-top: min(-5vh, -50px);
 }
 
 .not-found-graphic {
-    margin-bottom: 50px;
+    margin-bottom: min(5vh, 50px);
 }
 
 .floating-circle {
-    width: 180px;
-    height: 180px;
+    width: min(18vw, 180px);
+    height: min(18vw, 180px);
     position: relative;
     display: flex;
     justify-content: center;
@@ -37,20 +37,20 @@
 
 .circle {
     position: absolute;
-    border: 4px solid rgba(255, 255, 255, 0.8);
+    border: min(0.4vw, 4px) solid rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     animation: pulse 2s ease-in-out infinite;
-    width: 100px;
-    height: 100px;
+    width: min(10vw, 100px);
+    height: min(10vw, 100px);
     animation-delay: 0.5s;
 }
 
 .circle-center {
-    width: 16px;
-    height: 16px;
+    width: min(1.6vw, 16px);
+    height: min(1.6vw, 16px);
     background: #fff;
     border-radius: 50%;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 min(2vw, 20px) rgba(255, 255, 255, 0.8);
 }
 
 @keyframes pulse {
@@ -69,45 +69,45 @@
 }
 
 .not-found-title {
-    font-size: 160px;
+    font-size: min(16vw, 160px);
     font-weight: 300;
-    margin: 0 0 15px 0;
+    margin: 0 0 min(1.5vh, 15px) 0;
     opacity: 0.9;
-    text-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
-    letter-spacing: 3px;
+    text-shadow: 0 min(0.4vw, 4px) min(2.5vw, 25px) rgba(0, 0, 0, 0.3);
+    letter-spacing: min(0.3vw, 3px);
     line-height: 1;
 }
 
 .not-found-message {
-    font-size: 38px;
+    font-size: min(3.8vw, 38px);
     font-weight: 400;
-    margin: 0 0 20px 0;
+    margin: 0 0 min(2vh, 20px) 0;
     opacity: 0.95;
-    letter-spacing: 1px;
+    letter-spacing: min(0.1vw, 1px);
     line-height: 1.2;
 }
 
 .not-found-resource-id {
-    font-size: 20px;
-    margin: 0 0 15px 0;
+    font-size: min(2vw, 20px);
+    margin: 0 0 min(1.5vh, 15px) 0;
     opacity: 0.9;
 }
 
 .not-found-resource-id span {
     font-family: 'Courier New', monospace;
     background: rgba(255, 255, 255, 0.15);
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: min(0.6vw, 6px) min(1.2vw, 12px);
+    border-radius: min(0.6vw, 6px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     font-weight: 600;
 }
 
 .not-found-description {
-    font-size: 22px;
-    margin: 0 0 40px 0;
+    font-size: min(2.2vw, 22px);
+    margin: 0 0 min(4vh, 40px) 0;
     opacity: 0.9;
     line-height: 1.6;
-    max-width: 550px;
+    max-width: min(55vw, 550px);
     font-weight: 300;
 }
 
@@ -115,7 +115,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: min(2vh, 20px);
 }
 
 .not-found-actions .svg-round-button {
@@ -125,7 +125,7 @@
 .not-found-actions .svg-round-button:hover {
     transform: scale(1.15);
     opacity: 0.9;
-    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 min(0.6vw, 6px) min(2.5vw, 25px) rgba(255, 255, 255, 0.4);
 }
 
 .not-found-actions .svg-round-button:active {
@@ -134,32 +134,32 @@
 
 @media (max-width: 768px) {
     .not-found-background {
-        margin-top: -30px;
-        padding: 30px 20px;
+        margin-top: min(-3vh, -30px);
+        padding: min(3vw, 30px) min(2vw, 20px);
     }
     
     .not-found-title {
-        font-size: 120px;
-        margin: 0 0 10px 0;
+        font-size: min(12vw, 120px);
+        margin: 0 0 min(1vh, 10px) 0;
     }
     
     .not-found-message {
-        font-size: 32px;
-        margin: 0 0 15px 0;
+        font-size: min(3.2vw, 32px);
+        margin: 0 0 min(1.5vh, 15px) 0;
     }
     
     .not-found-description {
-        font-size: 20px;
-        margin: 0 0 30px 0;
+        font-size: min(2vw, 20px);
+        margin: 0 0 min(3vh, 30px) 0;
     }
     
     .floating-circle {
-        width: 150px;
-        height: 150px;
+        width: min(15vw, 150px);
+        height: min(15vw, 150px);
     }
     
     .circle {
-        width: 85px;
-        height: 85px;
+        width: min(8.5vw, 85px);
+        height: min(8.5vw, 85px);
     }
 }
