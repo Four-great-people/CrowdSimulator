@@ -325,10 +325,13 @@ const AnimationDetail: React.FC = () => {
 
 
 
-    const statisticsFormatString = (n: any) => {
-        if (!n || n.value == null) return "маршрут невозможно построить";
-        const reached = participantsNumber - (n.problematic ?? 0);
-        return `${n.value} с\nдошло ${reached} из ${participantsNumber}`;
+    const statisticsFormatString = (timeObj: any) => {
+        if (!timeObj) {
+            throw new Error("Statistic object is undefined"); 
+        }
+        else if (timeObj.value == null) return "маршрут невозможно построить";
+        const reached = participantsNumber - (timeObj.problematic);
+        return `${timeObj.value} с\nдошло ${reached} из ${participantsNumber}`;
     };
 
     return (
