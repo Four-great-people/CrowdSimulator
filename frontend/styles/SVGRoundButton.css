@@ -1,6 +1,6 @@
 .back-button-container {
     display: flex;
-    padding: 10px;
+    padding: clamp(8px, 1vw, 12px);
     width: fit-content;
     height: fit-content;
 }
@@ -11,6 +11,8 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  width: clamp(40px, 6vw, 60px);
+  height: clamp(40px, 6vw, 60px);
 }
 
 .svg-round-button:hover {
