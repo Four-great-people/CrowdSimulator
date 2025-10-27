@@ -246,12 +246,18 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             data-tick={renderTick}>
             {grid.cells.map((row) =>
                 row.map((cell) => {
-                    const personReachedGoal = hasPersonReachedGoal(cell.x, cell.y);
                     const isWallCell = isWall(cell.x, cell.y);
+                    const personsInCell = grid.getCell(cell.x, cell.y)?.persons || [];
                     const isPersonCell = isPerson(cell.x, cell.y);
-                    const personId = getPersonId(cell.x, cell.y);
                     const isGoalCell = isGoal(cell.x, cell.y);
                     const direction = directionOfWall(cell.x, cell.y);
+
+                    const displayPerson = personsInCell.find(person => 
+                        !(person.goal.x === cell.x && person.goal.y === cell.y)
+                    ) || personsInCell[0];
+
+                    const personReachedGoal = displayPerson ? 
+                        (displayPerson.goal.x === cell.x && displayPerson.goal.y === cell.y) : false;
 
                     return (
                         <div
@@ -259,13 +265,13 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                             className={`cell ${isWallCell ? 'wall' : ''} ${direction.includes("vertical") ? 'vertical' : ''} ${direction.includes("horizontal") ? 'horizontal' : ''}`}
                             style={{backgroundColor: cell.getColorString(grid.allTicks)}}
                         >
-                            {isPersonCell && (
+                            {isGoalCell && !isPersonCell && <div className="goal"></div>}
+                            {displayPerson && (
                                 <div
-                                    key={`${animationKey}-${personId}`}
-                                    className={`person ${isAnimating && !personReachedGoal ? 'animate-movement' : ''} person-${personId} ${personReachedGoal ? 'reached-goal' : ''}`}
+                                    key={`${animationKey}-${displayPerson.id}`}
+                                    className={`person ${isAnimating && !personReachedGoal ? 'animate-movement' : ''} person-${displayPerson.id} ${personReachedGoal ? 'reached-goal' : ''}`}
                                 ></div>
                             )}
-                            {isGoalCell && <div className="goal"></div>}
                         </div>
                     );
                 })

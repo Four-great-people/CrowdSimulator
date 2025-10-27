@@ -161,7 +161,7 @@ async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics:
 }
 
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
-    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics", { method: 'GET' });
+    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics/dense", { method: 'GET' });
     const data = await response.json();
     console.log(data);
     return data;
