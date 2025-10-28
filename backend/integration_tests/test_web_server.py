@@ -1,10 +1,12 @@
-import pytest
 import requests
 
 URL_POST_SIMPLE = "http://localhost:8080/route/simple"
 URL_POST_DENSE = "http://localhost:8080/route/dense"
+URL_POST_RANDOM = "http://localhost:8080/route/random"
 
 URL_POSTS = [URL_POST_DENSE, URL_POST_SIMPLE]
+URL_POSTS_INACCURATE = URL_POSTS[:]
+URL_POSTS_INACCURATE.append(URL_POST_RANDOM)
 
 def test_simple_route_good():
     data = '''
@@ -32,6 +34,8 @@ def test_simple_route_good():
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
         assert response.text == result
+    response = requests.post(url=URL_POST_RANDOM, data=data, timeout=10)
+    assert response.status_code == 200
 
 def test_no_type_error():
     data = '''
@@ -85,7 +89,6 @@ def test_no_route_good():
         assert response.status_code == 200
         assert response.text == result
 
-@pytest.mark.skip(reason="need be fixed") # TODO(verbinna22): fix it
 def test_cant_reach_good():
     data = '''
 {
@@ -107,7 +110,7 @@ def test_cant_reach_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":null}]'''
+    result = '''[{"id":0,"route":[]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200

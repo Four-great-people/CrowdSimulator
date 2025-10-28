@@ -1,6 +1,7 @@
 #ifndef CATABLE_H
 #define CATABLE_H
 
+#include "actions.h"
 #include "point.h"
 #include <unordered_map>
 #include <unordered_set>
@@ -36,7 +37,7 @@ public:
 	bool has_agents_nearby(const Point& point, int radius = 1) const;
     std::vector<Point> get_neighbors_timestep(const Point& point, int time) const;
 
-    const static int wait_cost = 2;
+    constexpr static int wait_cost = get_cost(Action::WAIT);
     
 private:
     bool is_cell_available(int x, int y, int t) const;
