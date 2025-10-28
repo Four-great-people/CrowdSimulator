@@ -34,16 +34,14 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
 
 std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     auto indices = get_priorities_shortest_first();
-    
-    ca_table = CATable();
     stops.clear();
     std::vector<std::vector<Action>> results(_persons.size());
     bool changed = true;
     while (changed) {
+        ca_table = CATable();
         fill(results.begin(), results.end(), std::vector<Action>());
         for (int priority = 0; priority < _persons.size(); ++priority) {
             int agent_id = indices[priority];
-            
             auto route = calculate_route(_persons[agent_id]);
             
             if (route) {
@@ -59,8 +57,6 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
                 }
                 
                 ca_table.add_trajectory(agent_id, trajectory);
-            } else {
-                results[agent_id] = std::vector<Action>{};
             }
         }
         changed = validate_results(results);
@@ -108,6 +104,10 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     while (!open.empty() && steps < MAX_TIME) {
         auto current = open.top();
         open.pop();
+
+        if (stops.find(current->position) != stops.end()) {
+            continue;
+        }
         
         if (current->position == goal) {
             std::vector<Action> path;
@@ -124,8 +124,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
         auto neighbors = ca_table.get_neighbors_timestep(current->position, current->time);
         
         for (const auto& neighbor : neighbors) {
-            if (_grid->is_incorrect_move(Segment(current->position, neighbor))||
-                stops.find(current->position) != stops.end()) {
+            if (_grid->is_incorrect_move(Segment(current->position, neighbor))) {
                 continue;
             }
             
