@@ -208,10 +208,14 @@
 
 /*  */
 .algo-list-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+    width: min(14vw, 300px);
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    padding: min(0.8vw, 15px);
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
 }
 
 .algo-list-title {
