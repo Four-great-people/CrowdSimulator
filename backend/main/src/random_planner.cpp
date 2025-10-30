@@ -13,8 +13,8 @@
 #include "actions.h"
 #include "point.h"
 
-RandomPlanner::RandomPlanner(const std::vector<Person>& persons, Grid* grid)
-    : Planner(persons, grid), rng(std::random_device()()), dist(0, 1) {}
+RandomPlanner::RandomPlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
+    : Planner(persons, goals, grid), rng(std::random_device()()), dist(0, 1) {}
 
 std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes(_persons.size());
@@ -42,7 +42,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             }
             const auto& person = _persons[ind];
             const auto& current_position = current_positions[ind];
-            if (current_position == person.get_goal()) {
+            if (is_reached_goal(current_position)) {
                 moving_positions.erase(ind);
             }
             auto new_position_option =
@@ -64,7 +64,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             next_time_to_move[ind] += get_cost(action);
             next_busy_positions.insert(new_position);
             current_positions[ind] = new_position;
-            if (new_position == person.get_goal()) {
+            if (is_reached_goal(new_position)) {
                 moving_positions.erase(ind);
             }
         }

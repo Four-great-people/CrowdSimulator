@@ -24,7 +24,12 @@ def test_simple_route_good():
         {
             "id": 0,
             "position": { "x": 1, "y": 1 },
-            "goal": { "x": 1, "y": 2 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 1, "y": 2 }
         }
     ]
 }
@@ -53,7 +58,12 @@ def test_no_type_error():
         {
             "id": 0,
             "position": { "x": 1, "y": 1 },
-            "goal": { "x": 1, "y": 2 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 1, "y": 2 }
         }
     ]
 }
@@ -78,7 +88,12 @@ def test_no_route_good():
         {
             "id": 0,
             "position": { "x": 0, "y": 1 },
-            "goal": { "x": 0, "y": 1 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 0, "y": 1 }
         }
     ]
 }
@@ -105,7 +120,12 @@ def test_cant_reach_good():
         {
             "id": 0,
             "position": { "x": 0, "y": 1 },
-            "goal": { "x": 0, "y": 100 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 0, "y": 100 },
         }
     ]
 }
@@ -131,7 +151,12 @@ def test_missed_json_field_bad():
     "persons": [
         {
             "id": 0,
-            "goal": { "x": 0, "y": 100 }
+            "position": { "x": 0, "y": 100 }
+        }
+    ],
+    "goals": [
+        {
+            "position": { "x": 0, "y": 100 }
         }
     ]
 }
@@ -164,14 +189,22 @@ def test_complicated_route_good():
         {
             "id": 0,
             "position": { "x": 1, "y": 1 },
-            "goal": { "x": 1, "y": 6 }
         },
         {
             "id": 1,
             "position": { "x": 2, "y": 2 },
-            "goal": { "x": 3, "y": 2 }
         }
-    ]
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 1, "y": 6 }
+        },
+        {
+            "id": 1,
+            "position": { "x": 3, "y": 2 }
+        }
+    ],
 }
     '''
     result = '''[{"id":0,"route":["UP","UP","UP","UP","UP"]},{"id":1,"route":["RIGHT"]}]'''

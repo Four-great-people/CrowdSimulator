@@ -51,8 +51,9 @@ TEST(test_person, random_test_simple_planner) {
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        SimplePlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        SimplePlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
@@ -85,8 +86,9 @@ TEST(test_person, random_test_prioritized_planner) {
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        PrioritizedPlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
@@ -119,8 +121,9 @@ TEST(test_person, random_test_random_planner) {
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        PrioritizedPlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.plan_all_routes()[0];
         Point current_point = start;
         for (auto action : route) {
