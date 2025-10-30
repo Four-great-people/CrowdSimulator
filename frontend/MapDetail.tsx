@@ -6,6 +6,11 @@ import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
 
+interface Algorithm {
+  title: string;
+  description: string;
+}
+
 const MapDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -17,10 +22,17 @@ const MapDetail: React.FC = () => {
     const [grid, setGrid] = useState<Grid | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isNewMap, setIsNewMap] = useState(false);
-    // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const algorithmsSupported: Algorithm[] = [
+        {title: "dense", description: "Считать с учётом пересечений"},
+        {title: "simple", description: "Считать без учёта пересечений"},
+        {title: "random", description: "Считать случайный маршрут"},
+    ];
+
+    const [selectedAlgo, setSelectedAlgo] = useState<Algorithm>(algorithmsSupported[0]);
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -128,6 +140,10 @@ const MapDetail: React.FC = () => {
         }, [id]
     );
 
+    const handleItemClick = (item: Algorithm) => {
+        setSelectedAlgo(item);
+    };
+
     return (
         <div className="App">
             <div className="controls">
@@ -148,6 +164,20 @@ const MapDetail: React.FC = () => {
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} />}
+                </div>
+                <div className="algo-list-container">
+                    <h2 className="algo-list-title">Выберите алгоритм:</h2>
+                    <div className="algo-list">
+                        {algorithmsSupported.map((item) => (
+                        <div
+                            className={`algo-item`}
+                            onClick={() => handleItemClick(item)}>
+                            <div className="algo-item-content">
+                            <p className={selectedAlgo.title === item.title ? "algo-item-title-selected" : "algo-item-title"}>{item.description}</p>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             <div className="back-button-container">
