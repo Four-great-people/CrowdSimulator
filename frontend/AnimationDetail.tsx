@@ -8,12 +8,12 @@ import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
 
 const AnimationDetail: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+    const { id, algo } = useParams<{ id: string, algo: string }>();
     const navigate = useNavigate();
     const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
 
-    if (!id) {
-        return <div>ID карты не указан</div>;
+    if (!id || !algo && !isSavedAnimation) {
+        return <div>ID карты или алгоритм не указан</div>;
     }
     
     const [grid, setGrid] = useState<Grid | null>(null);
@@ -88,7 +88,7 @@ const AnimationDetail: React.FC = () => {
         setShowStatistics(false);
 
         try {
-            const statisticsFromBackend = await GetStatisticsFromBackend(id);
+            const statisticsFromBackend = await GetStatisticsFromBackend(id, algo);
             setRoutes(statisticsFromBackend.routes || []);
             grid.reset();
             const gridCopy = grid.clone();
