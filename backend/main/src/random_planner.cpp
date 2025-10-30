@@ -91,7 +91,7 @@ std::optional<Point> RandomPlanner::plan_next_action(
     std::vector<double> probabilities(next_positions.size());
     std::transform(
         next_positions.begin(), next_positions.end(), probabilities.begin(),
-        [&person](const auto& p) { return 1.0 / (h(person, p) + 1); });
+        [this](const auto& p) { return 1.0 / (h(p) + 1); });
     std::partial_sum(probabilities.begin(), probabilities.end(),
                      probabilities.begin(), std::plus<double>());
     double sum = probabilities.back();

@@ -134,7 +134,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
                 continue;
             }
             
-            int new_h = h(person, neighbor);
+            int new_h = h(person);
             auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, current);
             open.push(new_node);
             visited.insert(new_tp);

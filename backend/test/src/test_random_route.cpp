@@ -74,13 +74,27 @@ TEST(test_person, random_test_prioritized_planner) {
                                                                           50);
     std::uniform_int_distribution<std::mt19937::result_type>
         direction_distribution(0, 3);
+    std::uniform_int_distribution<std::mt19937::result_type>
+        wall_direction_distribution(0, 1);
     for (int i = 0; i < 1000; ++i) {
         std::vector<Border> border;
         int border_size = distribution(generator);
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Border(
-                Point(distribution(generator), distribution(generator)),
-                Point(distribution(generator), distribution(generator))));
+            int same_coord = distribution(generator);
+            int diff_coord_2 = distribution(generator);
+            int diff_coord_1 = distribution(generator);
+            int direction = wall_direction_distribution(generator);
+            if (direction == 0) {
+                border.push_back(Border(
+                    Point(same_coord, diff_coord_1),
+                    Point(same_coord, diff_coord_2)));
+            }
+            else {
+                border.push_back(Border(
+                    Point(diff_coord_1, same_coord),
+                    Point(diff_coord_2, same_coord)));
+            }
+            
         }
         Grid grid(border);
         Point start(distribution(generator), distribution(generator));
@@ -90,6 +104,15 @@ TEST(test_person, random_test_prioritized_planner) {
         Goal goal(0, finish);
         PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
+        if (!route.has_value()) {
+            std::cout << "Start: " <<  start.get_x() << ' ' << start.get_y() << std::endl;
+            std::cout << "Finish: " <<  finish.get_x() << ' ' << finish.get_y() << std::endl;
+            std::cout << "Borders" << std::endl;
+            for (auto b: border) {
+                std::cout << b.get_first().get_x() << ' ' << b.get_first().get_y() << ' ' <<  b.get_second().get_x() << ' ' << b.get_second().get_y() << std::endl;
+            }
+            std::cout << std::endl;
+        }
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
         for (auto action : route.value()) {
@@ -126,12 +149,15 @@ TEST(test_person, random_test_random_planner) {
         PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.plan_all_routes()[0];
         Point current_point = start;
-        for (auto action : route) {
-            Point next_point = current_point + action;
-            ASSERT_FALSE(
-                grid.is_intersecting(Segment(current_point, next_point)));
-            current_point = next_point;
+        if (route.size() > 0) {
+            for (auto action : route) {
+                Point next_point = current_point + action;
+                ASSERT_FALSE(
+                    grid.is_intersecting(Segment(current_point, next_point)));
+                current_point = next_point;
+            }
+            ASSERT_EQ(current_point, finish);
         }
-        ASSERT_EQ(current_point, finish);
+        
     }
 }

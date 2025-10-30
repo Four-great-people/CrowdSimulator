@@ -205,3 +205,31 @@ TEST(test_route, calculate_long_route) {
     ASSERT_EQ(prioritized_route->size(), 31);
 
 }
+
+TEST(test_route, from_random_case) {
+    std::vector<Border> border{};
+    // Start: 3 21
+    // Finish: 4 50
+    // Borders
+    // 49 11 49 25
+    // 44 33 44 3
+    // 28 25 26 25
+    // 44 7 44 26
+    // 46 43 46 25
+    // 24 48 20 48
+    Grid grid(border);
+    Person person(0, Point(3, 21));
+    Goal goal(0, Point(4, 50));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
+    auto simple_route = simple_planner.calculate_route(person);
+    auto prioritized_route = prioritized_planner.calculate_route(person);
+
+    ASSERT_TRUE(simple_route.has_value());
+    ASSERT_EQ(simple_route->size(), 29);
+
+    ASSERT_TRUE(prioritized_route.has_value());
+    ASSERT_EQ(prioritized_route->size(), 29);
+
+}

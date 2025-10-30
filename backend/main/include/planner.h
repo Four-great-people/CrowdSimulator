@@ -24,21 +24,21 @@ protected:
     std::unordered_set<Goal> _goals;
     Grid* _grid;
 
-    static int h(const Person& person, const Point &point) noexcept {
-        return static_cast<int>((person.get_position() - point).diag_norm_multiplied2());
-    }
-
-    int h(const Person& person) const noexcept {
+    int h(const Point& point) const noexcept {
         if (_goals.size() == 0) {
             return -1;
         }
         auto it = _goals.begin();
-        int minim = h(person, it->get_position());
+        int minim = h(point, it->get_position());
         it++;
         for ( ; it != _goals.end(); ++it) {
-            minim = std::min(minim, h(person, it->get_position()));
+            minim = std::min(minim, h(point, it->get_position()));
         }
         return minim;
+    }
+
+    int h(const Person& person) const noexcept {
+        return h(person.get_position());
     }
 
     int is_reached_goal(const Point& point) const noexcept {
@@ -48,6 +48,10 @@ protected:
             }
         }
         return false;
+    }
+private:
+    static int h(const Point& point, const Point &other_point) noexcept {
+        return static_cast<int>((point - other_point).diag_norm_multiplied2());
     }
 };
 
