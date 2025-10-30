@@ -103,7 +103,7 @@ const MapDetail: React.FC = () => {
                 if (!grid) return;
                 const generatedMapId = await saveMapToBackend(grid);
                 alert("Карта сохранена с ID: " + generatedMapId);
-                navigate("/animation/new/" + generatedMapId);
+                navigate("/animation/new/" + generatedMapId + "/" + selectedAlgo.title);
             } catch (error) {
                 console.error(error);
                 alert("Ошибка сохранения карты");
@@ -112,7 +112,7 @@ const MapDetail: React.FC = () => {
             }
         } else {
             await saveMap();
-            navigate("/animation/new/" + String(id));
+            navigate("/animation/new/" + String(id) + "/" + selectedAlgo.title);
         }
     }
     

@@ -27,12 +27,12 @@ export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<voi
 };
 
 
-export const GetStatisticsFromBackend = async (mapId: string): Promise<any> => {
+export const GetStatisticsFromBackend = async (mapId: string, algoName: string): Promise<any> => {
     try {
         if (useFakeCalls) {
             return fakeGetRoutes(mapId);
         }
-        return await getRoutes(mapId);
+        return await getRoutes(mapId, algoName);
     } catch (error) {
         throw error;
     }
@@ -160,8 +160,8 @@ async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics:
     return data._id;
 }
 
-async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
-    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics", { method: 'GET' });
+async function getRoutes(mapId: string, algoName: string): Promise<{ id: number, route: string[] }[]> {
+    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics/" + algoName, { method: 'GET' });
     const data = await response.json();
     console.log(data);
     return data;
