@@ -104,15 +104,6 @@ TEST(test_person, random_test_prioritized_planner) {
         Goal goal(0, finish);
         PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
-        if (!route.has_value()) {
-            std::cout << "Start: " <<  start.get_x() << ' ' << start.get_y() << std::endl;
-            std::cout << "Finish: " <<  finish.get_x() << ' ' << finish.get_y() << std::endl;
-            std::cout << "Borders" << std::endl;
-            for (auto b: border) {
-                std::cout << b.get_first().get_x() << ' ' << b.get_first().get_y() << ' ' <<  b.get_second().get_x() << ' ' << b.get_second().get_y() << std::endl;
-            }
-            std::cout << std::endl;
-        }
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
         for (auto action : route.value()) {
@@ -149,15 +140,12 @@ TEST(test_person, random_test_random_planner) {
         PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.plan_all_routes()[0];
         Point current_point = start;
-        if (route.size() > 0) {
-            for (auto action : route) {
-                Point next_point = current_point + action;
-                ASSERT_FALSE(
-                    grid.is_intersecting(Segment(current_point, next_point)));
-                current_point = next_point;
-            }
-            ASSERT_EQ(current_point, finish);
+        for (auto action : route) {
+            Point next_point = current_point + action;
+            ASSERT_FALSE(
+                grid.is_intersecting(Segment(current_point, next_point)));
+            current_point = next_point;
         }
-        
+        ASSERT_EQ(current_point, finish);
     }
 }

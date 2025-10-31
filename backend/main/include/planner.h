@@ -37,10 +37,6 @@ protected:
         return minim;
     }
 
-    int h(const Person& person) const noexcept {
-        return h(person.get_position());
-    }
-
     int is_reached_goal(const Point& point) const noexcept {
         for (auto goal : _goals) {
             if (point == goal.get_position()) {

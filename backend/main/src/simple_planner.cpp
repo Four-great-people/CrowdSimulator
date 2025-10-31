@@ -55,7 +55,7 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;
-                int f = new_g + h(person);
+                int f = new_g + h(position);
                 if (point_to_iterator.contains(position)) {
                     f_to_point.erase(point_to_iterator[position]);
                 }

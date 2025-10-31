@@ -12,7 +12,7 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;
     
     for (int i = 0; i < _persons.size(); ++i) {
-        int distance = h(_persons[i]);
+        int distance = h(_persons[i].get_position());
         data.push_back({distance, i});
     }
     
@@ -94,7 +94,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     NodeQueue open;
     std::unordered_set<TimePoint, TimePointHash> visited;
     
-    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person), 0);
+    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person.get_position()), 0);
     open.push(start_node);
     visited.insert({start_position.get_x(), start_position.get_y(), 0});
     
@@ -134,7 +134,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
                 continue;
             }
             
-            int new_h = h(person);
+            int new_h = h(neighbor);
             auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, current);
             open.push(new_node);
             visited.insert(new_tp);
