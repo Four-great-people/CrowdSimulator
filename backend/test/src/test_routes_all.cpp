@@ -128,3 +128,22 @@ TEST(test_routes, calculate_route__no_multiple_swap_route) {
     ASSERT_EQ(routes[1].size(), 0);
     ASSERT_EQ(routes[2].size(), 0);
 }
+
+TEST(test_routes, prioritized_locked_person) {
+    std::vector<Border> borders = {
+        Border{Point{0, 0}, Point{0, 2}},
+        Border{Point{0, 0}, Point{2, 0}},
+        Border{Point{2, 2}, Point{0, 2}},
+        Border{Point{2, 2}, Point{2, 0}},
+    };
+    Grid grid(borders, Point(0, 0), Point(10, 10));
+    std::vector<Person> persons;
+    persons.emplace_back(0, Point(0, 0), Point(4, 4));
+    persons.emplace_back(1, Point(5, 5), Point(8, 5));
+
+    PrioritizedPlanner planner(persons, &grid);
+    auto routes = planner.plan_all_routes();
+    ASSERT_EQ(routes.size(), 2);
+    ASSERT_EQ(routes[0].size(), 0);
+    ASSERT_EQ(routes[1].size(), 3);
+}

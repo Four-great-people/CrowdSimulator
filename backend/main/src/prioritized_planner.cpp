@@ -33,16 +33,14 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
 
 std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     auto indices = get_priorities_shortest_first();
-    
-    ca_table = CATable();
     stops.clear();
     std::vector<std::vector<Action>> results(_persons.size());
     bool changed = true;
     while (changed) {
+        ca_table = CATable();
         fill(results.begin(), results.end(), std::vector<Action>());
         for (int priority = 0; priority < _persons.size(); ++priority) {
             int agent_id = indices[priority];
-            
             auto route = calculate_route(_persons[agent_id]);
             
             if (route) {
@@ -58,8 +56,6 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
                 }
                 
                 ca_table.add_trajectory(agent_id, trajectory);
-            } else {
-                results[agent_id] = std::vector<Action>{};
             }
         }
         changed = validate_results(results);
@@ -96,8 +92,10 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
                                          TimedNode::Compare>;
     NodeQueue open;
     std::unordered_set<TimePoint, TimePointHash> visited;
+    std::vector<std::shared_ptr<TimedNode>> time_nodes;
     
-    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person, goal), 0);
+    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person, goal), 0, 0, -1);
+    time_nodes.push_back(start_node);
     open.push(start_node);
     visited.insert({start_position.get_x(), start_position.get_y(), 0});
     
@@ -105,13 +103,18 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     while (!open.empty() && steps < MAX_TIME) {
         auto current = open.top();
         open.pop();
+
+        if (stops.find(current->position) != stops.end()) {
+            continue;
+        }
         
         if (current->position == goal) {
             std::vector<Action> path;
             auto node = current;
-            while (node->parent != nullptr) {
-                path.push_back(node->parent->position.to_another(node->position));
-                node = node->parent;
+            while (node->parent_index != -1) {
+                auto parent_node = time_nodes[node->parent_index];
+                path.push_back(parent_node->position.to_another(node->position));
+                node = parent_node;
             }
             std::reverse(path.begin(), path.end());
             return path;
@@ -120,8 +123,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
         auto neighbors = ca_table.get_neighbors_timestep(current->position, current->time);
         
         for (const auto& neighbor : neighbors) {
-            if (_grid->is_incorrect_move(Segment(current->position, neighbor))||
-                stops.find(current->position) != stops.end()) {
+            if (_grid->is_incorrect_move(Segment(current->position, neighbor))) {
                 continue;
             }
             
@@ -138,7 +140,8 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
             }
             
             int new_h = h(person, neighbor);
-            auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, current);
+            auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, time_nodes.size(), current->self_index);
+            time_nodes.push_back(new_node);
             open.push(new_node);
             visited.insert(new_tp);
         }
