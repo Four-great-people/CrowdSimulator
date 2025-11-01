@@ -10,10 +10,11 @@ struct TimedNode {
     int h;
     int f;
     int time;
-    std::shared_ptr<TimedNode> parent;
+    int self_index;
+    int parent_index;
     
-    TimedNode(Point pos, int g_val, int h_val, int t, std::shared_ptr<TimedNode> p = nullptr)
-        : position(pos), g(g_val), h(h_val), f(g_val + h_val), time(t), parent(p) {}
+    TimedNode(Point pos, int g_val, int h_val, int t, int  ind, int p = -1)
+        : position(pos), g(g_val), h(h_val), f(g_val + h_val), time(t), self_index(ind), parent_index(p) {}
     
     struct Compare {
         bool operator()(const std::shared_ptr<TimedNode>& a, const std::shared_ptr<TimedNode>& b) const {

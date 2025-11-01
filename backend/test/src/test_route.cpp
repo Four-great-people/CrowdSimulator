@@ -194,3 +194,24 @@ TEST(test_route, calculate_long_route) {
     ASSERT_EQ(prioritized_route->size(), 31);
 
 }
+
+TEST(test_route, calculate_one_one_locked_no_route) {
+    std::vector border{
+        Border(Point(0, 0), Point(1, 0)),
+        Border(Point(0, 0), Point(0, 1)),
+        Border(Point(1, 1), Point(1, 0)),
+        Border(Point(1, 1), Point(0, 1))
+    };
+    Grid grid(border);
+    Person person(0, Point(0, 0), Point(3, 3));
+    
+    SimplePlanner simple_planner({person}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, &grid);
+    auto simple_route = simple_planner.calculate_route(person);
+    auto prioritized_route = prioritized_planner.calculate_route(person);
+
+    ASSERT_FALSE(simple_route.has_value());
+
+    ASSERT_FALSE(prioritized_route.has_value());
+
+}
