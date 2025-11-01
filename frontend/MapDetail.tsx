@@ -4,6 +4,7 @@ import Grid from './src/models/Grid';
 import { GetMapFromBackend, saveMapToBackend, updateMapInBackend, deleteMapFromBackend } from './src/services/api';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
+import NotFound from './src/components/NotFound';
 import './styles/App.css';
 
 const MapDetail: React.FC = () => {
@@ -21,6 +22,7 @@ const MapDetail: React.FC = () => {
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -29,6 +31,7 @@ const MapDetail: React.FC = () => {
     const loadMap = async (mapId: string) => {
         if (isSaving || isLoadingMap) return;
         try {
+            setError(null);
             if (mapId =='new') {
                 setIsNewMap(true);
                 setGrid(createNewGrid());
@@ -39,8 +42,8 @@ const MapDetail: React.FC = () => {
                 setIsNewMap(false);
             }
         } catch (error) {
+            setError('Карта не найдена');
             console.log(error);
-            navigate("/maps");
         } finally {
             setIsLoadingMap(false);
         }
@@ -127,6 +130,10 @@ const MapDetail: React.FC = () => {
             return () => {};
         }, [id]
     );
+
+    if (error) {
+        return <NotFound />;
+    }
 
     return (
         <div className="App">

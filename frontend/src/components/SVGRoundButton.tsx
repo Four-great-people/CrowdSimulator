@@ -6,6 +6,7 @@ interface SvgRoundButtonProps {
   direction?: 'left' | 'right' | 'up' | 'down';
   size?: number;
   color?: string;
+  arrowColor?: string;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ const SvgRoundButton: React.FC<SvgRoundButtonProps> = ({
   direction = 'left',
   size = 35,
   color = '#3e6cecff',
+  arrowColor = 'white',
   className = ''
 }) => {
   const getRotation = () => {
@@ -42,7 +44,7 @@ const SvgRoundButton: React.FC<SvgRoundButtonProps> = ({
         height={size * 0.5}
         viewBox="0 0 24 24"
         fill="none"
-        stroke="white"
+        stroke={arrowColor}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"

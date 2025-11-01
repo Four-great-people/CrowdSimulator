@@ -5,6 +5,7 @@ import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, s
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
+import NotFound from './src/components/NotFound';
 import './styles/App.css';
 
 const AnimationDetail: React.FC = () => {
@@ -33,6 +34,7 @@ const AnimationDetail: React.FC = () => {
     const [routes, setRoutes] = useState<any[]>([]);
     const [showStatistics, setShowStatistics] = useState(false);
     const [isAnimationSaved, setIsAnimationSaved] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadContent(id);
@@ -42,6 +44,7 @@ const AnimationDetail: React.FC = () => {
         if (isAnimating || isLoadingMap) return;
         try {
             setIsLoadingMap(true);
+            setError(null);
             
             if (isSavedAnimation) {
                 const { grid: animationGrid, routes: animationRoutes, statistics: animationStats } = await GetAnimationFromBackend(contentId);
@@ -70,7 +73,7 @@ const AnimationDetail: React.FC = () => {
             }
         } catch (error) {
             console.log(error);
-            navigate("/maps");
+            setError('Анимация не найдена');
         } finally {
             setIsLoadingMap(false);
         }
@@ -318,6 +321,9 @@ const AnimationDetail: React.FC = () => {
         }, [id, isLoadedMap]
     );
 
+    if (error) {
+        return <NotFound />;
+    }
 
 
     const statisticsFormatString = (n: any) => {
