@@ -47,7 +47,7 @@ const AnimationDetail: React.FC = () => {
             setError(null);
             
             if (isSavedAnimation) {
-                const { grid: animationGrid, routes: animationRoutes, statistics: animationStats } = await GetAnimationFromBackend(contentId);
+                const { grid: animationGrid, routes: animationRoutes, statistics: animationStats, name: name } = await GetAnimationFromBackend(contentId);
                 setGrid(animationGrid);
                 setOriginalGrid(animationGrid.clone());
                 setRoutes(animationRoutes || []);
@@ -59,7 +59,7 @@ const AnimationDetail: React.FC = () => {
 
                 startSavedAnimation(animationGrid, animationRoutes, animationStats);
             } else {
-                let newGrid = await GetMapFromBackend(contentId);
+                let {grid: newGrid, name: name} = await GetMapFromBackend(contentId);
                 setGrid(newGrid);
                 setOriginalGrid(newGrid.clone());
                 const initialSteps: { [id: number]: number } = {};

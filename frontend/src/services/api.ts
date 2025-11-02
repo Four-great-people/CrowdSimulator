@@ -54,7 +54,7 @@ export const GetMapsFromBackend = async (): Promise<MapAnimItem[]> => {
     }
 }
 
-export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
+export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, name: string}> => {
     try {
         let map;
         if (useFakeCalls) {
@@ -74,7 +74,7 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
             newGrid.addPerson(p);
             newGrid.setGoal(person["goal"]);
         })
-        return newGrid;
+        return {grid: newGrid, name: name}
     } catch (error) {
         throw error;
     }
@@ -90,7 +90,7 @@ export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
     }
 };
 
-export const GetAnimationFromBackend = async (animationId: string): Promise<{grid: Grid, routes: any[], statistics: any}> => {
+export const GetAnimationFromBackend = async (animationId: string): Promise<{grid: Grid, routes: any[], statistics: any, name: string}> => {
     try {
         const animationMap = await getAnimation(animationId);
         let width = animationMap["up_right_point"]["x"];
@@ -110,6 +110,7 @@ export const GetAnimationFromBackend = async (animationId: string): Promise<{gri
             grid: newGrid,
             routes: animationMap["routes"] || [],
             statistics: animationMap["statistics"] || {},
+            name: name
         };
     } catch (error) {
         throw error;
