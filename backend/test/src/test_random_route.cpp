@@ -51,8 +51,9 @@ TEST(test_person, random_test_simple_planner) {
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        SimplePlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        SimplePlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
@@ -73,20 +74,35 @@ TEST(test_person, random_test_prioritized_planner) {
                                                                           50);
     std::uniform_int_distribution<std::mt19937::result_type>
         direction_distribution(0, 3);
+    std::uniform_int_distribution<std::mt19937::result_type>
+        wall_direction_distribution(0, 1);
     for (int i = 0; i < 1000; ++i) {
         std::vector<Border> border;
         int border_size = distribution(generator);
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Border(
-                Point(distribution(generator), distribution(generator)),
-                Point(distribution(generator), distribution(generator))));
+            int same_coord = distribution(generator);
+            int diff_coord_2 = distribution(generator);
+            int diff_coord_1 = distribution(generator);
+            int direction = wall_direction_distribution(generator);
+            if (direction == 0) {
+                border.push_back(Border(
+                    Point(same_coord, diff_coord_1),
+                    Point(same_coord, diff_coord_2)));
+            }
+            else {
+                border.push_back(Border(
+                    Point(diff_coord_1, same_coord),
+                    Point(diff_coord_2, same_coord)));
+            }
+            
         }
         Grid grid(border);
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        PrioritizedPlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.calculate_route(person);
         ASSERT_TRUE(route.has_value());
         Point current_point = start;
@@ -119,8 +135,9 @@ TEST(test_person, random_test_random_planner) {
         Point start(distribution(generator), distribution(generator));
         int try_steps = distribution(generator);
         Point finish = random_move(try_steps, generator, start, grid);
-        Person person(0, start, finish);
-        PrioritizedPlanner planner({person}, &grid);
+        Person person(0, start);
+        Goal goal(0, finish);
+        PrioritizedPlanner planner({person}, {goal}, &grid);
         auto route = planner.plan_all_routes()[0];
         Point current_point = start;
         for (auto action : route) {
