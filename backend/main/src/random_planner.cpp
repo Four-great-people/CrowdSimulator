@@ -83,7 +83,7 @@ std::optional<Point> RandomPlanner::plan_next_action(
         probable_neighbors.begin(), probable_neighbors.end(),
         std::back_insert_iterator(next_positions),
         [this, &current_position](const auto& position) {
-            return !_grid->is_incorrect_move(Segment(current_position, position));
+            return !_grid->is_incorrect_move(Segment(current_position, position)) && h(position) != -1;
         });
     if (next_positions.empty()) {
         return std::nullopt;

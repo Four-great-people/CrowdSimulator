@@ -10,11 +10,8 @@ class Planner {
 public:
     Planner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid) 
     : _persons(persons)
-    , _grid(grid) {
-        for (auto g : goals) {
-            _goals.insert(g);
-        }
-    };
+    , _goals(goals.begin(), goals.end())
+    , _grid(grid) {};
 
     virtual ~Planner() = default;
     virtual std::vector<std::vector<Action>> plan_all_routes() = 0;
@@ -37,8 +34,8 @@ protected:
         return minim;
     }
 
-    int is_reached_goal(const Point& point) const noexcept {
-        for (auto goal : _goals) {
+    bool is_reached_goal(const Point& point) const noexcept {
+        for (auto& goal : _goals) {
             if (point == goal.get_position()) {
                 return true;
             }
