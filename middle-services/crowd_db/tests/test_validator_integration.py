@@ -41,9 +41,14 @@ def test_json_schema_allows_id_types():
         "down_left_point": {"x": 0, "y": 0},
         "borders": [],
         "persons": [
-            {"id": 0, "position": {"x": 0, "y": 1}, "goal": {"x": 1, "y": 1}},
-            {"id": "user-1", "position": {"x": 1, "y": 1}, "goal": {"x": 2, "y": 2}},
-            {"position": {"x": 2, "y": 2}, "goal": {"x": 3, "y": 3}},  
+            {"id": 0, "position": {"x": 0, "y": 1}},
+            {"id": "user-1", "position": {"x": 1, "y": 1}},
+            {"position": {"x": 2, "y": 2}},  
+        ],
+        "goals": [
+            {"id": 0, "position": {"x": 1, "y": 1}},
+            {"id": "goal-1", "position": {"x": 2, "y": 2}},
+            {"position": {"x": 3, "y": 3}},  
         ],
     }
     # не должно кидать
