@@ -1,4 +1,4 @@
-from db.models import Point, Segment, PersonSpec, MapDoc
+from db.models import Point, Segment, NamedPointSpec, MapDoc
 
 def test_point_roundtrip():
     p = Point(1, -2)
@@ -10,8 +10,8 @@ def test_segment_roundtrip():
     assert again == s
 
 def test_person_roundtrip_with_id_int():
-    ps = PersonSpec(id=7, position=Point(0,1), goal=Point(2,3))
-    again = PersonSpec.from_bson(ps.to_bson())
+    ps = NamedPointSpec(id=7, position=Point(0,1), goal=Point(2,3))
+    again = NamedPointSpec.from_bson(ps.to_bson())
     assert again.id == 7 and again.position == ps.position and again.goal == ps.goal
 
 def test_mapdoc_roundtrip():
@@ -19,7 +19,8 @@ def test_mapdoc_roundtrip():
         up_right_point=Point(10, 10),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0,0), Point(10,0))],
-        persons=[PersonSpec(id=None, position=Point(0,1), goal=Point(1,1))],
+        persons=[NamedPointSpec(id=None, position=Point(0,1))],
+        goals=[NamedPointSpec(id=None, position=Point(1,1))],
     )
     again = MapDoc.from_bson(m.to_bson())
     assert again.up_right_point == m.up_right_point
