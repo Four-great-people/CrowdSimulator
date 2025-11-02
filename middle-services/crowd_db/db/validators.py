@@ -24,13 +24,12 @@ def apply_collection_validator():
         "additionalProperties": False,
     }
 
-    person = {
+    named_point = {
         "bsonType": "object",
-        "required": ["position", "goal"],
+        "required": ["position"],
         "properties": {
             "id": {"bsonType": ["int", "string", "null"]},
             "position": point,
-            "goal": point,
         },
         "additionalProperties": False,
     }
@@ -68,13 +67,14 @@ def apply_collection_validator():
     schema = {
         "$jsonSchema": {
             "bsonType": "object",
-            "required": ["up_right_point", "down_left_point", "borders", "persons"],
+            "required": ["up_right_point", "down_left_point", "borders", "persons", "goals"],
             "properties": {
                 "_id": {},
                 "up_right_point": point,
                 "down_left_point": point,
                 "borders": {"bsonType": "array", "items": segment},
-                "persons": {"bsonType": "array", "items": person},
+                "persons": {"bsonType": "array", "items": named_point},
+                "goals": {"bsonType": "array", "items": named_point},
                 "name": {"bsonType": "string"},
             },
             "additionalProperties": False,
@@ -84,13 +84,14 @@ def apply_collection_validator():
     animation_schema = {
         "$jsonSchema": {
         "bsonType": "object",
-        "required": ["up_right_point", "down_left_point", "borders", "persons", "routes", "statistics"],
+        "required": ["up_right_point", "down_left_point", "borders", "persons", "goals", "routes", "statistics"],
         "properties": {
             "_id": {},
             "up_right_point": point,
             "down_left_point": point,
             "borders": {"bsonType": "array", "items": segment},
-            "persons": {"bsonType": "array", "items": person},
+            "persons": {"bsonType": "array", "items": named_point},
+            "goals": {"bsonType": "array", "items": named_point},
             "routes": {"bsonType": "array", "items": route_person},
             "statistics": statistics,
             "name": {"bsonType": "string"},
