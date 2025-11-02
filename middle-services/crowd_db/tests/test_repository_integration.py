@@ -1,6 +1,6 @@
 import pytest
 from db.repository import MongoMapRepository
-from db.models import MapDoc, Point, Segment, PersonSpec
+from db.models import MapDoc, Point, Segment, NamedPointSpec
 from db.client import get_db
 from db.config import MAPS_COLLECTION
 from db.validators import apply_collection_validator
@@ -32,7 +32,8 @@ def test_insert_and_read_real_mongo():
         up_right_point=Point(5, 5),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0,0), Point(5,0))],
-        persons=[PersonSpec(id="p-42", position=Point(0,1), goal=Point(1,1))]
+        persons=[NamedPointSpec(id="p-42", position=Point(0,1))]
+        goals=[NamedPointSpec(id="p-42", position=Point(1,1))]
     )
     _id = repo.create(m)
     got = repo.get(_id)
