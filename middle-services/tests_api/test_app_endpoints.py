@@ -13,8 +13,12 @@ def valid_payload():
             {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}},
         ],
         "persons": [
-            {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}},
-            {"id": 2, "position": {"x": 2, "y": 2}, "goal": {"x": 6, "y": 6}},
+            {"id": 1, "position": {"x": 1, "y": 1}},
+            {"id": 2, "position": {"x": 2, "y": 2}},
+        ],
+        "goals": [
+            {"id": 1, "position": {"x": 5, "y": 5}},
+            {"id": 2, "position": {"x": 6, "y": 6}},
         ],
     }
 
@@ -57,7 +61,8 @@ def test_get_map_returns_full_document_in_order(client):
     i_down = raw.find('"down_left_point"')
     i_borders = raw.find('"borders"')
     i_persons = raw.find('"persons"')
-    assert 0 <= i_id < i_up < i_down < i_borders < i_persons
+    i_goals = raw.find('"goals"')
+    assert 0 <= i_id < i_up < i_down < i_borders < i_persons < i_goals
 
 def test_get_map_400(client):
     resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa")  
@@ -89,8 +94,9 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
     i_down = packed.find('"down_left_point"')
     i_borders = packed.find('"borders"')
     i_persons = packed.find('"persons"')
+    i_goals = packed.find('"goals"')
 
-    assert 0 <= i_id < i_up < i_down < i_borders < i_persons, packed
+    assert 0 <= i_id < i_up < i_down < i_borders < i_persons < i_goals, packed
 
 def test_simulate_calls_cpp_with_statistics(client, mock_requests):
     
