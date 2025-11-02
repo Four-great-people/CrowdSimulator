@@ -75,6 +75,7 @@ def apply_collection_validator():
                 "down_left_point": point,
                 "borders": {"bsonType": "array", "items": segment},
                 "persons": {"bsonType": "array", "items": person},
+                "name": {"bsonType": "string"},
             },
             "additionalProperties": False,
         }
@@ -91,7 +92,8 @@ def apply_collection_validator():
             "borders": {"bsonType": "array", "items": segment},
             "persons": {"bsonType": "array", "items": person},
             "routes": {"bsonType": "array", "items": route_person},
-                "statistics": statistics
+            "statistics": statistics,
+            "name": {"bsonType": "string"},
         },
         "additionalProperties": False
         }

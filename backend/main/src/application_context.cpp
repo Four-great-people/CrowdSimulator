@@ -66,10 +66,11 @@ struct Map {
     Point up_right_point;
     std::vector<Segment> borders;
     std::vector<Person> persons;
+    std::string name;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, down_left_point, up_right_point, borders,
-                                   persons)
+                                   persons, name)
 
 struct RouteResult {
     int id;

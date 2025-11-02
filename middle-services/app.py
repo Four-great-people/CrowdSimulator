@@ -32,6 +32,7 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od = OrderedDict()
     if _id is not None:
         od["_id"] = _id
+    od["name"] = m.name or "Без названия"
     od["up_right_point"] = d["up_right_point"]
     od["down_left_point"] = d["down_left_point"]
     od["borders"] = d.get("borders", [])
@@ -53,8 +54,16 @@ def create_map():
 @app.route("/maps", methods=["GET"])
 def get_maps():
     try:
-        index_list = list(map(lambda m: str(m._id),repo.list(limit=1000)))
-        return jsonify(index_list), 200
+        maps = repo.list(limit=1000)
+        map_list = [
+            {
+                "id": str(m._id),
+                "name": m.name or "Без названия"
+            }
+            for m in maps
+            if m._id is not None
+        ]
+        return jsonify(map_list), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
@@ -81,6 +90,7 @@ def get_map(map_id: str):
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
     resp["persons"] = [p.to_bson() for p in m.persons]
+    resp["name"] = m.name or "Без названия"
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),
@@ -152,8 +162,15 @@ def create_animation():
 def get_animations():
     try:
         animations = repo.get_animations(limit=1000)
-        animation_ids = [str(anim._id) for anim in animations if anim._id]
-        return jsonify(animation_ids), 200
+        animation_list = [
+            {
+                "id": str(anim._id),
+                "name": anim.name or "Без названия"
+            }
+            for anim in animations
+            if anim._id is not None
+        ]
+        return jsonify(animation_list), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
@@ -167,6 +184,8 @@ def get_animation(animation_id: str):
 
         if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
             animation_data['_id'] = str(animation_data['_id'])
+        if 'name' not in animation_data:
+            animation_data['name'] = animation.name or "Без названия"
         
         return jsonify(animation_data), 200
     except Exception as e:

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GetMapsFromBackend, deleteMapFromBackend, GetAnimationsFromBackend } from './src/services/api';
+import { GetMapsFromBackend, deleteMapFromBackend, GetAnimationsFromBackend, MapAnimItem } from './src/services/api';
 import './styles/App.css';
 import Grid from './src/models/Grid';
 
 const Maps: React.FC = () => {
-    const [mapList, setMaps] = useState<string[]>([]);
+    const [mapList, setMaps] = useState<MapAnimItem[]>([]);
     const [isLoadingMaps, setIsLoadingMaps] = useState(false);
     const [busyId, setBusyId] = useState<string | null>(null);
-    const [animationList, setAnimations] = useState<string[]>([]);
+    const [animationList, setAnimations] = useState<MapAnimItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -63,7 +63,7 @@ const Maps: React.FC = () => {
         try {
             setBusyId(mapId);
             await deleteMapFromBackend(mapId);
-            setMaps(prev => prev.filter(id => id !== mapId));
+            setMaps(prev => prev.filter(item => item.id !== mapId));
         } catch (err) {
           console.error(err);
           alert('Не удалось удалить карту');
@@ -110,22 +110,22 @@ const Maps: React.FC = () => {
                             </button>
                         </div>
                         <div className="map-list">
-                            {mapList.map(mapId => (
-                                <div key={mapId} className="map-row" onClick={() => handleMapClick(mapId)}>
+                            {mapList.map(mapItem => (
+                                <div key={mapItem.id} className="map-row" onClick={() => handleMapClick(mapItem.id)}>
                                     <button
                                         className="blue-button map-row__title"
                                         disabled={isLoadingMaps || !!busyId}
-                                        title={mapId}
+                                        title={mapItem.name}
                                     >
-                                        {mapId}
+                                        {mapItem.name}
                                     </button>
 
                                     <button
                                         className="icon-button delete"
                                         aria-label="Удалить карту"
                                         title="Удалить карту"
-                                        disabled={busyId === mapId}
-                                        onClick={e => deleteMap(e, mapId)}
+                                        disabled={busyId === mapItem.id}
+                                        onClick={e => deleteMap(e, mapItem.id)}
                                     >
                                         🗑
                                     </button>
@@ -140,14 +140,14 @@ const Maps: React.FC = () => {
                                 Нет сохраненных анимаций
                             </div>
                         ) : (
-                            animationList.map((animationId) => (
+                            animationList.map((animItem) => (
                                 <button 
-                                    key={animationId}
+                                    key={animItem.id}
                                     className="blue-button"
-                                    onClick={() => handleAnimationClick(animationId)}
+                                    onClick={() => handleAnimationClick(animItem.id)}
                                     disabled={isLoading}
                                 >
-                                    Анимация {animationId}
+                                    {animItem.name}
                                 </button>
                             ))
                         )}

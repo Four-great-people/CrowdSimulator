@@ -3,24 +3,29 @@ import Person from '../models/Person';
 
 const useFakeCalls = process.env.MODE ? true : false
 
-export const saveMapToBackend = async (grid: Grid): Promise<string> => {
+export interface MapAnimItem {
+    id: string,
+    name: string
+}
+
+export const saveMapToBackend = async (grid: Grid, name: string): Promise<string> => {
     try {
         if (useFakeCalls) {
-            return fakeSave(grid);
+            return fakeSave(grid, name);
         }
-        return await saveToRealBackend(grid);
+        return await saveToRealBackend(grid, name);
     } catch (error) {
         throw error;
     }
 };
 
 
-export const updateMapInBackend = async (mapId: string, grid: Grid): Promise<void> => {
+export const updateMapInBackend = async (mapId: string, grid: Grid, name: string): Promise<void> => {
     try {
         if (useFakeCalls) {
-            return fakeUpdate(mapId, grid);
+            return fakeUpdate(mapId, grid, name);
         }
-        return await updateToRealBackend(mapId, grid);
+        return await updateToRealBackend(mapId, grid, name);
     } catch (error) {
         throw error;
     }
@@ -38,7 +43,7 @@ export const GetStatisticsFromBackend = async (mapId: string): Promise<any> => {
     }
 };
 
-export const GetMapsFromBackend = async (): Promise<string[]> => {
+export const GetMapsFromBackend = async (): Promise<MapAnimItem[]> => {
     try {
         if (useFakeCalls) {
             return fakeGetMaps();
@@ -59,6 +64,7 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
         }
         let width = map["up_right_point"]["x"];
         let height = map["up_right_point"]["y"];
+        let name = map["name"] || "Без названия";   
         let newGrid = new Grid(width, height);
         map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
@@ -90,6 +96,7 @@ export const GetAnimationFromBackend = async (animationId: string): Promise<{gri
         let width = animationMap["up_right_point"]["x"];
         let height = animationMap["up_right_point"]["y"];
         let newGrid = new Grid(width, height);
+        let name = animationMap["name"] || "Без названия";
         animationMap["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
         });
@@ -102,14 +109,14 @@ export const GetAnimationFromBackend = async (animationId: string): Promise<{gri
         return {
             grid: newGrid,
             routes: animationMap["routes"] || [],
-            statistics: animationMap["statistics"] || {}
+            statistics: animationMap["statistics"] || {},
         };
     } catch (error) {
         throw error;
     }
 }
 
-export const GetAnimationsFromBackend = async (): Promise<string[]> => {
+export const GetAnimationsFromBackend = async (): Promise<MapAnimItem[]> => {
     try {
         return await getAnimations();
     } catch (error) {
@@ -117,15 +124,15 @@ export const GetAnimationsFromBackend = async (): Promise<string[]> => {
     }
 }
 
-export const saveAnimationToBackend = async (grid: Grid, routes: any[], statistics: any): Promise<string> => {
+export const saveAnimationToBackend = async (grid: Grid, routes: any[], statistics: any, name: string): Promise<string> => {
     try {
-        return await saveAnimationToRealBackend(grid, routes, statistics);
+        return await saveAnimationToRealBackend(grid, routes, statistics, name);
     } catch (error) {
         throw error;
     }
 };
 
-async function getMaps() {
+async function getMaps(): Promise<MapAnimItem[]> {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
     const data = await response.json();
     return data;
@@ -137,7 +144,7 @@ async function getMap(mapId: string) {
     return data;
 }
 
-async function getAnimations() {
+async function getAnimations(): Promise<MapAnimItem[]> {
     const response = await fetch("http://localhost:5000/animations", { method: 'GET' });
     const data = await response.json();
     return data;
@@ -149,8 +156,12 @@ async function getAnimation(animationId: string) {
     return data;
 } 
 
-async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics: any): Promise<string> {
-    const animationData = grid.getAnimationDataForBackend(routes, statistics);
+async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics: any, name: string): Promise<string> {
+    const animationData = {
+        ...grid.getAnimationDataForBackend(routes, statistics),
+        name: name
+    };
+
     const response = await fetch("http://localhost:5000/animations", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,14 +172,17 @@ async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics:
 }
 
 async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
-    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics", { method: 'GET' });
+    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics/dense", { method: 'GET' });
     const data = await response.json();
     console.log(data);
     return data;
 }
 
-async function saveToRealBackend(grid: Grid): Promise<string> {
-    const requestData = grid.getDataForBackend();
+async function saveToRealBackend(grid: Grid, name: string): Promise<string> {
+    const requestData = {
+        ...grid.getDataForBackend(),
+        name: name
+    }
     const response = await fetch("http://localhost:5000/maps", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,8 +192,11 @@ async function saveToRealBackend(grid: Grid): Promise<string> {
     return data._id;
 }
 
-async function updateToRealBackend(mapId: string, grid: Grid): Promise<void> {
-    const requestData = grid.getDataForBackend();
+async function updateToRealBackend(mapId: string, grid: Grid, name: string): Promise<void> {
+    const requestData = {
+        ...grid.getDataForBackend(),
+        name: name
+    }
     const response = await fetch(`http://localhost:5000/maps/${mapId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -199,68 +216,68 @@ async function deleteFromRealBackend(mapId: string): Promise<void> {
     }
 }
 
-const fakeMapList = [
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-]
+const fakeMapList: MapAnimItem[] = [
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+    { id: "0", name: "0 - Без названия" },
+    { id: "1", name: "1 - Без названия" },
+    { id: "2", name: "2 - Без названия" },
+    { id: "3", name: "3 - Без названия" },
+    { id: "4", name: "4 - Без названия" },
+];
 
 function fakeGetMaps() {
     return fakeMapList
@@ -297,25 +314,30 @@ function fakeGetMap(mapId: string) {
             { "id": 1, "position": { "x": 15, "y": 15 }, "goal": { "x": 18, "y": 15 } },
             { "id": 2, "position": { "x": 14, "y": 16 }, "goal": { "x": 18, "y": 17 } },
             { "id": 3, "position": { "x": 13, "y": 13 }, "goal": { "x": 10, "y": 12 } }
-        ]
+        ],
+        "name": `Карта ${mapId}`
     }
 }
 
-function fakeSave(grid: Grid) {
+function fakeSave(grid: Grid, name: string) {
     const requestData = grid.getDataForBackend();
     console.log(requestData);
     const newId = String(fakeMapList.length)
-    fakeMapList.push(newId)
+    fakeMapList.push({id: newId, name: name})
     return newId;
 }
 
-function fakeUpdate(mapId: string, grid: Grid): void {
+function fakeUpdate(mapId: string, grid: Grid, name: string): void {
     const payload = grid.getDataForBackend();
-    console.log('[FAKE updateMapInBackend] mapId:', mapId, 'payload:', payload);
+    console.log('[FAKE updateMapInBackend] mapId:', mapId, 'payload:', payload, 'name: ', name);
+    const mapItem = fakeMapList.find(item => item.id === mapId);
+    if (mapItem) {
+        mapItem.name = name;
+    }
 }
 
 function fakeDelete(mapId: string): void {
-  const idx = fakeMapList.indexOf(mapId);
-  if (idx !== -1) fakeMapList.splice(idx, 1);
+    const idx = fakeMapList.findIndex(item => item.id === mapId);
+    if (idx !== -1) fakeMapList.splice(idx, 1);
 }
 
