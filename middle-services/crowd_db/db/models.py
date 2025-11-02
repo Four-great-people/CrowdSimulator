@@ -32,7 +32,6 @@ class Segment:
 class NamedPointSpec:
     id: Optional[Union[int, str]]
     position: Point
-    goal: Point
 
     def to_bson(self) -> Dict[str, Any]:
         doc: Dict[str, Any] = {

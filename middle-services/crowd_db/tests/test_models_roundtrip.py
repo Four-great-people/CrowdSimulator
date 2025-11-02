@@ -10,7 +10,7 @@ def test_segment_roundtrip():
     assert again == s
 
 def test_person_roundtrip_with_id_int():
-    ps = NamedPointSpec(id=7, position=Point(0,1), goal=Point(2,3))
+    ps = NamedPointSpec(id=7, position=Point(0,1),)
     again = NamedPointSpec.from_bson(ps.to_bson())
     assert again.id == 7 and again.position == ps.position and again.goal == ps.goal
 
