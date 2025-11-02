@@ -29,7 +29,7 @@ class Segment:
         return Segment(Point.from_bson(d["first"]), Point.from_bson(d["second"]))
 
 @dataclass
-class PersonSpec:
+class NamedPointSpec:
     id: Optional[Union[int, str]]
     position: Point
     goal: Point
@@ -37,18 +37,16 @@ class PersonSpec:
     def to_bson(self) -> Dict[str, Any]:
         doc: Dict[str, Any] = {
             "position": self.position.to_bson(),
-            "goal": self.goal.to_bson(),
         }
         if self.id is not None:
             doc["id"] = self.id
         return doc
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "PersonSpec":
-        return PersonSpec(
+    def from_bson(d: Dict[str, Any]) -> "NamedPointSpec":
+        return NamedPointSpec(
             id=d.get("id"),
             position=Point.from_bson(d["position"]),
-            goal=Point.from_bson(d["goal"]),
         )
 
 @dataclass
@@ -56,7 +54,8 @@ class MapDoc:
     up_right_point: Point
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
-    persons: List[PersonSpec] = field(default_factory=list)
+    persons: List[NamedPointSpec] = field(default_factory=list)
+    goals: List[NamedPointSpec] = field(default_factory=list)
     _id: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
@@ -66,6 +65,7 @@ class MapDoc:
             "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
+            "goals": [p.to_bson() for p in self.goals],
         }
 
     @staticmethod
@@ -74,7 +74,8 @@ class MapDoc:
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
-            persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
+            persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
+            goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
             _id=d.get("_id"),
         )
 
@@ -83,7 +84,8 @@ class AnimationDoc:
     up_right_point: Point
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
-    persons: List[PersonSpec] = field(default_factory=list)
+    persons: List[NamedPointSpec] = field(default_factory=list)
+    goals: List[NamedPointSpec] = field(default_factory=list)
     
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
@@ -96,6 +98,7 @@ class AnimationDoc:
             "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
+            "goals": [p.to_bson() for p in self.goals],
             "routes": self.routes,
             "statistics": self.statistics
         }
@@ -109,7 +112,8 @@ class AnimationDoc:
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
-            persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
+            persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
+            goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
             _id=d.get("_id")
