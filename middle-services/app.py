@@ -191,3 +191,14 @@ def get_animation(animation_id: str):
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
+@app.route("/animations/<animation_id>", methods=["PUT"])
+def update_animation(animation_id: str):
+    payload = request.get_json(force=True)
+    try:
+        new_name = payload.get('name', '')
+        result = repo.update_animation_name(animation_id, new_name)
+        if not result:
+            return jsonify({"error": "animation not found"}), 400   
+        return jsonify({"message": "animation updated"}), 200
+    except Exception as e:
+        return jsonify({"error": f"invalid animation payload: {e}"}), 400

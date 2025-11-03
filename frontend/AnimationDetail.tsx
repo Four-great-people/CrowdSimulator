@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
+import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend, updateAnimationInBackend } from './src/services/api';
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -35,6 +35,9 @@ const AnimationDetail: React.FC = () => {
     const [showStatistics, setShowStatistics] = useState(false);
     const [isAnimationSaved, setIsAnimationSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [animationName, setAnimationName] = useState('');
+    const [originalAnimationName, setOriginalAnimationName] = useState('');
+    const [savedAnimationId, setSavedAnimationId] = useState<string | null>(null);
 
     useEffect(() => {
         loadContent(id);
@@ -56,7 +59,8 @@ const AnimationDetail: React.FC = () => {
                 setParticipantsNumber(animationRoutes.length);
                 setShowStatistics(true);
                 setIsAnimationSaved(true);
-
+                setOriginalAnimationName(name || "Без названия");
+                setAnimationName(name || "Без названия");
                 startSavedAnimation(animationGrid, animationRoutes, animationStats);
             } else {
                 let {grid: newGrid, name: name} = await GetMapFromBackend(contentId);
@@ -70,6 +74,7 @@ const AnimationDetail: React.FC = () => {
                 setShowStatistics(false);
                 setIsLoadedMap(true);
                 setIsAnimationSaved(false);
+                setOriginalAnimationName("Без названия");
             }
         } catch (error) {
             console.log(error);
@@ -120,19 +125,23 @@ const AnimationDetail: React.FC = () => {
         if (!originalGrid || !grid || isSaving || !idealTime || !validTime || !routes || routes.length === 0) return;
 
         if (isAnimationSaved) {
-                alert("Анимация уже сохранена");
+                await renameAnimation();
                 return;
         }
 
         setIsSaving(true);
         try {
+            const nameToSave = animationName.trim() || originalAnimationName;
+
             const statistics = {
                 valid: validTime,
                 ideal: idealTime
             };
-            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics);
+            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics, nameToSave);
             alert(`Анимация сохранена с ID: ${animationId}`);
             setIsAnimationSaved(true);
+            setOriginalAnimationName(nameToSave);
+            setSavedAnimationId(animationId);
         } catch (error) {
             console.error('Ошибка сохранения анимации:', error);
             alert('Ошибка сохранения анимации');
@@ -172,6 +181,19 @@ const AnimationDetail: React.FC = () => {
             setIsAnimating(false);
         }
     };
+
+    const renameAnimation = async () => {
+        try {
+            const nameToSave = animationName.trim() || originalAnimationName;
+            const animationIdToUpdate = savedAnimationId || id;
+            await updateAnimationInBackend(animationIdToUpdate, nameToSave);
+            setOriginalAnimationName(nameToSave);
+            alert('Анимация переименована');
+        } catch (error) {
+            console.error('Ошибка переименования анимации:', error);
+            alert('Ошибка переименования анимации');
+        };
+    }
 
     const isRouteCompleted = (route: any): boolean => {
         if (route) {
@@ -334,20 +356,31 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
-            {!isSavedAnimation && (
-                <div className="animation-controls">
-                    {animationCompleted && (
-                        <button 
-                            onClick={saveAnimation} 
-                            disabled={isSaving}
-                            className="save-animation-btn"
-                        >
-                            {isSaving ? "Сохраняется..." :
-                            isAnimationSaved ? "Анимация сохранена" : "Сохранить анимацию"}
-                        </button>
-                    )}
-                </div>
-            )}
+            <div className="animation-controls">
+                {(animationCompleted || isAnimationSaved) && (
+                    <div className="name-input-container">
+                        <input
+                            type="text"
+                            value={animationName}
+                            onChange={(e) => setAnimationName(e.target.value)}
+                            placeholder="Введите название анимации"
+                            className="name-input"
+                        />
+                    </div>
+                )}
+                {(animationCompleted || isAnimationSaved) && (
+                    <button 
+                        onClick={saveAnimation} 
+                        disabled={isSaving}
+                        className="save-animation-btn"
+                    >
+                        {isSaving ? "Сохраняется..." :
+                        isAnimationSaved ? "Переименовать" : "Сохранить анимацию"}
+                    </button>
+                )}
+            </div>
+            
+            
 
             <div className="body">
                 <div className="grid-wrapper">

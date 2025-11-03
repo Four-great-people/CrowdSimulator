@@ -133,6 +133,14 @@ export const saveAnimationToBackend = async (grid: Grid, routes: any[], statisti
     }
 };
 
+export const updateAnimationInBackend = async (animId: string, name: string): Promise<void> => {
+    try {
+        return updateAnimationInRealBackend(animId, name);
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getMaps(): Promise<MapAnimItem[]> {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
     const data = await response.json();
@@ -214,6 +222,22 @@ async function deleteFromRealBackend(mapId: string): Promise<void> {
     if (!res.ok && res.status !== 204) {
         const t = await res.text().catch(() => '');
         throw new Error(`Не удалось удалить карту: ${res.status} ${t}`);
+    }
+}
+
+async function updateAnimationInRealBackend(animationId: string, name: string): Promise<void> {
+    const updateData = {
+        name: name
+    };
+
+    const response = await fetch(`http://localhost:5000/animations/${animationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+    });
+    if (!response.ok) {
+        const t = await response.text().catch(() => '');
+        throw new Error(`Ошибка обновления анимации: ${response.status} ${t}`);
     }
 }
 
