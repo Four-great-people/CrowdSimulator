@@ -23,7 +23,6 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     
     std::vector<int> indices(_persons.size());
     for (int i = 0; i < data.size(); ++i) {
-        int length = data[i].first;
         int pos = data[i].second;
         indices[i] = pos;
     }

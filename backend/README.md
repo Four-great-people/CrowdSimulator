@@ -3,6 +3,8 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+cppcheck --enable=warning,style,performance,portability main test --inline-suppr
+
 # Backend. Python
 
 Для интеграционного тестирования всего сервиса здесь используется Python.
