@@ -2,12 +2,12 @@ from __future__ import annotations
 import os
 import json
 from typing import Any, Dict, Optional, Tuple
+from collections import OrderedDict
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
-from collections import OrderedDict
 
 from crowd_db.db.models import MapDoc, AnimationDoc
 from crowd_db.db.repository import MongoMapRepository
@@ -46,16 +46,16 @@ def create_map():
         m = MapDoc.from_bson(payload)
         oid = repo.create(m)
         return jsonify({"_id": str(oid)}), 201
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 
 @app.route("/maps", methods=["GET"])
 def get_maps():
     try:
-        index_list = list(map(lambda m: str(m._id),repo.list(limit=1000)))
+        index_list = list(map(lambda m: str(m.identifier),repo.list(limit=1000)))
         return jsonify(index_list), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 @app.route("/maps/<map_id>", methods=["DELETE"])
@@ -65,7 +65,7 @@ def delete_map(map_id: str):
         if not ok:
             return jsonify({"error": "map not found"}), 400
         return jsonify({"message": "map deleted"}), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"delete failed: {e}"}), 400
 
 @app.route("/maps/<map_id>", methods=["GET"])
@@ -75,8 +75,8 @@ def get_map(map_id: str):
         return jsonify({"error": "map not found"}), 400
 
     resp = OrderedDict()
-    if m._id is not None:
-        resp["_id"] = str(m._id)
+    if m.identifier is not None:
+        resp["_id"] = str(m.identifier)
     resp["up_right_point"] = m.up_right_point.to_bson()
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
@@ -87,7 +87,8 @@ def get_map(map_id: str):
         mimetype="application/json"
     )
 
-def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Tuple[Any, Any]:
+def calculate_statistics_for_endpoint(endpoint: str,
+                payload: str, headers: Dict[str, str]) -> Tuple[Any, Any]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -97,10 +98,14 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
     result.raise_for_status()
     j = result.json()
     def extract_person(person) -> Optional[int]:
-        return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"])) if person["route"] is not None else None
+        return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"]))\
+            if person["route"] is not None else None
     personal_values = list(map(extract_person, j))
     count_of_none = len(list(filter(lambda x: x is None, personal_values)))
-    return { "value": (max(filter(lambda x: x is not None, personal_values)) if count_of_none != len(personal_values) else None), "problematic": count_of_none }, j # type: ignore
+    return { "value":
+        (max(filter(lambda x: x is not None,
+            personal_values)) if count_of_none != len(personal_values) else None), # type: ignore
+            "problematic": count_of_none }, j # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics/<algo>", methods=["GET"])
@@ -129,12 +134,12 @@ def update_map(map_id: str):
     payload = request.get_json(force=True)
     try:
         m = MapDoc.from_bson(payload)
-        m._id = ObjectId(map_id)  
+        m.identifier = ObjectId(map_id)
         ok = repo.replace(m)
         if not ok:
             return jsonify({"error": "map not found"}), 400
         return jsonify({"message": "map updated"}), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 
@@ -145,16 +150,16 @@ def create_animation():
         animation_doc = AnimationDoc.from_bson(payload)
         animation_id = repo.create_animation(animation_doc.to_bson())
         return jsonify({"_id": str(animation_id)}), 201
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid animation payload: {e}"}), 400
 
 @app.route("/animations", methods=["GET"])
 def get_animations():
     try:
         animations = repo.get_animations(limit=1000)
-        animation_ids = [str(anim._id) for anim in animations if anim._id]
+        animation_ids = [str(anim.identifier) for anim in animations if anim.identifier]
         return jsonify(animation_ids), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 @app.route("/animations/<animation_id>", methods=["GET"])
@@ -167,8 +172,6 @@ def get_animation(animation_id: str):
 
         if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
             animation_data['_id'] = str(animation_data['_id'])
-        
         return jsonify(animation_data), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
-

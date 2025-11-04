@@ -57,11 +57,11 @@ class MapDoc:
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
     persons: List[PersonSpec] = field(default_factory=list)
-    _id: Optional[ObjectId] = None
+    identifier: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
         return {
-            "_id": self._id if self._id else ObjectId(),
+            "_id": self.identifier if self.identifier else ObjectId(),
             "up_right_point": self.up_right_point.to_bson(),
             "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
@@ -75,7 +75,7 @@ class MapDoc:
             down_left_point=Point.from_bson(d["down_left_point"]),
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
-            _id=d.get("_id"),
+            identifier=d.get("_id"),
         )
 
 @dataclass
@@ -88,7 +88,7 @@ class AnimationDoc:
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     
-    _id: Optional[ObjectId] = None
+    identifier: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
         doc = {
@@ -99,8 +99,8 @@ class AnimationDoc:
             "routes": self.routes,
             "statistics": self.statistics
         }
-        if self._id:
-            doc["_id"] = self._id
+        if self.identifier:
+            doc["_id"] = self.identifier
         return doc
 
     @staticmethod
@@ -112,5 +112,5 @@ class AnimationDoc:
             persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
-            _id=d.get("_id")
+            identifier=d.get("_id")
         )
