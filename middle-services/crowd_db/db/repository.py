@@ -39,7 +39,7 @@ class MongoMapRepository:
         oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
         res = _col().delete_one({"_id": oid})
         return res.deleted_count == 1
-    
+
     def create_animation(self, animation_data: dict) -> ObjectId:
         animation_doc = AnimationDoc.from_bson(animation_data)
         doc = animation_doc.to_bson()
@@ -61,9 +61,9 @@ class MongoMapRepository:
         try:
             animation_doc = AnimationDoc.from_bson(animation_data)
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
-        except (InvalidId, Exception):
+        except (InvalidId, Exception): # pylint: disable=broad-exception-caught
             return False
-        
+
         result = _animations_col().replace_one({"_id": oid}, animation_doc.to_bson())
         return result.matched_count == 1
 
@@ -74,4 +74,3 @@ class MongoMapRepository:
             return False
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
-    

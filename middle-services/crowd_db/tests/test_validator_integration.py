@@ -4,6 +4,7 @@ from db.client import get_db
 from db.config import MAPS_COLLECTION
 from db.validators import apply_collection_validator
 
+# pylint: disable=duplicate-code
 pytestmark = [
     pytest.mark.skipif(
         not getattr(pytest, "config").getoption("--integration"),
@@ -43,10 +44,9 @@ def test_json_schema_allows_id_types():
         "persons": [
             {"id": 0, "position": {"x": 0, "y": 1}, "goal": {"x": 1, "y": 1}},
             {"id": "user-1", "position": {"x": 1, "y": 1}, "goal": {"x": 2, "y": 2}},
-            {"position": {"x": 2, "y": 2}, "goal": {"x": 3, "y": 3}},  
+            {"position": {"x": 2, "y": 2}, "goal": {"x": 3, "y": 3}},
         ],
     }
     # не должно кидать
     res = col.insert_one(good)
     assert res.inserted_id is not None
-

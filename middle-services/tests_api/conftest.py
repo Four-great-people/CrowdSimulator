@@ -1,20 +1,20 @@
 from __future__ import annotations
 import json
-import types
+import sys
+import os
 import pytest
 from bson import ObjectId
-import sys, os
+
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-import app as app_module  
+import app as app_module # pylint: disable=wrong-import-position
 
 
 class FakeRepo:
     """Простейший in-memory репозиторий с API как у MongoMapRepository."""
     def __init__(self):
-        self._store = {}  
+        self._store = {}
 
-    
     def create(self, m):
         d = m.to_bson()
         oid = d.get("_id") or ObjectId()
@@ -22,7 +22,7 @@ class FakeRepo:
         self._store[str(oid)] = d
         return oid
 
-    def list(self, limit: int = 50):
+    def list(self, limit: int = 50): # pylint: disable=unused-argument
         return list(map(app_module.MapDoc.from_bson, self._store.values()))
 
     def get(self, map_id):
@@ -57,19 +57,20 @@ class FakeResp:
     def json(self):
         return self._json_obj
     def raise_for_status(self):
-        if not (200 <= self.status_code < 300):
+        if not 200 <= self.status_code < 300:
             raise RuntimeError(f"HTTP {self.status_code}")
 
 
 @pytest.fixture
 def mock_requests(monkeypatch):
-    sent = {"calls": []}  
+    sent = {"calls": []}
 
-    def fake_post(url, *args, **kwargs):
+    def fake_post(url, *args, **kwargs): # pylint: disable=unused-argument
         body_text = kwargs.get("data")
         json_body = kwargs.get("json")
         headers = kwargs.get("headers", {})
-        sent["calls"].append({"url": url, "body_text": body_text, "json_body": json_body, "headers": headers})
+        sent["calls"].append({"url": url, "body_text": body_text,
+                            "json_body": json_body, "headers": headers})
         if "simple" in url:
             return FakeResp([{"id": 1, "route": ["UP", "RIGHT", "LEFT_DOWN"]}], status_code=200)
         if "dense" in url:
@@ -78,4 +79,3 @@ def mock_requests(monkeypatch):
 
     monkeypatch.setattr(app_module.requests, "post", fake_post)
     return sent
-

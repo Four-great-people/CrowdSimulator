@@ -29,7 +29,7 @@ def test_crud_maps_unit():
     lst = repo.list(limit=10)
     assert any(doc.identifier == _id for doc in lst)
 
-    # replace 
+    # replace
     got.persons.append(PersonSpec(id=1, position=Point(1,1), goal=Point(2,2)))
     assert repo.replace(got) is True
     got2 = repo.get(_id)
@@ -38,4 +38,3 @@ def test_crud_maps_unit():
     # delete
     assert repo.delete(_id) is True
     assert repo.get(_id) is None
-

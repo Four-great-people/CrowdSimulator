@@ -18,4 +18,3 @@ if __name__ == "__main__":
 
     _id = repo.create(doc)
     print("✅ Inserted:", _id)
-

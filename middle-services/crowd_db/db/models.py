@@ -84,10 +84,10 @@ class AnimationDoc:
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
     persons: List[PersonSpec] = field(default_factory=list)
-    
+
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
-    
+
     identifier: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:

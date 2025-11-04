@@ -6,6 +6,7 @@ from db.config import MAPS_COLLECTION
 from db.validators import apply_collection_validator
 
 # run with:  pytest --integration
+# pylint: disable=duplicate-code
 pytestmark = [
     pytest.mark.skipif(
         not getattr(pytest, "config").getoption("--integration"),
@@ -37,4 +38,3 @@ def test_insert_and_read_real_mongo():
     got = repo.get(_id)
     assert got is not None
     assert got.persons[0].id == "p-42"
-

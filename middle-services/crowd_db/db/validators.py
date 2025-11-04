@@ -83,7 +83,8 @@ def apply_collection_validator():
     animation_schema = {
         "$jsonSchema": {
         "bsonType": "object",
-        "required": ["up_right_point", "down_left_point", "borders", "persons", "routes", "statistics"],
+        "required": ["up_right_point", "down_left_point",
+                     "borders", "persons", "routes", "statistics"],
         "properties": {
             "_id": {},
             "up_right_point": point,
@@ -96,7 +97,6 @@ def apply_collection_validator():
         "additionalProperties": False
         }
     }
-    
 
     if MAPS_COLLECTION not in db.list_collection_names():
         db.create_collection(MAPS_COLLECTION, validator=schema)
@@ -107,4 +107,3 @@ def apply_collection_validator():
         db.create_collection(ANIMATIONS_COLLECTION, validator=animation_schema)
     else:
         db.command("collMod", ANIMATIONS_COLLECTION, validator=animation_schema)
-
