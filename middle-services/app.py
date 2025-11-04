@@ -22,7 +22,6 @@ CORS(app)
 
 repo = MongoMapRepository()
 
-
 def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     d = m.to_bson()
     _id = d.get("_id")
