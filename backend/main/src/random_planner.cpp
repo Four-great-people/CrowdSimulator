@@ -25,7 +25,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
     constexpr int MAX_ITERATION_NUMBER = 50000;
     std::unordered_set<int> moving_positions;
     std::unordered_map<int, int> next_time_to_move;
-    for (int i = 0; i < int(_persons.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(_persons.size()); ++i) {
         moving_positions.insert(i);
         next_time_to_move[0] = 0;
         current_positions.push_back(_persons[std::size_t(i)].get_position());
@@ -99,8 +99,9 @@ std::optional<Point> RandomPlanner::plan_next_action(
     auto position_iterator =
         std::upper_bound(probabilities.begin(), probabilities.end(), threshold);
     int index = (position_iterator == probabilities.end())
-                    ? (int(probabilities.size()) - 1)
-                    : int(std::distance(probabilities.begin(), position_iterator));
+                    ? (static_cast<int>(probabilities.size()) - 1)
+                    : static_cast<int>(std::distance(probabilities.begin(),
+                                                     position_iterator));
     Point new_position = next_positions[std::size_t(index)];
     return new_position;
 }

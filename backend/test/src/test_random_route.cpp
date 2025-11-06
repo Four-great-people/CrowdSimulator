@@ -15,21 +15,23 @@ Point random_move(int try_steps, std::mt19937 &generator, Point finish,
     std::uniform_int_distribution<std::mt19937::result_type>
         direction_distribution(0, 3);
     while (try_steps--) {
-        int direction_index = direction_distribution(generator);
+        int direction_index =
+            static_cast<int>(direction_distribution(generator));
         std::vector<Point> neighbors = finish.get_neighbors();
-        Segment move(finish, neighbors[direction_index]);
+        Segment move(finish,
+                     neighbors[static_cast<std::size_t>(direction_index)]);
         if (grid.is_intersecting(move) ||
-            neighbors[direction_index].get_x() >
+            neighbors[static_cast<std::size_t>(direction_index)].get_x() >
                 grid.get_upper_right().get_x() ||
-            neighbors[direction_index].get_y() >
+            neighbors[static_cast<std::size_t>(direction_index)].get_y() >
                 grid.get_upper_right().get_y() ||
-            neighbors[direction_index].get_x() <
+            neighbors[static_cast<std::size_t>(direction_index)].get_x() <
                 grid.get_lower_left().get_x() ||
-            neighbors[direction_index].get_y() <
+            neighbors[static_cast<std::size_t>(direction_index)].get_y() <
                 grid.get_lower_left().get_y()) {
             continue;
         }
-        finish = neighbors[direction_index];
+        finish = neighbors[static_cast<std::size_t>(direction_index)];
     }
     return finish;
 }
@@ -41,15 +43,18 @@ TEST(test_person, random_test_simple_planner) {
                                                                           50);
     for (int i = 0; i < 1000; ++i) {
         std::vector<Border> border;
-        int border_size = distribution(generator);
+        int border_size = static_cast<int>(distribution(generator));
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Border(
-                Point(distribution(generator), distribution(generator)),
-                Point(distribution(generator), distribution(generator))));
+            border.push_back(
+                Border(Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator))),
+                       Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator)))));
         }
         Grid grid(border);
-        Point start(distribution(generator), distribution(generator));
-        int try_steps = distribution(generator);
+        Point start(static_cast<int>(distribution(generator)),
+                    static_cast<int>(distribution(generator)));
+        int try_steps = static_cast<int>(distribution(generator));
         Point finish = random_move(try_steps, generator, start, grid);
         Person person(0, start, finish);
         SimplePlanner planner({person}, &grid);
@@ -75,15 +80,18 @@ TEST(test_person, random_test_prioritized_planner) {
         direction_distribution(0, 3);
     for (int i = 0; i < 1000; ++i) {
         std::vector<Border> border;
-        int border_size = distribution(generator);
+        int border_size = static_cast<int>(distribution(generator));
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Border(
-                Point(distribution(generator), distribution(generator)),
-                Point(distribution(generator), distribution(generator))));
+            border.push_back(
+                Border(Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator))),
+                       Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator)))));
         }
         Grid grid(border);
-        Point start(distribution(generator), distribution(generator));
-        int try_steps = distribution(generator);
+        Point start(static_cast<int>(distribution(generator)),
+                    static_cast<int>(distribution(generator)));
+        int try_steps = static_cast<int>(distribution(generator));
         Point finish = random_move(try_steps, generator, start, grid);
         Person person(0, start, finish);
         PrioritizedPlanner planner({person}, &grid);
@@ -109,15 +117,18 @@ TEST(test_person, random_test_random_planner) {
         direction_distribution(0, 3);
     for (int i = 0; i < 1000; ++i) {
         std::vector<Border> border;
-        int border_size = distribution(generator);
+        int border_size = static_cast<int>(distribution(generator));
         for (int j = 0; j < border_size; ++j) {
-            border.push_back(Border(
-                Point(distribution(generator), distribution(generator)),
-                Point(distribution(generator), distribution(generator))));
+            border.push_back(
+                Border(Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator))),
+                       Point(static_cast<int>(distribution(generator)),
+                             static_cast<int>(distribution(generator)))));
         }
         Grid grid(border);
-        Point start(distribution(generator), distribution(generator));
-        int try_steps = distribution(generator);
+        Point start(static_cast<int>(distribution(generator)),
+                    static_cast<int>(distribution(generator)));
+        int try_steps = static_cast<int>(distribution(generator));
         Point finish = random_move(try_steps, generator, start, grid);
         Person person(0, start, finish);
         PrioritizedPlanner planner({person}, &grid);

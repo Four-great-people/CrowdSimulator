@@ -9,9 +9,10 @@ void CATable::add_trajectory(int /*traj_id*/,
     }
     int t = 0;
     Point last_point = trajectory[0];
-    for (int i = 1; i < int(trajectory.size()); ++i) {
+    for (int i = 1; i < static_cast<int>(trajectory.size()); ++i) {
         const Point& coord = trajectory[std::size_t(i)];
-        int move_cost = int((coord - last_point).diag_norm_multiplied2());
+        int move_cost =
+            static_cast<int>((coord - last_point).diag_norm_multiplied2());
         for (int add_t = 0; add_t < move_cost; ++add_t) {
             add_time_point(last_point.get_x(), last_point.get_y(), t + add_t);
         }
@@ -39,7 +40,8 @@ bool CATable::check_move(const Point& from, const Point& to,
         }
         return true;
     }
-    int new_time = start_time + int((to - from).diag_norm_multiplied2());
+    int new_time =
+        start_time + static_cast<int>((to - from).diag_norm_multiplied2());
     if (!is_cell_available(to.get_x(), to.get_y(), new_time)) {
         return false;
     }
@@ -56,8 +58,8 @@ bool CATable::check_move(const Point& from, const Point& to,
     return is_reverse_move_valid(from, to, new_time - 1, new_time);
 }
 
-int CATable::last_visited(
-    const Point& point) const {  // cppcheck-suppress unusedFunction
+int CATable::last_visited(  // cppcheck-suppress unusedFunction
+    const Point& point) const {
     auto last_it =
         _last_visit_table.find(point);  // TODO(verbinna22): remove unused
     if (last_it != _last_visit_table.end()) {
@@ -88,8 +90,8 @@ std::vector<Point> CATable::get_neighbors_timestep(const Point& point,
     std::vector<Point> valid_neighbors;
     for (const auto& neighbor : neighbors) {
         if (check_move(point, neighbor, time)) {
-            valid_neighbors.push_back(
-                neighbor);  // cppcheck-suppress useStlAlgorithm
+            valid_neighbors.push_back(  // cppcheck-suppress useStlAlgorithm
+                neighbor);
         }
     }
 

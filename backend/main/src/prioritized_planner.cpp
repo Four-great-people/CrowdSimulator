@@ -14,7 +14,7 @@ PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons,
 std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;
 
-    for (int i = 0; i < int(_persons.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(_persons.size()); ++i) {
         Point start = _persons[std::size_t(i)].get_position();
         Point goal = _persons[std::size_t(i)].get_goal();
         int distance = std::abs(start.get_x() - goal.get_x()) +
@@ -25,7 +25,7 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::sort(data.begin(), data.end());
 
     std::vector<int> indices(_persons.size());
-    for (int i = 0; i < int(data.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(data.size()); ++i) {
         int pos = data[std::size_t(i)].second;
         indices[std::size_t(i)] = pos;
     }
@@ -41,7 +41,8 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     while (changed) {
         ca_table = CATable();
         fill(results.begin(), results.end(), std::vector<Action>());
-        for (int priority = 0; priority < int(_persons.size()); ++priority) {
+        for (int priority = 0; priority < static_cast<int>(_persons.size());
+             ++priority) {
             int agent_id = indices[std::size_t(priority)];
             auto route = calculate_route(_persons[std::size_t(agent_id)]);
 
@@ -70,7 +71,8 @@ bool PrioritizedPlanner::validate_results(
     std::vector<std::vector<Action>>&
         results) {  // cppcheck-suppress constParameterReference
     bool changed = false;
-    for (int agent_id = 0; agent_id < int(results.size()); ++agent_id) {
+    for (int agent_id = 0; agent_id < static_cast<int>(results.size());
+         ++agent_id) {
         if (results[std::size_t(agent_id)].size() == 0) {
             auto position = _persons[std::size_t(agent_id)].get_position();
             if (stops.find(position) == stops.end()) {
@@ -137,8 +139,8 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(
                 continue;
             }
 
-            int move_cost =
-                int((neighbor - current->position).diag_norm_multiplied2());
+            int move_cost = static_cast<int>(
+                (neighbor - current->position).diag_norm_multiplied2());
             if (neighbor == current->position) {
                 move_cost += CATable::wait_cost;
             }

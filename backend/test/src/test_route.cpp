@@ -59,8 +59,9 @@ TEST(test_route, calculate_route__far_away_point__returns_route) {
 
     ASSERT_TRUE(simple_route.has_value());
     ASSERT_EQ(simple_route.value().size(), 19);
-    for (int i = 0; i < simple_route.value().size(); ++i) {
-        ASSERT_EQ(simple_route.value()[i], Action::UP);
+    for (int i = 0; i < static_cast<int>(simple_route.value().size()); ++i) {
+        ASSERT_EQ(simple_route.value()[static_cast<std::size_t>(i)],
+                  Action::UP);
     }
     ASSERT_EQ(prioritized_route, simple_route);
 }

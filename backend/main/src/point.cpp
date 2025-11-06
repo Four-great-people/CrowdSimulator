@@ -73,8 +73,8 @@ std::vector<Point> Point::get_neighbors() const noexcept {
     };
 }
 
-std::int64_t Point::abs_norm()
-    const noexcept {                     // cppcheck-suppress unusedFunction
+std::int64_t Point::abs_norm()  // cppcheck-suppress unusedFunction
+    const noexcept {
     return std::abs(_x) + std::abs(_y);  // TODO(verbinna22): remove
 }
 

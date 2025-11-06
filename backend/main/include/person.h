@@ -15,9 +15,9 @@ class Person {
 
     Point get_position() const noexcept { return _position; }
     Point get_goal() const noexcept { return _goal; }
-    int get_id() const noexcept {
+    int get_id() const noexcept {  // cppcheck-suppress unusedFunction
         return _id;
-    }  // cppcheck-suppress unusedFunction
+    }
 
  private:
     int _id;
