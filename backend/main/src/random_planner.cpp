@@ -79,12 +79,12 @@ std::optional<Point> RandomPlanner::plan_next_action(
     auto probable_neighbors = current_position.get_neighbors();
     std::vector<Point> next_positions;
     next_positions.reserve(probable_neighbors.size());
-    std::copy_if(
-        probable_neighbors.begin(), probable_neighbors.end(),
-        std::back_insert_iterator(next_positions),
-        [this, &current_position](const auto& position) {
-            return !_grid->is_incorrect_move(Segment(current_position, position));
-        });
+    std::copy_if(probable_neighbors.begin(), probable_neighbors.end(),
+                 std::back_insert_iterator(next_positions),
+                 [this, &current_position](const auto& position) {
+                     return !_grid->is_incorrect_move(
+                         Segment(current_position, position));
+                 });
     if (next_positions.empty()) {
         return std::nullopt;
     }

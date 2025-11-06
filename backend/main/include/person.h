@@ -4,8 +4,9 @@
 #include "point.h"
 
 class Person {
-public:
-    Person(int id, Point position, Point goal) : _id(id), _position(position), _goal(goal) {}
+ public:
+    Person(int id, Point position, Point goal)
+        : _id(id), _position(position), _goal(goal) {}
     Person(const Person &) = default;
     Person(Person &&) noexcept = default;
     Person &operator=(const Person &) = default;
@@ -14,12 +15,14 @@ public:
 
     Point get_position() const noexcept { return _position; }
     Point get_goal() const noexcept { return _goal; }
-    int get_id() const noexcept { return _id; } // cppcheck-suppress unusedFunction
+    int get_id() const noexcept {
+        return _id;
+    }  // cppcheck-suppress unusedFunction
 
-private:
+ private:
     int _id;
     Point _position;
     Point _goal;
 };
 
-#endif // PERSON_H
+#endif  // PERSON_H

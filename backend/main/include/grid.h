@@ -8,9 +8,8 @@
 #include "segment.h"
 
 class Grid {
-   public:
-    explicit Grid(std::span<Border> borders,
-                  Point lower_left = Point(-50, -50),
+ public:
+    explicit Grid(std::span<Border> borders, Point lower_left = Point(-50, -50),
                   Point upper_right = Point(50, 50));
     Grid(const Grid &) = default;
     Grid(Grid &&) noexcept = default;
@@ -23,7 +22,7 @@ class Grid {
     Point get_lower_left() const noexcept;
     Point get_upper_right() const noexcept;
 
-   private:
+ private:
     std::vector<Border> _borders;
     Point _lower_left_point;
     Point _upper_right_point;

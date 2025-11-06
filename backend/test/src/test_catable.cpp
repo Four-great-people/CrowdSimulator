@@ -1,10 +1,9 @@
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <vector>
 
 #include "catable.h"
-
 
 TEST(test_catable, empty_catable) {
     CATable table;

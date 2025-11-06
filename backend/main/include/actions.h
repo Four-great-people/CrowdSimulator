@@ -10,7 +10,7 @@ enum class Action {
     LEFT,
     RIGHT,
     WAIT,
-// ----------------
+    // ----------------
     LEFT_UP,
     RIGHT_UP,
     LEFT_DOWN,
@@ -24,4 +24,4 @@ constexpr int get_cost(Action action) {
     return 3;
 }
 
-#endif // ACTIONS_H
+#endif  // ACTIONS_H

@@ -4,7 +4,7 @@
 #include "point.h"
 
 class Segment {
-public:
+ public:
     Segment(const Point &first, const Point &second);
     Segment(const Segment &) = default;
     Segment(Segment &&) noexcept = default;
@@ -15,7 +15,8 @@ public:
     const Point &get_first() const noexcept;
     const Point &get_second() const noexcept;
     bool is_intersecting(const Segment &route) const noexcept;
-private:
+
+ private:
     Point _first;
     Point _second;
 
@@ -23,4 +24,4 @@ private:
     int sine_sign(const Point &point) const noexcept;
 };
 
-#endif // SEGMENT_H
+#endif  // SEGMENT_H

@@ -1,11 +1,14 @@
 #ifndef POINT_H
 #define POINT_H
 
+#include <cstdint>
 #include <functional>
+#include <vector>
+
 #include "actions.h"
 
 class Point {
-   public:
+ public:
     Point(int x, int y);
     Point(const Point &) = default;
     Point(Point &&) noexcept = default;
@@ -20,13 +23,13 @@ class Point {
 
     int get_x() const noexcept;
     int get_y() const noexcept;
-    long long cross_product(const Point &other) const noexcept;
+    std::int64_t cross_product(const Point &other) const noexcept;
     std::vector<Point> get_neighbors() const noexcept;
-    long long abs_norm() const noexcept;
-    long long diag_norm_multiplied2() const noexcept;
+    std::int64_t abs_norm() const noexcept;
+    std::int64_t diag_norm_multiplied2() const noexcept;
     Action to_another(const Point &point) const;
 
-   private:
+ private:
     int _x;
     int _y;
 };
