@@ -3,9 +3,28 @@
 ### Purpose
 This service calculates optimal paths for people to take
 
+# Линтеры
+
+Для запуска линтеров (Linux, WSL) можно использовать:
+```
 cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --error-exitcode=1
-run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -j 4 // -checks='*' ИЛИ -fix
+run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -j 4
 cpplint --filter=-build/include_subdir,-legal/copyright,-build/header_guard,-runtime/references,-build/c++11  --recursive main/src main/include test/src
+```
+Чтобы установить линтеры:
+```
+sudo apt install cppcheck
+sudo apt install clang-tidy
+sudo apt install cpplint
+sudo apt install clang-format
+```
+run-clang-tidy требует, чтобы build существовала
+Чтобы не фиксить всё вручную, используйте:
+```
+clang-format -i  main/src/* main/include/* test/src/*
+run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -fix -j 4
+```
+ВНИМАНИЕ: для полной проверки run-clang-tidy используйте -checks='*'. Сейчас эта опция не включена, т. к. исправлений очень много
 
 # Backend. Python
 
