@@ -5,8 +5,14 @@ This services are working with many computation-lite requests like signing up, s
 
 # Включить Pylint
 ```
-pip install pylint
+pip install pylint ruff
 .venv/bin/pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
+ruff check --select ALL --ignore S101,D103,PLR2004,EXE002,D100,INP001,ANN002,EM102,TRY003,D102,D107,D101,RUF002,BLE001,D104,T201,D400,D200,EM101,S106,PLW0603,PGH003
+```
+Подавление:
+```
+# ruff: noqa: ANN201
+# pylint: disable=broad-exception-caught
 ```
 
 # Flask сервер
