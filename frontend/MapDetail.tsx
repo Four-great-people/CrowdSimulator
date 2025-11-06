@@ -21,6 +21,9 @@ const MapDetail: React.FC = () => {
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    
+    const objectTypes: string[] = ["border", "person", "goal"];
+    const [currentObject, setCurrentObject] = useState("border");
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -121,6 +124,10 @@ const MapDetail: React.FC = () => {
         }
     };
 
+    const onObjectClick = async(object: string) => {
+        setCurrentObject(object);
+    };
+
     useEffect(
         () => {
             loadMap(id as string);
@@ -138,7 +145,11 @@ const MapDetail: React.FC = () => {
                     {isSaving ? "Сохраняется..." : "Сохранить как"}
                 </button>
                 <button onClick={goToAnimation}>Начать анимацию</button>
-
+                {objectTypes.map((type) =>
+                    <button disabled={type == currentObject} key={type}>
+                        <img src={"/" + type + ".png"} onClick={() => onObjectClick(type)} width="30" height="30"></img>
+                    </button>
+                )}
                 {id !== 'new' && (
                     <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
                         Удалить карту
@@ -147,7 +158,7 @@ const MapDetail: React.FC = () => {
             </div>
             <div className="body">
                 <div className="grid-wrapper">
-                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} />}
+                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} objectPlacing={currentObject} />}
                 </div>
             </div>
             <div className="back-button-container">

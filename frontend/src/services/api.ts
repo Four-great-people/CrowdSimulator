@@ -1,5 +1,5 @@
 import { Grid } from '../models/Grid';
-import Person from '../models/Person';
+import NamedPoint from '../models/NamedPoint';
 
 const useFakeCalls = process.env.MODE ? true : false
 
@@ -63,10 +63,13 @@ export const GetMapFromBackend = async (mapId: string): Promise<Grid> => {
         map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
         });
-        map["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number }) => {
-            const p = new Person(person["id"], person["position"], person["goal"]);
+        map["persons"].forEach((person: { position: { x: number; y: number; }; id: number }) => {
+            const p = new NamedPoint(person["id"], person["position"]);
             newGrid.addPerson(p);
-            newGrid.setGoal(person["goal"]);
+        })
+        map["goals"].forEach((goal: { position: { x: number; y: number; }; id: number }) => {
+            const g = new NamedPoint(goal["id"], goal["position"]);
+            newGrid.addGoal(g);
         })
         return newGrid;
     } catch (error) {
@@ -93,10 +96,13 @@ export const GetAnimationFromBackend = async (animationId: string): Promise<{gri
         animationMap["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
             newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
         });
-        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number}) => {
-            const p = new Person(person["id"], person["position"], person["goal"]);
+        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; id: number }) => {
+            const p = new NamedPoint(person["id"], person["position"]);
             newGrid.addPerson(p);
-            newGrid.setGoal(person["goal"]);
+        })
+        animationMap["goals"].forEach((goal: { position: { x: number; y: number; }; id: number }) => {
+            const g = new NamedPoint(goal["id"], goal["position"]);
+            newGrid.addGoal(g);
         })
 
         return {
@@ -294,9 +300,14 @@ function fakeGetMap(mapId: string) {
             { "first": { "x": 19, "y": 10 }, "second": { "x": 19, "y": 19 } }
         ],
         "persons": [
-            { "id": 1, "position": { "x": 15, "y": 15 }, "goal": { "x": 18, "y": 15 } },
-            { "id": 2, "position": { "x": 14, "y": 16 }, "goal": { "x": 18, "y": 17 } },
-            { "id": 3, "position": { "x": 13, "y": 13 }, "goal": { "x": 10, "y": 12 } }
+            { "id": 1, "position": { "x": 15, "y": 15 } },
+            { "id": 2, "position": { "x": 14, "y": 16 } },
+            { "id": 3, "position": { "x": 13, "y": 13 } }
+        ],
+        "goals": [
+            { "id": 1, "position": { "x": 18, "y": 15 } },
+            { "id": 2, "position": { "x": 18, "y": 17 } },
+            { "id": 3, "position": { "x": 10, "y": 12 } }
         ]
     }
 }

@@ -1,12 +1,13 @@
 import Cell from './Cell';
-import Person from './Person';
+import NamedPoint from './NamedPoint';
 import Wall from './Wall';
 
 export class Grid {
     width: number;
     height: number;
     cells: Cell[][];
-    persons: Person[];
+    persons: NamedPoint[];
+    goals: NamedPoint[];
     walls: Wall[];
     allTicks: number;
 
@@ -15,6 +16,7 @@ export class Grid {
         this.height = height;
         this.cells = this.createGrid();
         this.persons = [];
+        this.goals = [];
         this.walls = [];
         this.allTicks = 0;
     }
@@ -93,34 +95,19 @@ export class Grid {
       }
       this.walls = newWalls;
     }
-removePersonOrGoalAt(x: number, y: number) {
+removeNamedPointAt(x: number, y: number) {
     const cell = this.getCell(x, y);
     if (!cell) return;
 
     if (cell.persons.length > 0) {
-
         const person = cell.persons[0];
-
         cell.persons = cell.persons.filter(p => p.id !== person.id);
-
         this.persons = this.persons.filter(p => p.id !== person.id);
-
-        const goalCell = this.getCell(person.goal.x, person.goal.y);
-        if (goalCell) goalCell.removeGoal();
-        return;
     }
-
-
-    if (typeof cell.hasGoal === 'function' && cell.hasGoal()) {
-        const person = this.persons.find(p => p.goal.x === x && p.goal.y === y);
-        cell.removeGoal();
-        if (person) {
-            const personCell = this.getCell(person.position.x, person.position.y);
-            if (personCell) {
-                personCell.persons = personCell.persons.filter(p => p.id !== person.id);
-            }
-            this.persons = this.persons.filter(p => p.id !== person.id);
-        }
+    else if (cell.goals.length > 0) {
+        const goal = cell.goals[0];
+        cell.goals = cell.goals.filter(g => g.id !== goal.id);
+        this.goals = this.goals.filter(g => g.id !== goal.id);
     }
 }
 
@@ -144,6 +131,13 @@ removePersonOrGoalAt(x: number, y: number) {
                 return cell.persons.find(p => p.id === person.id) || person.clone();
             }
             return person.clone();
+        });
+        newGrid.goals = this.goals.map(goal => {
+            const cell = newGrid.getCell(goal.position.x, goal.position.y);
+            if (cell && cell.persons.length > 0) {
+                return cell.persons.find(p => p.id === goal.id) || goal.clone();
+            }
+            return goal.clone();
         });
 
         newGrid.allTicks = this.allTicks;
@@ -178,7 +172,7 @@ removePersonOrGoalAt(x: number, y: number) {
         }
     }
 
-    addPerson(person: Person) {
+    addPerson(person: NamedPoint) {
         const cell = this.getCell(person.position.x, person.position.y);
         if (cell) {
             cell.persons = cell.persons.filter(p => p.id !== person.id);
@@ -189,20 +183,16 @@ removePersonOrGoalAt(x: number, y: number) {
         }
     }   
 
-    setGoal(goal: { x: number, y: number }) {
-    const cell = this.getCell(goal.x, goal.y);
-    if (cell) {
-        const personReachedThisGoal = cell.persons.find(p => 
-            p.reachedGoal && p.goal.x === goal.x && p.goal.y === goal.y
-        );
+    addGoal(goal: NamedPoint) {
+        const cell = this.getCell(goal.position.x, goal.position.y);
+        if (cell) {
+            cell.goals = cell.goals.filter(p => p.id !== goal.id);
+            cell.addGoal(goal);
         
-        if (!personReachedThisGoal) {
-            cell.setGoal(goal);
-        } else {
-            cell.removeGoal();
+            this.goals = this.goals.filter(p => p.id !== goal.id);
+            this.goals.push(goal);
         }
-    }
-    }
+    }   
 
     setHotspots (hotspot: { x: number, y: number, usedTicks: number }) {
         const cell = this.getCell(hotspot.x, hotspot.y);
@@ -219,7 +209,10 @@ removePersonOrGoalAt(x: number, y: number) {
             persons: this.persons.map(person => ({
                 id: person.id,
                 position: person.position,
-                goal: person.goal
+            })),
+            goals: this.goals.map(goal => ({
+                id: goal.id,
+                position: goal.position,
             }))
         };
     }
@@ -236,7 +229,10 @@ removePersonOrGoalAt(x: number, y: number) {
             persons: this.persons.map(person => ({
                 id: person.id,
                 position: person.position,
-                goal: person.goal,
+            })),
+            goals: this.goals.map(goal => ({
+                id: goal.id,
+                position: goal.position,
             })),
             routes: cleanRoutes,
             statistics: statistics

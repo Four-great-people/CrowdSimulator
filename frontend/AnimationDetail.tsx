@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
 import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
-import Person from './src/models/Person';
+import NamedPoint from './src/models/NamedPoint';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import './styles/App.css';
@@ -94,11 +94,15 @@ const AnimationDetail: React.FC = () => {
             const gridCopy = grid.clone();
             setGrid(gridCopy);
 
-            const persons: Person[] = [];
+            const persons: NamedPoint[] = [];
+            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
+                    }
+                    if (cell.goals.length > 0) {
+                        goals.push(...cell.goals);
                     }
                 });
             });
@@ -149,11 +153,15 @@ const AnimationDetail: React.FC = () => {
             const gridCopy = savedGrid.clone();
             setGrid(gridCopy);
 
-            const persons: Person[] = [];
+            const persons: NamedPoint[] = [];
+            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
+                    }
+                    if (cell.goals.length > 0) {
+                        goals.push(...cell.goals);
                     }
                 });
             });
@@ -226,7 +234,7 @@ const AnimationDetail: React.FC = () => {
         route.tactToWait -= 1;
     }
 
-    const executeSteps = (currentGrid: Grid, persons: Person[], stepIndex: number, routes: any[]) => {
+    const executeSteps = (currentGrid: Grid, persons: NamedPoint[], stepIndex: number, routes: any[]) => {
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
             prepareRoute(route);
@@ -244,7 +252,7 @@ const AnimationDetail: React.FC = () => {
 
         const newGrid = currentGrid.clone();
         newGrid.addTick();
-        const updatedPersons: Person[] = [];
+        const updatedPersons: NamedPoint[] = [];
         const updatedSteps = { ...currentSteps };
         const updatedCompleted = { ...completedGoals };
 
@@ -261,13 +269,12 @@ const AnimationDetail: React.FC = () => {
                         oldCell.persons = oldCell.persons.filter(p => p.id !== person.id);
                     }
 
-                    const newPerson = new Person(person.id, newPosition, person.goal, person.reachedGoal);
-
-                    if (newPosition.x === person.goal.x && newPosition.y === person.goal.y) {
+                    const newPerson = new NamedPoint(person.id, newPosition, person.reachedGoal);
+                    if (targetCell.hasGoal()) {
                         newPerson.reachedGoal = true;
                         updatedCompleted[person.id] = true;
 
-                        const goalCell = newGrid.getCell(person.goal.x, person.goal.y);
+                        const goalCell = newGrid.getCell(targetCell.x, targetCell.y);
                         if (goalCell) {
                             goalCell.removeGoal();
                         }
@@ -280,13 +287,13 @@ const AnimationDetail: React.FC = () => {
                     newGrid.addPerson(newPerson);
                     updatedSteps[person.id] = stepIndex + 1;
                 } else {
-                    const newPerson = new Person(person.id, person.position, person.goal, person.reachedGoal);
+                    const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                     newPerson.reachedGoal = person.reachedGoal;
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                 }
             } else {
-                const newPerson = new Person(person.id, person.position, person.goal, person.reachedGoal);
+                const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                 newPerson.reachedGoal = person.reachedGoal;
                 updatedPersons.push(newPerson);
                 newGrid.addPerson(newPerson);
@@ -345,7 +352,7 @@ const AnimationDetail: React.FC = () => {
 
             <div className="body">
                 <div className="grid-wrapper">
-                    {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
+                    {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} objectPlacing='' />}
                 </div>
                 <div className="text-table-wrapper">
                     {showStatistics && <div className="text-table">
