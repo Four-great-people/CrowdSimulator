@@ -7,6 +7,39 @@ on:
     branches: ["*"]
 
 jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install -y wget cmake g++
+          sudo apt install -y libasio-dev zlib1g-dev libssl-dev libgtest-dev libgmock-dev
+          wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+          sudo dpkg -i Crow-1.2.1-Linux.deb
+      
+      - name: set cmake
+        run: |
+          cd backend
+          mkdir build
+          cd build
+          cmake ..
+      
+      - name: build
+        run: |
+          cd backend/build
+          make backend
+      
+      - name: lint
+        run: |
+          sudo apt install -y cppcheck clang-tidy cpplint
+          cd backend
+          cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --error-exitcode=1
+          run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*'
+          cpplint --filter=-build/include_subdir,-legal/copyright,-build/header_guard,-runtime/references,-build/c++11  --recursive main/src main/include test/src
+
   build-test-backend:
     runs-on: ubuntu-latest
     steps:
@@ -134,6 +167,24 @@ jobs:
         run: |
           cd middle-services
           pytest -q tests_api
+
+  lint-middle-end:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install python3-pip
+          python3 -m pip config set global.break-system-packages true
+          cd middle-services
+          pip3 install -r requirements.txt
+
+      - name: mock-tests
+        run: |
+          cd middle-services
+          pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
 
   test-crowddb-unit:
     runs-on: ubuntu-latest
