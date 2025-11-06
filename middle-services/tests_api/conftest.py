@@ -1,17 +1,20 @@
 from __future__ import annotations
+
 import json
-import sys
 import os
+import sys
+
 import pytest
 from bson import ObjectId
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-import app as app_module # pylint: disable=wrong-import-position
+import app as app_module  # pylint: disable=wrong-import-position
 
 
 class FakeRepo:
     """Простейший in-memory репозиторий с API как у MongoMapRepository."""
+
     def __init__(self):
         self._store = {}
 

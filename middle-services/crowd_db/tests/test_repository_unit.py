@@ -1,7 +1,7 @@
 import pytest
-
+from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
-from db.models import MapDoc, Point, Segment, PersonSpec
+
 
 @pytest.mark.usefixtures("use_mongomock", "clean_maps_collection")
 def test_crud_maps_unit():

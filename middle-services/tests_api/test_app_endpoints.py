@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+
 def valid_payload():
     return {
         "up_right_point": {"x": 10, "y": 10},

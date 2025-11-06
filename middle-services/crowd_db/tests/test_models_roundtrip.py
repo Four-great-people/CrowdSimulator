@@ -1,4 +1,5 @@
-from db.models import Point, Segment, PersonSpec, MapDoc
+from db.models import MapDoc, PersonSpec, Point, Segment
+
 
 def test_point_roundtrip():
     p = Point(1, -2)

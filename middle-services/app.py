@@ -1,15 +1,17 @@
 from __future__ import annotations
-import os
+
 import json
-from typing import Any, Dict, Optional, Tuple
+import os
 from collections import OrderedDict
+from typing import Any
+
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, Response
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
-from crowd_db.db.models import MapDoc, AnimationDoc
+from crowd_db.db.models import AnimationDoc, MapDoc
 from crowd_db.db.repository import MongoMapRepository
 
 load_dotenv()
@@ -17,7 +19,7 @@ load_dotenv()
 CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://localhost:8080/route")
 
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+app.config["JSON_SORT_KEYS"] = False
 CORS(app)
 
 repo = MongoMapRepository()
@@ -83,11 +85,11 @@ def get_map(map_id: str):
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),
-        mimetype="application/json"
+        mimetype="application/json",
     )
 
 def calculate_statistics_for_endpoint(endpoint: str,
-                payload: str, headers: Dict[str, str]) -> Tuple[Any, Any]:
+                payload: str, headers: dict[str, str]) -> tuple[Any, Any]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -96,7 +98,7 @@ def calculate_statistics_for_endpoint(endpoint: str,
         )
     result.raise_for_status()
     j = result.json()
-    def extract_person(person) -> Optional[int]:
+    def extract_person(person) -> int | None:
         return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"]))\
             if person["route"] is not None else None
     personal_values = list(map(extract_person, j))
@@ -169,8 +171,8 @@ def get_animation(animation_id: str):
             return jsonify({"error": "Animation was not found"}), 400
         animation_data = animation.to_bson()
 
-        if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
-            animation_data['_id'] = str(animation_data['_id'])
+        if "_id" in animation_data and isinstance(animation_data["_id"], ObjectId):
+            animation_data["_id"] = str(animation_data["_id"])
         return jsonify(animation_data), 200
     except Exception as e: # pylint: disable=broad-exception-caught
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+        return jsonify({"error": f"Internal server error: {e!s}"}), 500

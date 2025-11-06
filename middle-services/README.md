@@ -3,7 +3,11 @@
 ### Purpose
 This services are working with many computation-lite requests like signing up, saving map etc. This services are also between frontend and backend on finding paths requests.
 
+# Включить Pylint
+```
+pip install pylint
 .venv/bin/pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
+```
 
 # Flask сервер
 Этот сервис для взаимодействия между фронтом и C++-бэкендом:

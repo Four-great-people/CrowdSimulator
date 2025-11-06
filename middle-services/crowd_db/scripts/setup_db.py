@@ -1,5 +1,4 @@
-"""
-Run:  python -m middle-sevices.crowd_db.scripts.setup_db
+"""Run:  python -m middle-sevices.crowd_db.scripts.setup_db
 """
 from crowd_db.db.validators import apply_collection_validator
 

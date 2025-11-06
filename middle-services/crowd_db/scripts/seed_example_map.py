@@ -1,5 +1,5 @@
+from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
-from db.models import MapDoc, Point, Segment, PersonSpec
 
 if __name__ == "__main__":
     repo = MongoMapRepository()
