@@ -50,7 +50,7 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
                 continue;
             }
             int new_g = current_f +
-                        (position - current_position).diag_norm_multiplied2();
+                        int((position - current_position).diag_norm_multiplied2());
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;

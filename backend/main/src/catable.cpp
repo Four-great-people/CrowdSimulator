@@ -2,16 +2,16 @@
 
 #include <algorithm>
 
-void CATable::add_trajectory(int traj_id,
+void CATable::add_trajectory(int /*traj_id*/,
                              const std::vector<Point>& trajectory) {
     if (trajectory.size() == 0) {
         return;
     }
     int t = 0;
     Point last_point = trajectory[0];
-    for (int i = 1; i < trajectory.size(); ++i) {
-        const Point& coord = trajectory[i];
-        int move_cost = (coord - last_point).diag_norm_multiplied2();
+    for (int i = 1; i < int(trajectory.size()); ++i) {
+        const Point& coord = trajectory[std::size_t(i)];
+        int move_cost = int((coord - last_point).diag_norm_multiplied2());
         for (int add_t = 0; add_t < move_cost; ++add_t) {
             add_time_point(last_point.get_x(), last_point.get_y(), t + add_t);
         }
@@ -39,7 +39,7 @@ bool CATable::check_move(const Point& from, const Point& to,
         }
         return true;
     }
-    int new_time = start_time + (to - from).diag_norm_multiplied2();
+    int new_time = start_time + int((to - from).diag_norm_multiplied2());
     if (!is_cell_available(to.get_x(), to.get_y(), new_time)) {
         return false;
     }

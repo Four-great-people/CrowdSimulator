@@ -14,9 +14,9 @@ PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons,
 std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;
 
-    for (int i = 0; i < _persons.size(); ++i) {
-        Point start = _persons[i].get_position();
-        Point goal = _persons[i].get_goal();
+    for (int i = 0; i < int(_persons.size()); ++i) {
+        Point start = _persons[std::size_t(i)].get_position();
+        Point goal = _persons[std::size_t(i)].get_goal();
         int distance = std::abs(start.get_x() - goal.get_x()) +
                        std::abs(start.get_y() - goal.get_y());
         data.push_back({distance, i});
@@ -25,9 +25,9 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::sort(data.begin(), data.end());
 
     std::vector<int> indices(_persons.size());
-    for (int i = 0; i < data.size(); ++i) {
-        int pos = data[i].second;
-        indices[i] = pos;
+    for (int i = 0; i < int(data.size()); ++i) {
+        int pos = data[std::size_t(i)].second;
+        indices[std::size_t(i)] = pos;
     }
 
     return indices;
@@ -41,15 +41,15 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     while (changed) {
         ca_table = CATable();
         fill(results.begin(), results.end(), std::vector<Action>());
-        for (int priority = 0; priority < _persons.size(); ++priority) {
-            int agent_id = indices[priority];
-            auto route = calculate_route(_persons[agent_id]);
+        for (int priority = 0; priority < int(_persons.size()); ++priority) {
+            int agent_id = indices[std::size_t(priority)];
+            auto route = calculate_route(_persons[std::size_t(agent_id)]);
 
             if (route) {
-                results[agent_id] = *route;
+                results[std::size_t(agent_id)] = *route;
 
                 std::vector<Point> trajectory;
-                Point current = _persons[agent_id].get_position();
+                Point current = _persons[std::size_t(agent_id)].get_position();
                 trajectory.push_back(current);
 
                 for (const auto& action : *route) {
@@ -70,9 +70,9 @@ bool PrioritizedPlanner::validate_results(
     std::vector<std::vector<Action>>&
         results) {  // cppcheck-suppress constParameterReference
     bool changed = false;
-    for (int agent_id = 0; agent_id < results.size(); ++agent_id) {
-        if (results[agent_id].size() == 0) {
-            auto position = _persons[agent_id].get_position();
+    for (int agent_id = 0; agent_id < int(results.size()); ++agent_id) {
+        if (results[std::size_t(agent_id)].size() == 0) {
+            auto position = _persons[std::size_t(agent_id)].get_position();
             if (stops.find(position) == stops.end()) {
                 stops.insert(position);  // cppcheck-suppress stlFindInsert
                 changed = true;
@@ -119,7 +119,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(
             std::vector<Action> path;
             auto node = current;
             while (node->parent_index != -1) {
-                auto parent_node = time_nodes[node->parent_index];
+                auto parent_node = time_nodes[std::size_t(node->parent_index)];
                 path.push_back(
                     parent_node->position.to_another(node->position));
                 node = parent_node;
@@ -138,7 +138,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(
             }
 
             int move_cost =
-                (neighbor - current->position).diag_norm_multiplied2();
+                int((neighbor - current->position).diag_norm_multiplied2());
             if (neighbor == current->position) {
                 move_cost += CATable::wait_cost;
             }

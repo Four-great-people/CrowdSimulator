@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.5)
 project(backend)
 
+add_compile_options(
+   -Werror
+
+   -Wall
+   -Wextra
+   -Wpedantic
+
+   -Wcast-align
+   -Wcast-qual
+   -Wconversion
+   -Wctor-dtor-privacy
+   -Wenum-compare
+   -Wfloat-equal
+   -Wnon-virtual-dtor
+   -Wold-style-cast
+   -Woverloaded-virtual
+   -Wredundant-decls
+   -Wsign-conversion
+   -Wsign-promo
+)
+
 if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/main/include)
 list(APPEND PATH_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/main/include)
 FILE (GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/main/include/*)
@@ -97,27 +118,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     COMMAND gprof ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test_gprof > ../profile_data.txt
   )
 endif()
-
-add_compile_options(
-   -Werror
-
-   -Wall
-   -Wextra
-   -Wpedantic
-
-   -Wcast-align
-   -Wcast-qual
-   -Wconversion
-   -Wctor-dtor-privacy
-   -Wenum-compare
-   -Wfloat-equal
-   -Wnon-virtual-dtor
-   -Wold-style-cast
-   -Woverloaded-virtual
-   -Wredundant-decls
-   -Wsign-conversion
-   -Wsign-promo
-)
 
 if(NOT CMAKE_CXX_EXTENSIONS)
    set(CMAKE_CXX_EXTENSIONS OFF)

@@ -8,7 +8,7 @@
 #include "application_context.h"
 #include "json.hpp"
 
-int main(int argc, const char** argv) {
+int main(int /*argc*/, const char** /*argv*/) {
     crow::App<crow::CORSHandler> app;
     ApplicationContext context;
 
