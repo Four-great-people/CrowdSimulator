@@ -4,7 +4,8 @@
 This service calculates optimal paths for people to take
 
 cppcheck --enable=warning,style,performance,portability main test --inline-suppr
-run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -j 4 // -checks='*'
+cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --error-exitcode=1
+run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -j 4 // -checks='*' ИЛИ -fix
 
 # Backend. Python
 

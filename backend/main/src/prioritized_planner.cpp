@@ -63,13 +63,13 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     return results;
 }
 
-bool PrioritizedPlanner::validate_results(std::vector<std::vector<Action>>& results) {
+bool PrioritizedPlanner::validate_results(std::vector<std::vector<Action>>& results) { // cppcheck-suppress constParameterReference
     bool changed = false;
     for (int agent_id = 0; agent_id < results.size(); ++agent_id) {
         if (results[agent_id].size() == 0) {
             auto position = _persons[agent_id].get_position();
             if (stops.find(position) == stops.end()) {
-                stops.insert(position);
+                stops.insert(position); // cppcheck-suppress stlFindInsert
                 changed = true;
             }
         }

@@ -82,8 +82,8 @@ std::vector<Point> Point::get_neighbors() const noexcept {
     };
 }
 
-long long Point::abs_norm() const noexcept {
-    return std::abs(_x) + std::abs(_y);
+long long Point::abs_norm() const noexcept { // cppcheck-suppress unusedFunction
+    return std::abs(_x) + std::abs(_y); // TODO(verbinna22): remove
 }
 
 long long Point::diag_norm_multiplied2() const noexcept {

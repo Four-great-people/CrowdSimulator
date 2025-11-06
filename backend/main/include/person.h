@@ -14,12 +14,12 @@ public:
 
     Point get_position() const noexcept { return _position; }
     Point get_goal() const noexcept { return _goal; }
-    int get_id() const noexcept { return _id; }
+    int get_id() const noexcept { return _id; } // cppcheck-suppress unusedFunction
 
 private:
+    int _id;
     Point _position;
     Point _goal;
-    int _id;
 };
 
 #endif // PERSON_H

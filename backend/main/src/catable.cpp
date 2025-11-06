@@ -51,8 +51,8 @@ bool CATable::check_move(const Point& from, const Point& to, int start_time) con
     return is_reverse_move_valid(from, to, new_time - 1, new_time);
 }
 
-int CATable::last_visited(const Point& point) const {
-    auto last_it = _last_visit_table.find(point);
+int CATable::last_visited(const Point& point) const { // cppcheck-suppress unusedFunction
+    auto last_it = _last_visit_table.find(point); // TODO(verbinna22): remove unused
     if (last_it != _last_visit_table.end()) {
         return last_it->second;
     }
@@ -79,7 +79,7 @@ std::vector<Point> CATable::get_neighbors_timestep(const Point& point, int time)
     std::vector<Point> valid_neighbors;
     for (const auto& neighbor : neighbors) {
         if (check_move(point, neighbor, time)) {
-            valid_neighbors.push_back(neighbor);
+            valid_neighbors.push_back(neighbor); // cppcheck-suppress useStlAlgorithm
         }
     }
     
