@@ -7,7 +7,7 @@ This service calculates optimal paths for people to take
 
 Для запуска линтеров (Linux, WSL) можно использовать:
 ```
-cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --error-exitcode=1
+cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --force --error-exitcode=1
 run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -j 4
 cpplint --filter=-build/include_subdir,-legal/copyright,-build/header_guard,-runtime/references,-build/c++11  --recursive main/src main/include test/src
 ```

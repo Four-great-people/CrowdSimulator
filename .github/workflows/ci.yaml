@@ -36,7 +36,7 @@ jobs:
         run: |
           sudo apt install -y cppcheck clang-tidy cpplint
           cd backend
-          cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --error-exitcode=1
+          cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --force --error-exitcode=1
           run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*'
           cpplint --filter=-build/include_subdir,-legal/copyright,-build/header_guard,-runtime/references,-build/c++11  --recursive main/src main/include test/src
 
@@ -181,7 +181,7 @@ jobs:
           cd middle-services
           pip3 install -r requirements.txt
 
-      - name: mock-tests
+      - name: lint
         run: |
           cd middle-services
           pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
