@@ -134,8 +134,8 @@ removeNamedPointAt(x: number, y: number) {
         });
         newGrid.goals = this.goals.map(goal => {
             const cell = newGrid.getCell(goal.position.x, goal.position.y);
-            if (cell && cell.persons.length > 0) {
-                return cell.persons.find(p => p.id === goal.id) || goal.clone();
+            if (cell && cell.goals.length > 0) {
+                return cell.goals.find(g => g.id === goal.id) || goal.clone();
             }
             return goal.clone();
         });
