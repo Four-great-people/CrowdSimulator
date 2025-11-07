@@ -122,7 +122,7 @@ const AnimationDetail: React.FC = () => {
     };
 
     const saveAnimation = async () => {
-        if (!originalGrid || !grid || isSaving || !idealTime || !validTime || !routes || routes.length === 0) return;
+        if (!originalGrid || !grid || isSaving) return;
 
         if (isAnimationSaved) {
                 await renameAnimation();
@@ -138,7 +138,7 @@ const AnimationDetail: React.FC = () => {
                 ideal: idealTime
             };
             const animationId = await saveAnimationToBackend(originalGrid, routes, statistics, nameToSave);
-            alert(`Анимация сохранена с ID: ${animationId}`);
+            alert(`Анимация сохранена с именем: ${originalAnimationName}`);
             setIsAnimationSaved(true);
             setOriginalAnimationName(nameToSave);
             setSavedAnimationId(animationId);
@@ -365,6 +365,7 @@ const AnimationDetail: React.FC = () => {
                             onChange={(e) => setAnimationName(e.target.value)}
                             placeholder="Введите название анимации"
                             className="name-input"
+                            maxLength={35}
                         />
                     </div>
                 )}

@@ -65,7 +65,7 @@ const MapDetail: React.FC = () => {
         try {
             if (isNewMap) {
                 const generatedMapId = await saveMapToBackend(grid, nameToSave);
-                alert("Новая карта сохранена с ID: " + generatedMapId  + " и именем: " + nameToSave);
+                alert("Новая карта сохранена с именем: " + nameToSave);
                 setIsNewMap(false);
                 navigate(`/map/${generatedMapId}`);
             } else {
@@ -89,7 +89,7 @@ const MapDetail: React.FC = () => {
         setIsSaving(true);
         try {
             const generatedMapId = await saveMapToBackend(grid, nameToSave);
-            alert("Карта сохранена как новая с ID: " + generatedMapId + " и именем: " + nameToSave);
+            alert("Карта сохранена с именем: " + nameToSave);
             setIsNewMap(false);
             navigate(`/map/${generatedMapId}`);
         } catch (error) {
@@ -102,13 +102,13 @@ const MapDetail: React.FC = () => {
 
     const goToAnimation = async() => {
         const nameToSave = mapName.trim() || originalMapName;
-        
+
         if (isNewMap) {
             setIsSaving(true);
             try {
                 if (!grid) return;
                 const generatedMapId = await saveMapToBackend(grid, nameToSave);
-                alert("Карта сохранена с ID: " + generatedMapId + "и именем: " + nameToSave);
+                alert("Карта сохранена с именем: " + nameToSave);
                 navigate("/animation/new/" + generatedMapId);
             } catch (error) {
                 console.error(error);
@@ -161,6 +161,7 @@ const MapDetail: React.FC = () => {
                             placeholder="Введите название карты"
                             className="name-input"
                             disabled={isSaving}
+                            maxLength={35}
                         />
                 </div>
                 <button onClick={saveMap} disabled={isSaving}>
