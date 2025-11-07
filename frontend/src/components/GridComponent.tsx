@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/GridComponent.css';
 import Grid from '../models/Grid';
-import Person from '../models/Person';
+import NamedPoint from '../models/NamedPoint';
 
 interface GridProps {
     grid: Grid;
@@ -9,11 +9,13 @@ interface GridProps {
     currentSteps?: {[id: number]: number};
     completedGoals?: {[id: number]: boolean};
     editable?: boolean;
+    objectPlacing: string;
 }
 
-const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false }) => {
-    const [idleState, wallState, personState] = ['idle', 'wall', 'person'];
-    const [state, setState] = useState<'idle'|'wall'|'person'>('idle');
+const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "" }) => {
+    const [idleState, inProcessState] = ['idle', 'inProcess'];
+    const [borderType, personType, goalType] = ['border', 'person', 'goal'] // Да, зависимости протекают. Но этот фронтенд я не понимаю
+    const [state, setState] = useState('idle');
     const [savedX, setSavedX] = useState(0);
     const [savedY, setSavedY] = useState(0);
 
@@ -90,13 +92,13 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     };
 
 
-    const processIdle = (offsetX: number, offsetY: number, localOffsetX: number, localOffsetY: number, localWidth: number, localHeight: number, intersectionArea: number) => {
-        if (isInside(localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea)) {
+    const processIdle = (offsetX: number, offsetY: number, localWidth: number, localHeight: number, intersectionArea: number) => {
+        if (objectPlacing !== borderType) {
             const cellX = Math.floor(offsetX / localWidth);
             const cellY = Math.floor(offsetY / localHeight);
-            setSavedX(cellX);
-            setSavedY(cellY);
-            setState(personState);
+            setSavedX(-1);
+            setSavedY(-1);
+            processNonWall(cellX, cellY);
         } else {
             const cornerX = toCorner(offsetX, localWidth, intersectionArea);
             const cornerY = toCorner(offsetY, localHeight, intersectionArea);
@@ -105,7 +107,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             if (outsideBorders(cornerX, cornerY)) {
                 alert(outsideBordersMessage);
             } else {
-                setState(wallState);
+                setState(inProcessState);
             }
         }
     };
@@ -125,25 +127,21 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         setState(idleState);
     };
 
-    const processPerson = (offsetX: number, offsetY: number, localWidth: number, localHeight: number) => {
-        const cellX = Math.floor(offsetX / localWidth);
-        const cellY = Math.floor(offsetY / localHeight);
-        setState(idleState);
-        if (cellX === savedX && cellY === savedY) {
-            alert(sameCellMessage);
-            return;
+    const processNonWall = (cellX: number, cellY: number) => {
+        const position = { x: cellX, y: cellY };
+        const point = new NamedPoint(grid.persons.length, position)
+        if (objectPlacing == personType) {
+            grid.addPerson(point);
         }
-        const position = { x: savedX, y: savedY };
-        const goal = { x: cellX, y: cellY };
-        grid.addPerson(new Person(grid.persons.length, position, goal));
-        grid.setGoal(goal);
+        else {
+            grid.addGoal(point);
+        }  
     };
-
 
     const processDeleteFromCenter = (cellX: number, cellY: number) => {
 
-        if (typeof (grid as any).removePersonOrGoalAt === 'function') {
-            (grid as any).removePersonOrGoalAt(cellX, cellY);
+        if (typeof (grid as any).removeNamedPointAt === 'function') {
+            (grid as any).removeNamedPointAt(cellX, cellY);
         }
         setDelState(delIdle);
 
@@ -180,24 +178,20 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
         const localWidth = 30;
         const localHeight = 30;
-        const intersectionArea = Math.floor((Math.min(localWidth, localHeight) * intersectionAreaRatio));
+        const intersectionArea = 15;
         const height = localHeight * grid.height;
 
         const offsetX = e.clientX - e.currentTarget.offsetLeft;
         const offsetY = height - (e.clientY - e.currentTarget.offsetTop); 
-        const localOffsetX = offsetX % localWidth;
-        const localOffsetY = localHeight - (offsetY % localHeight);
-
         if (state === idleState) {
-            processIdle(offsetX, offsetY, localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea);
-        } else if (state === wallState) {
+            processIdle(offsetX, offsetY, localWidth, localHeight, intersectionArea);
+        } else if (state === inProcessState) {
             processWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
-        } else if (state === personState) {
-            processPerson(offsetX, offsetY, localWidth, localHeight);
         }
         else {
             alert("Некорректное состояние сервиса");
         }
+        forceRerender();
     };
 
     const handleOnContextMenu = (e: any) => {
