@@ -100,10 +100,22 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
     result.raise_for_status()
     j = result.json()
     def extract_person(person) -> Optional[int]:
-        return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"])) if person["route"] is not None else None
+        route = person.get("route")
+        if not route:  
+            return None
+        return sum(15 if "-" in direction else 10 for direction in route)
+
     personal_values = list(map(extract_person, j))
-    count_of_none = len(list(filter(lambda x: x is None, personal_values)))
-    return { "value": (max(filter(lambda x: x is not None, personal_values)) if count_of_none != len(personal_values) else None), "problematic": count_of_none }, j # type: ignore
+    count_of_none = len([x for x in personal_values if x is None])
+
+    return {
+        "value": (
+            max(x for x in personal_values if x is not None)
+            if count_of_none != len(personal_values)
+            else None
+        ),
+        "problematic": count_of_none,
+    }, j     # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics", methods=["GET"])

@@ -236,12 +236,8 @@ const AnimationDetail: React.FC = () => {
         if (allRoutesCompleted) {
             setIsAnimating(false);
             setAnimationCompleted(true);
-            const notReached = persons.filter(p => !p.reachedGoal).length;
             const total = persons.length;
-
             if (!isSavedAnimation) {
-                setIdealTime(prev => prev ? { ...prev, problematic: notReached } : prev);
-                setValidTime(prev => prev ? { ...prev, problematic: notReached } : prev);
                 setParticipantsNumber(total);
                 setShowStatistics(true);
             }
