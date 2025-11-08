@@ -196,6 +196,33 @@ const AnimationDetail: React.FC = () => {
         }
     };
 
+    const restartAnimation = () => {
+        if (isAnimating) return;
+
+        if (!originalGrid || routes.length === 0) {
+            if (!isSavedAnimation) {
+                startAnimation();
+            }
+            return;
+        }
+
+        setCurrentSteps({});
+        setCompletedGoals({});
+        setAnimationCompleted(false);
+        setShowStatistics(false);
+
+        const baseGrid = originalGrid.clone();
+        const stats = { ideal: idealTime, valid: validTime };
+
+        const freshRoutes = routes.map((r) => ({
+            id: r.id,
+            route: Array.isArray(r.route) ? [...r.route] : r.route,
+        }));
+
+        setRoutes(freshRoutes);
+
+        startSavedAnimation(baseGrid, freshRoutes, stats);
+    };
     const isRouteCompleted = (route: any): boolean => {
         if (route) {
             console.log(`${route.route.length} ${route.animationIndex} ${route.route}`)
@@ -357,26 +384,38 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
-            {!isSavedAnimation ? (
-                <div className="animation-controls">
-                    {animationCompleted && (
-                        <button 
-                            onClick={saveAnimation} 
-                            disabled={isSaving}
-                            className="save-animation-btn"
-                        >
-                            {isSaving ? "Сохраняется..." :
-                            isAnimationSaved ? "Анимация сохранена" : "Сохранить анимацию"}
-                        </button>
-                    )}
-                </div>
-            ) : (
-                <div className="animation-controls">
-                    <button onClick={removeAnimation} disabled={isDeleting} style={{ color: '#fff', background: '#d32f2f' }}>
+            <div className="animation-controls">
+                {animationCompleted && !isSavedAnimation && (
+                    <button 
+                        onClick={saveAnimation} 
+                        disabled={isSaving}
+                        className="save-animation-btn"
+                    >
+                        {isSaving ? "Сохраняется..." :
+                        isAnimationSaved ? "Анимация сохранена" : "Сохранить анимацию"}
+                    </button>
+                )}
+
+                {isSavedAnimation && (
+                    <button
+                        onClick={removeAnimation}
+                        disabled={isDeleting}
+                        style={{ color: '#fff', background: '#d32f2f' }}
+                    >
                         {isDeleting ? "Удаляется..." : "Удалить анимацию"}
                     </button>
-                </div>
-            )}
+                )}
+
+                {animationCompleted && (
+                    <button
+                        onClick={restartAnimation}
+                        className="save-animation-btn"
+                    >
+                        Повторить анимацию
+                    </button>
+                )}
+            </div>
+
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
@@ -402,5 +441,4 @@ const AnimationDetail: React.FC = () => {
         </div>
     );
 };
-
 export default AnimationDetail;
