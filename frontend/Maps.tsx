@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GetMapsFromBackend, deleteMapFromBackend, GetAnimationsFromBackend } from './src/services/api';
+import { 
+  GetMapsFromBackend, 
+  deleteMapFromBackend, 
+  GetAnimationsFromBackend,
+  deleteAnimationFromBackend
+} from './src/services/api';
+
 import './styles/App.css';
 import Grid from './src/models/Grid';
 
@@ -8,6 +14,7 @@ const Maps: React.FC = () => {
     const [mapList, setMaps] = useState<string[]>([]);
     const [isLoadingMaps, setIsLoadingMaps] = useState(false);
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [busyAnimationId, setBusyAnimationId] = useState<string | null>(null);
     const [animationList, setAnimations] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -50,6 +57,21 @@ const Maps: React.FC = () => {
 
     const handleAnimationClick = (animationId: string) => {
         navigate(`/animation/saved/${animationId}`);
+    };
+
+    const deleteAnimation = async (e: React.MouseEvent, animationId: string) => {
+        e.stopPropagation();
+        if (!confirm('Удалить эту анимацию безвозвратно?')) return;
+        try {
+            setBusyAnimationId(animationId);
+            await deleteAnimationFromBackend(animationId);
+            setAnimations(prev => prev.filter(id => id !== animationId));
+        } catch (err) {
+            console.error(err);
+            alert('Не удалось удалить анимацию');
+        } finally {
+            setBusyAnimationId(null);
+        }
     };
 
     const createNewMap = () => {
@@ -140,15 +162,25 @@ const Maps: React.FC = () => {
                                 Нет сохраненных анимаций
                             </div>
                         ) : (
-                            animationList.map((animationId) => (
-                                <button 
-                                    key={animationId}
-                                    className="blue-button"
-                                    onClick={() => handleAnimationClick(animationId)}
-                                    disabled={isLoading}
-                                >
-                                    Анимация {animationId}
-                                </button>
+                            animationList.map(animationId => ( 
+                                <div key={animationId} className="map-row" onClick={() => handleAnimationClick(animationId)}>
+                                    <button
+                                        className="blue-button map-row__title"
+                                        disabled={isLoading || !!busyAnimationId}
+                                        title={animationId}
+                                    >
+                                        Анимация {animationId}
+                                    </button>
+                                    <button
+                                        className="icon-button delete"
+                                        aria-label="Удалить анимацию"
+                                        title="Удалить анимацию"
+                                        disabled={busyAnimationId === animationId}
+                                        onClick={e => deleteAnimation(e, animationId)}
+                                    >
+                                        🗑
+                                    </button>
+                                </div>
                             ))
                         )}
                     </div>

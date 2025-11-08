@@ -117,6 +117,17 @@ export const saveAnimationToBackend = async (grid: Grid, routes: any[], statisti
     }
 };
 
+export const deleteAnimationFromBackend = async (animationId: string): Promise<void> => {
+    try {
+        if (useFakeCalls) {
+            return fakeDeleteAnimation(animationId);
+        }
+        return await deleteAnimationReal(animationId);
+    } catch (error) {
+        throw error;
+    }
+};
+
 async function getMaps() {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
     const data = await response.json();
@@ -204,6 +215,14 @@ function createGridByMap(map: any) {
         newGrid.setGoal(person["goal"]);
     });
     return newGrid;
+}
+
+async function deleteAnimationReal(animationId: string): Promise<void> {
+    const res = await fetch(`http://localhost:5000/animations/${animationId}`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) {
+        const t = await res.text().catch(() => '');
+        throw new Error(`Не удалось удалить анимацию: ${res.status} ${t}`);
+    }
 }
 
 const fakeMapList = [
@@ -335,3 +354,7 @@ function fakeDelete(mapId: string): void {
   if (idx !== -1) fakeMapList.splice(idx, 1);
 }
 
+function fakeDeleteAnimation(animationId: string): void {
+    const idx = fakeMapList.indexOf(animationId);
+    if (idx !== -1) fakeMapList.splice(idx, 1);
+}

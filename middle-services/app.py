@@ -172,3 +172,12 @@ def get_animation(animation_id: str):
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
+@app.route("/animations/<animation_id>", methods=["DELETE"])
+def delete_animation(animation_id: str):
+    try:
+        ok = repo.delete_animation(animation_id)
+        if not ok:
+            return jsonify({"error": "animation not found"}), 400
+        return jsonify({"message": "animation deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": f"delete failed: {e}"}), 400

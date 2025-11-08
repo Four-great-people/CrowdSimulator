@@ -1,7 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend } from './src/services/api';
+import { 
+  GetMapFromBackend, 
+  GetStatisticsFromBackend, 
+  GetAnimationFromBackend, 
+  saveAnimationToBackend, 
+  deleteAnimationFromBackend
+} from './src/services/api';
+
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -24,6 +31,7 @@ const AnimationDetail: React.FC = () => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
@@ -140,7 +148,22 @@ const AnimationDetail: React.FC = () => {
             setIsSaving(false);
         }
     };
-
+    
+    const removeAnimation = async () => {
+        if (!isSavedAnimation || !id) return;
+        if (!confirm('Удалить эту анимацию? Это действие необратимо.')) return;
+        try {
+            setIsDeleting(true);
+            await deleteAnimationFromBackend(id);
+            navigate('/maps', { state: { activeTab: 'animations' } });
+        } catch (e) {
+            alert('Не удалось удалить анимацию');
+            console.error(e);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+    
     const startSavedAnimation = async (savedGrid: Grid, savedRoutes: any[], savedStatistics: any) => {
         if (!savedGrid || isAnimating) return;
 
@@ -334,7 +357,7 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
-            {!isSavedAnimation && (
+            {!isSavedAnimation ? (
                 <div className="animation-controls">
                     {animationCompleted && (
                         <button 
@@ -347,8 +370,13 @@ const AnimationDetail: React.FC = () => {
                         </button>
                     )}
                 </div>
+            ) : (
+                <div className="animation-controls">
+                    <button onClick={removeAnimation} disabled={isDeleting} style={{ color: '#fff', background: '#d32f2f' }}>
+                        {isDeleting ? "Удаляется..." : "Удалить анимацию"}
+                    </button>
+                </div>
             )}
-
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} />}
