@@ -170,6 +170,13 @@ curl -X PUT http://127.0.0.1:5000/animations/<id>
 -d '{"name": "Новое имя"}'
 ```
 
+### DELETE /animations/<id> — удалить анимацию по ID
+Удаляет сохранённую анимацию из базы данных.
+Возвращает статус выполнения операции.
+```bash
+curl -X DELETE http://127.0.0.1:5000/animations/<id>
+```
+
 ## Тесты
 ```bash
 pytest -q tests_api

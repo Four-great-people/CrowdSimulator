@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Grid from './src/models/Grid';
-import { GetMapFromBackend, GetStatisticsFromBackend, GetAnimationFromBackend, saveAnimationToBackend, updateAnimationInBackend } from './src/services/api';
+import { 
+  GetMapFromBackend, 
+  GetStatisticsFromBackend, 
+  GetAnimationFromBackend, 
+  saveAnimationToBackend, 
+  deleteAnimationFromBackend,
+  updateAnimationInBackend
+} from './src/services/api';
+
 import Person from './src/models/Person';
 import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
@@ -9,12 +17,12 @@ import NotFound from './src/components/NotFound';
 import './styles/App.css';
 
 const AnimationDetail: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+    const { id, algo } = useParams<{ id: string, algo: string }>();
     const navigate = useNavigate();
     const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
 
-    if (!id) {
-        return <div>ID карты не указан</div>;
+    if (!id || !algo && !isSavedAnimation) {
+        return <div>ID карты или алгоритм не указан</div>;
     }
     
     const [grid, setGrid] = useState<Grid | null>(null);
@@ -24,6 +32,7 @@ const AnimationDetail: React.FC = () => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [animationCompleted, setAnimationCompleted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
@@ -89,14 +98,14 @@ const AnimationDetail: React.FC = () => {
             alert("Анимация завершена");
             return;
         }
-        if (!grid || isAnimating) return;
+        if (!grid || isAnimating || !algo) return;
 
         setIsAnimating(true);
         setAnimationCompleted(false);
         setShowStatistics(false);
 
         try {
-            const statisticsFromBackend = await GetStatisticsFromBackend(id);
+            const statisticsFromBackend = await GetStatisticsFromBackend(id, algo);
             setRoutes(statisticsFromBackend.routes || []);
             grid.reset();
             const gridCopy = grid.clone();
@@ -138,7 +147,7 @@ const AnimationDetail: React.FC = () => {
                 ideal: idealTime
             };
             const animationId = await saveAnimationToBackend(originalGrid, routes, statistics, nameToSave);
-            alert(`Анимация сохранена с именем: ${originalAnimationName}`);
+            alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
             setOriginalAnimationName(nameToSave);
             setSavedAnimationId(animationId);
@@ -149,7 +158,22 @@ const AnimationDetail: React.FC = () => {
             setIsSaving(false);
         }
     };
-
+    
+    const removeAnimation = async () => {
+        if (!isSavedAnimation || !id) return;
+        if (!confirm('Удалить эту анимацию? Это действие необратимо.')) return;
+        try {
+            setIsDeleting(true);
+            await deleteAnimationFromBackend(id);
+            navigate('/maps', { state: { activeTab: 'animations' } });
+        } catch (e) {
+            alert('Не удалось удалить анимацию');
+            console.error(e);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+    
     const startSavedAnimation = async (savedGrid: Grid, savedRoutes: any[], savedStatistics: any) => {
         if (!savedGrid || isAnimating) return;
 
@@ -195,6 +219,33 @@ const AnimationDetail: React.FC = () => {
         };
     }
 
+    const restartAnimation = () => {
+        if (isAnimating) return;
+
+        if (!originalGrid || routes.length === 0) {
+            if (!isSavedAnimation) {
+                startAnimation();
+            }
+            return;
+        }
+
+        setCurrentSteps({});
+        setCompletedGoals({});
+        setAnimationCompleted(false);
+        setShowStatistics(false);
+
+        const baseGrid = originalGrid.clone();
+        const stats = { ideal: idealTime, valid: validTime };
+
+        const freshRoutes = routes.map((r) => ({
+            id: r.id,
+            route: Array.isArray(r.route) ? [...r.route] : r.route,
+        }));
+
+        setRoutes(freshRoutes);
+
+        startSavedAnimation(baseGrid, freshRoutes, stats);
+    };
     const isRouteCompleted = (route: any): boolean => {
         if (route) {
             console.log(`${route.route.length} ${route.animationIndex} ${route.route}`)
@@ -261,12 +312,13 @@ const AnimationDetail: React.FC = () => {
         if (allRoutesCompleted) {
             setIsAnimating(false);
             setAnimationCompleted(true);
+            const total = persons.length;
             if (!isSavedAnimation) {
+                setParticipantsNumber(total);
                 setShowStatistics(true);
             }
             return;
         }
-
         const newGrid = currentGrid.clone();
         newGrid.addTick();
         const updatedPersons: Person[] = [];
@@ -348,11 +400,14 @@ const AnimationDetail: React.FC = () => {
     }
 
 
-    const statisticsFormatString = (n: any) => {
-        if (n["value"] == null)
-            return "маршрут невозможно построить"
-        return `${n["value"]} с\nне дошло ${n["problematic"]} из ${participantsNumber}`
-    }
+    const statisticsFormatString = (timeObj: any) => {
+        if (!timeObj) {
+            throw new Error("Statistic object is undefined"); 
+        }
+        else if (timeObj.value == null) return "маршрут невозможно построить";
+        const reached = participantsNumber - (timeObj.problematic);
+        return `${timeObj.value} с\nдошло ${reached} из ${participantsNumber}`;
+    };
 
     return (
         <div className="App">
@@ -379,9 +434,26 @@ const AnimationDetail: React.FC = () => {
                         isAnimationSaved ? "Переименовать" : "Сохранить анимацию"}
                     </button>
                 )}
+
+                {isSavedAnimation && (
+                    <button
+                        onClick={removeAnimation}
+                        disabled={isDeleting}
+                        style={{ color: '#fff', background: '#d32f2f' }}
+                    >
+                        {isDeleting ? "Удаляется..." : "Удалить анимацию"}
+                    </button>
+                )}
+
+                {animationCompleted && (
+                    <button
+                        onClick={restartAnimation}
+                        className="save-animation-btn"
+                    >
+                        Повторить анимацию
+                    </button>
+                )}
             </div>
-            
-            
 
             <div className="body">
                 <div className="grid-wrapper">
@@ -408,5 +480,4 @@ const AnimationDetail: React.FC = () => {
         </div>
     );
 };
-
 export default AnimationDetail;

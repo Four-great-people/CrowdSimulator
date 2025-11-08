@@ -7,6 +7,11 @@ import SVGRoundButton from './src/components/SVGRoundButton';
 import NotFound from './src/components/NotFound';
 import './styles/App.css';
 
+interface Algorithm {
+  title: string;
+  description: string;
+}
+
 const MapDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -26,6 +31,14 @@ const MapDetail: React.FC = () => {
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const algorithmsSupported: Algorithm[] = [
+        {title: "dense", description: "Считать с учётом пересечений"},
+        {title: "simple", description: "Считать без учёта пересечений"},
+        {title: "random", description: "Считать случайный маршрут"},
+    ];
+
+    const [selectedAlgo, setSelectedAlgo] = useState<Algorithm>(algorithmsSupported[0]);
 
     const createNewGrid = () => {
         return new Grid(40, 22);
@@ -109,7 +122,7 @@ const MapDetail: React.FC = () => {
                 if (!grid) return;
                 const generatedMapId = await saveMapToBackend(grid, nameToSave);
                 alert("Карта сохранена с именем: " + nameToSave);
-                navigate("/animation/new/" + generatedMapId);
+                navigate("/animation/new/" + generatedMapId + "/" + selectedAlgo.title);
             } catch (error) {
                 console.error(error);
                 alert("Ошибка сохранения карты");
@@ -118,7 +131,7 @@ const MapDetail: React.FC = () => {
             }
         } else {
             await saveMap();
-            navigate("/animation/new/" + String(id));
+            navigate("/animation/new/" + String(id) + "/" + selectedAlgo.title);
         }
     }
     
@@ -146,6 +159,9 @@ const MapDetail: React.FC = () => {
         }, [id]
     );
 
+    const handleItemClick = (item: Algorithm) => {
+        setSelectedAlgo(item);
+    };
     if (error) {
         return <NotFound />;
     }
@@ -181,6 +197,20 @@ const MapDetail: React.FC = () => {
             <div className="body">
                 <div className="grid-wrapper">
                     {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} />}
+                </div>
+                <div className="algo-list-container">
+                    <h2 className="algo-list-title">Выберите алгоритм:</h2>
+                    <div className="algo-list">
+                        {algorithmsSupported.map((item) => (
+                        <div
+                            className={`algo-item`}
+                            onClick={() => handleItemClick(item)}>
+                            <div className="algo-item-content">
+                            <p className={selectedAlgo.title === item.title ? "algo-item-title-selected" : "algo-item-title"}>{item.description}</p>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             <div className="back-button-container">

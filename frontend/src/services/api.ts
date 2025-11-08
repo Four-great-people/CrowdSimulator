@@ -32,12 +32,12 @@ export const updateMapInBackend = async (mapId: string, grid: Grid, name: string
 };
 
 
-export const GetStatisticsFromBackend = async (mapId: string): Promise<any> => {
+export const GetStatisticsFromBackend = async (mapId: string, algoName: string): Promise<any> => {
     try {
         if (useFakeCalls) {
             return fakeGetRoutes(mapId);
         }
-        return await getRoutes(mapId);
+        return await getRoutes(mapId, algoName);
     } catch (error) {
         throw error;
     }
@@ -62,19 +62,9 @@ export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, nam
         } else {
             map = await getMap(mapId);
         }
-        let width = map["up_right_point"]["x"];
-        let height = map["up_right_point"]["y"];
         let name = map["name"] || "Без названия";   
-        let newGrid = new Grid(width, height);
-        map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
-            newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
-        });
-        map["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number }) => {
-            const p = new Person(person["id"], person["position"], person["goal"]);
-            newGrid.addPerson(p);
-            newGrid.setGoal(person["goal"]);
-        })
-        return {grid: newGrid, name: name}
+        return {grid: createGridByMap(map), name: name}
+
     } catch (error) {
         throw error;
     }
@@ -92,20 +82,19 @@ export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
 
 export const GetAnimationFromBackend = async (animationId: string): Promise<{grid: Grid, routes: any[], statistics: any, name: string}> => {
     try {
+        if (useFakeCalls) {
+            const map = fakeGetMap("")
+            return {
+                name: "Без названия",
+                grid: createGridByMap(map),
+                routes: fakeGetRoutes("")["routes"] || [],
+                statistics: fakeGetRoutes("") || {}
+            };
+        }
         const animationMap = await getAnimation(animationId);
-        let width = animationMap["up_right_point"]["x"];
-        let height = animationMap["up_right_point"]["y"];
-        let newGrid = new Grid(width, height);
         let name = animationMap["name"] || "Без названия";
-        animationMap["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
-            newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
-        });
-        animationMap["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number}) => {
-            const p = new Person(person["id"], person["position"], person["goal"]);
-            newGrid.addPerson(p);
-            newGrid.setGoal(person["goal"]);
-        })
 
+        let newGrid = createGridByMap(animationMap);
         return {
             grid: newGrid,
             routes: animationMap["routes"] || [],
@@ -119,6 +108,9 @@ export const GetAnimationFromBackend = async (animationId: string): Promise<{gri
 
 export const GetAnimationsFromBackend = async (): Promise<MapAnimItem[]> => {
     try {
+        if (useFakeCalls) {
+            return fakeGetAnimations();
+        }
         return await getAnimations();
     } catch (error) {
         throw error;
@@ -127,6 +119,9 @@ export const GetAnimationsFromBackend = async (): Promise<MapAnimItem[]> => {
 
 export const saveAnimationToBackend = async (grid: Grid, routes: any[], statistics: any, name: string): Promise<string> => {
     try {
+        if (useFakeCalls) {
+            return fakeSaveAnimation();
+        }
         return await saveAnimationToRealBackend(grid, routes, statistics, name);
     } catch (error) {
         throw error;
@@ -140,6 +135,18 @@ export const updateAnimationInBackend = async (animId: string, name: string): Pr
         throw error;
     }
 }
+
+export const deleteAnimationFromBackend = async (animationId: string): Promise<void> => {
+    try {
+        if (useFakeCalls) {
+            return fakeDeleteAnimation(animationId);
+        }
+        return await deleteAnimationReal(animationId);
+    } catch (error) {
+        throw error;
+    }
+};
+
 
 async function getMaps(): Promise<MapAnimItem[]> {
     const response = await fetch("http://localhost:5000/maps", { method: 'GET' });
@@ -180,8 +187,8 @@ async function saveAnimationToRealBackend(grid: Grid, routes: any[], statistics:
     return data._id;
 }
 
-async function getRoutes(mapId: string): Promise<{ id: number, route: string[] }[]> {
-    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics/dense", { method: 'GET' });
+async function getRoutes(mapId: string, algoName: string): Promise<{ id: number, route: string[] }[]> {
+    const response = await fetch("http://localhost:5000/maps/" + mapId + "/statistics/" + algoName, { method: 'GET' });
     const data = await response.json();
     console.log(data);
     return data;
@@ -303,9 +310,40 @@ const fakeMapList: MapAnimItem[] = [
     { id: "3", name: "3 - Без названия" },
     { id: "4", name: "4 - Без названия" },
 ];
+function createGridByMap(map: any) {
+    let width = map["up_right_point"]["x"];
+    let height = map["up_right_point"]["y"];
+    let newGrid = new Grid(width, height);
+    map["borders"].forEach((border: { [x: string]: { [x: string]: number; }; }) => {
+        newGrid.addWall(border["first"]["x"], border["first"]["y"], border["second"]["x"], border["second"]["y"]);
+    });
+    map["persons"].forEach((person: { position: { x: number; y: number; }; goal: { x: number; y: number; }; id: number; }) => {
+        const p = new Person(person["id"], person["position"], person["goal"]);
+        newGrid.addPerson(p);
+        newGrid.setGoal(person["goal"]);
+    });
+    return newGrid;
+}
+
+async function deleteAnimationReal(animationId: string): Promise<void> {
+    const res = await fetch(`http://localhost:5000/animations/${animationId}`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) {
+        const t = await res.text().catch(() => '');
+        throw new Error(`Не удалось удалить анимацию: ${res.status} ${t}`);
+    }
+}
 
 function fakeGetMaps() {
     return fakeMapList
+}
+
+function fakeGetAnimations() {
+    return fakeMapList;
+}
+
+function fakeSaveAnimation() {
+    const newId = String(fakeMapList.length)
+    return newId
 }
 
 function fakeGetRoutes(mapId: string) {
@@ -366,3 +404,7 @@ function fakeDelete(mapId: string): void {
     if (idx !== -1) fakeMapList.splice(idx, 1);
 }
 
+function fakeDeleteAnimation(animationId: string): void {
+    const idx = fakeMapList.findIndex(item => item.id === animationId);
+    if (idx !== -1) fakeMapList.splice(idx, 1);
+}

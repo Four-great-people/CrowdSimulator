@@ -64,7 +64,7 @@ class MongoMapRepository:
                 {"_id": oid},
                 {"$set": {"name": new_name}}
             )
-            return result.modified_count > 0
+            return result.matched_count > 0
         except (InvalidId, Exception):
             return False
         
