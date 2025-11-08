@@ -86,11 +86,11 @@ def get_map(map_id: str):
     resp = OrderedDict()
     if m._id is not None:
         resp["_id"] = str(m._id)
+    resp["name"] = m.name or "Без названия" 
     resp["up_right_point"] = m.up_right_point.to_bson()
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
     resp["persons"] = [p.to_bson() for p in m.persons]
-    resp["name"] = m.name or "Без названия"
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),

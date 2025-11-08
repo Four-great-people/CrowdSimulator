@@ -37,6 +37,7 @@ def test_json_schema_blocks_bad_doc_missing_required():
 def test_json_schema_allows_id_types():
     col = get_db()[MAPS_COLLECTION]
     good = {
+        "name": "Тестовая карта",
         "up_right_point": {"x": 10, "y": 10},
         "down_left_point": {"x": 0, "y": 0},
         "borders": [],

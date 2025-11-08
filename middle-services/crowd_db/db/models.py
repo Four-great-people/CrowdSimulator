@@ -63,11 +63,11 @@ class MapDoc:
     def to_bson(self) -> Dict[str, Any]:
         return {
             "_id": self._id if self._id else ObjectId(),
+            "name": self.name,
             "up_right_point": self.up_right_point.to_bson(),
             "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
-            "name": self.name,
         }
 
     @staticmethod
