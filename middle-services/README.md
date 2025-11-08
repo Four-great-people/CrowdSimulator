@@ -124,6 +124,13 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 [{"id":0,"route":null}]
 ```
 
+### DELETE /animations/<id> — удалить анимацию по ID
+Удаляет сохранённую анимацию из базы данных.
+Возвращает статус выполнения операции.
+```bash
+curl -X DELETE http://127.0.0.1:5000/animations/<id>
+```
+
 ## Тесты
 ```bash
 pytest -q tests_api
