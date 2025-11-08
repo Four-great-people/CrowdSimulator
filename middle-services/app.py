@@ -103,7 +103,7 @@ def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict
         route = person.get("route")
         if not route:  
             return None
-        return sum(15 if "-" in direction else 10 for direction in route)
+        return sum(15 if "_" in direction else 10 for direction in route)
 
     personal_values = list(map(extract_person, j))
     count_of_none = len([x for x in personal_values if x is None])
