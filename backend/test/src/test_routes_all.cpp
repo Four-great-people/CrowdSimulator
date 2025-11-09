@@ -112,14 +112,17 @@ TEST(test_routes, prioritized_locked_person) {
     };
     Grid grid(borders, Point(0, 0), Point(10, 10));
     std::vector<Person> persons;
-    persons.emplace_back(0, Point(0, 0), Point(4, 4));
-    persons.emplace_back(1, Point(5, 5), Point(8, 5));
+    std::vector<Goal> goals;
+    persons.emplace_back(0, Point(0, 0));
+    persons.emplace_back(1, Point(5, 5));
+    goals.emplace_back(0, Point(4, 4));
+    goals.emplace_back(1, Point(8, 5));
 
-    PrioritizedPlanner planner(persons, &grid);
+    PrioritizedPlanner planner(persons, goals, &grid);
     auto routes = planner.plan_all_routes();
     ASSERT_EQ(routes.size(), 2);
     ASSERT_EQ(routes[0].size(), 0);
-    ASSERT_EQ(routes[1].size(), 3);
+    ASSERT_EQ(routes[1].size(), 1);
 }
 
 // There were tests about swap routes

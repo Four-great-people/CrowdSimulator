@@ -91,7 +91,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     std::unordered_set<TimePoint, TimePointHash> visited;
     std::vector<std::shared_ptr<TimedNode>> time_nodes;
     
-    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person.get_position()), 0);
+    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person.get_position()), 0, 0);
     time_nodes.push_back(start_node);
     open.push(start_node);
     visited.insert({start_position.get_x(), start_position.get_y(), 0});
@@ -137,7 +137,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
             }
             
             int new_h = h(neighbor);
-            auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, current);
+            auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, time_nodes.size(), current->self_index);
             time_nodes.push_back(new_node);
             open.push(new_node);
             visited.insert(new_tp);

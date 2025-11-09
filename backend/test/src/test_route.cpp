@@ -214,10 +214,11 @@ TEST(test_route, calculate_one_one_locked_no_route) {
         Border(Point(1, 1), Point(0, 1))
     };
     Grid grid(border);
-    Person person(0, Point(0, 0), Point(3, 3));
+    Person person(0, Point(0, 0));
+    Goal goal(0,  Point(3, 3));
     
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
