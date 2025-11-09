@@ -6,6 +6,7 @@ import pytest
 
 def valid_payload():
     return {
+        "name": "Тестовая карта",
         "up_right_point": {"x": 10, "y": 10},
         "down_left_point": {"x": 0, "y": 0},
         "borders": [
@@ -37,7 +38,9 @@ def test_get_maps(client):
 
     json_list = resp2.get_json()
     assert isinstance(json_list, list)
-    assert oid in json_list
+    
+    found = any(item["id"] == oid for item in json_list)
+    assert found, f"Map with id {oid} not found in {json_list}"
 
 def test_get_map_returns_full_document_in_order(client):
    
@@ -53,11 +56,12 @@ def test_get_map_returns_full_document_in_order(client):
   
     assert raw.find('"__id"') == -1  
     i_id = raw.find('"_id"')
+    i_name = raw.find('"name"')
     i_up = raw.find('"up_right_point"')
     i_down = raw.find('"down_left_point"')
     i_borders = raw.find('"borders"')
     i_persons = raw.find('"persons"')
-    assert 0 <= i_id < i_up < i_down < i_borders < i_persons
+    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons
 
 def test_get_map_400(client):
     resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa")  
@@ -85,12 +89,13 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
     packed = body.replace(" ", "").replace("\n", "")
 
     i_id = packed.find('"_id"')
+    i_name = packed.find('"name"')
     i_up = packed.find('"up_right_point"')
     i_down = packed.find('"down_left_point"')
     i_borders = packed.find('"borders"')
     i_persons = packed.find('"persons"')
 
-    assert 0 <= i_id < i_up < i_down < i_borders < i_persons, packed
+    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons, packed
 
 def test_simulate_calls_cpp_with_statistics(client, mock_requests):
     

@@ -8,6 +8,7 @@ def test_crud_maps_unit():
     repo = MongoMapRepository()
 
     m = MapDoc(
+        name="Тестовая карта",
         up_right_point=Point(10, 10),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0, 0), Point(10, 0))],
@@ -21,6 +22,7 @@ def test_crud_maps_unit():
     # get
     got = repo.get(_id)
     assert got is not None
+    assert got.name == "Тестовая карта"
     assert got.up_right_point == Point(10,10)
     assert len(got.persons) == 1
     assert got.persons[0].position == Point(0,1)

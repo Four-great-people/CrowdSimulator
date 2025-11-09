@@ -28,6 +28,7 @@ def clean_and_validate():
 def test_insert_and_read_real_mongo():
     repo = MongoMapRepository()
     m = MapDoc(
+        name="Тестовая карта",
         up_right_point=Point(5, 5),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0,0), Point(5,0))],
@@ -36,5 +37,6 @@ def test_insert_and_read_real_mongo():
     _id = repo.create(m)
     got = repo.get(_id)
     assert got is not None
+    assert got.name == "Тестовая карта"
     assert got.persons[0].id == "p-42"
 

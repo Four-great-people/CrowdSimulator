@@ -12,6 +12,7 @@ def test_simple_route_good():
     data = '''
 {
     "_id": "0",
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -41,6 +42,7 @@ def test_no_type_error():
     data = '''
 {
     "_id": 0,
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -66,6 +68,7 @@ def test_no_route_good():
     data = '''
 {
     "_id": "0",
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -93,6 +96,7 @@ def test_cant_reach_good():
     data = '''
 {
     "_id": "0",
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -120,6 +124,7 @@ def test_missed_json_field_bad():
     data = '''
 {
     "_id": "0",
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -152,6 +157,7 @@ def test_complicated_route_good():
     data = '''
 {
     "_id": "0",
+    "name": "Test map",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [

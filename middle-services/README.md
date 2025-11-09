@@ -33,6 +33,7 @@ flask run --port 5000
 curl -X POST http://127.0.0.1:5000/maps \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "Моя карта",
     "up_right_point": {"x": 10, "y": 10},
     "down_left_point": {"x": 0, "y": 0},
     "borders": [
@@ -56,6 +57,7 @@ curl -X POST http://127.0.0.1:5000/maps \
 curl -X PUT http://127.0.0.1:5000/maps/<id> \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "Моя карта",
     "up_right_point": {"x": 20, "y": 20},
     "down_left_point": {"x": 0, "y": 0},
     "borders": [
@@ -73,7 +75,7 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
 ```bash
 curl -X DELETE http://127.0.0.1:5000/maps/<id>
 ```
-### GET /maps — получить список из ID всех карт
+### GET /maps — получить список из ID и названий всех карт
 ```bash
 curl http://127.0.0.1:5000/maps
 ```
@@ -122,6 +124,50 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 Пустой маршрут тоже возможен. Если добраться невозможно:
 ```
 [{"id":0,"route":null}]
+```
+
+### POST /animations - создать анимацию
+Сохраняет анимацию и возвращает id
+
+```bash
+ curl -X POST http://127.0.0.1:5000/animations
+```
+
+```json
+  -H "Content-Type: application/json"
+  -d '{
+    "name": "Моя анимация",
+    "up_right_point": {"x": 10, "y": 10},
+    "down_left_point": {"x": 0, "y": 0},
+    "borders": [...],
+    "persons": [...],
+    "routes": [...],
+    "statistics": {...}
+  }'
+```
+Ответ:
+```json
+{ "_id": "..." }
+```
+### GET /animations — получить список всех анимаций
+```bash
+curl http://127.0.0.1:5000/animations
+```
+
+### GET /animations/<id> — получить анимацию по ID
+```bash
+curl http://127.0.0.1:5000/animations/<id>
+```
+
+### PUT /animations/<id> — обновить имя анимации
+Меняет только имя у анимации.
+```bash
+curl -X PUT http://127.0.0.1:5000/animations/<id>
+```
+
+```json
+-H "Content-Type: application/json"
+-d '{"name": "Новое имя"}'
 ```
 
 ### DELETE /animations/<id> — удалить анимацию по ID

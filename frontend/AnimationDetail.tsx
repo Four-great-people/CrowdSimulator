@@ -6,7 +6,8 @@ import {
   GetStatisticsFromBackend, 
   GetAnimationFromBackend, 
   saveAnimationToBackend, 
-  deleteAnimationFromBackend
+  deleteAnimationFromBackend,
+  updateAnimationInBackend
 } from './src/services/api';
 
 import Person from './src/models/Person';
@@ -43,6 +44,9 @@ const AnimationDetail: React.FC = () => {
     const [showStatistics, setShowStatistics] = useState(false);
     const [isAnimationSaved, setIsAnimationSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [animationName, setAnimationName] = useState('');
+    const [originalAnimationName, setOriginalAnimationName] = useState('');
+    const [savedAnimationId, setSavedAnimationId] = useState<string | null>(null);
 
     useEffect(() => {
         loadContent(id);
@@ -55,7 +59,7 @@ const AnimationDetail: React.FC = () => {
             setError(null);
             
             if (isSavedAnimation) {
-                const { grid: animationGrid, routes: animationRoutes, statistics: animationStats } = await GetAnimationFromBackend(contentId);
+                const { grid: animationGrid, routes: animationRoutes, statistics: animationStats, name: name } = await GetAnimationFromBackend(contentId);
                 setGrid(animationGrid);
                 setOriginalGrid(animationGrid.clone());
                 setRoutes(animationRoutes || []);
@@ -64,10 +68,11 @@ const AnimationDetail: React.FC = () => {
                 setParticipantsNumber(animationRoutes.length);
                 setShowStatistics(true);
                 setIsAnimationSaved(true);
-
+                setOriginalAnimationName(name || "Без названия");
+                setAnimationName(name || "Без названия");
                 startSavedAnimation(animationGrid, animationRoutes, animationStats);
             } else {
-                let newGrid = await GetMapFromBackend(contentId);
+                let {grid: newGrid, name: name} = await GetMapFromBackend(contentId);
                 setGrid(newGrid);
                 setOriginalGrid(newGrid.clone());
                 const initialSteps: { [id: number]: number } = {};
@@ -78,6 +83,7 @@ const AnimationDetail: React.FC = () => {
                 setShowStatistics(false);
                 setIsLoadedMap(true);
                 setIsAnimationSaved(false);
+                setOriginalAnimationName("Без названия");
             }
         } catch (error) {
             console.log(error);
@@ -92,7 +98,7 @@ const AnimationDetail: React.FC = () => {
             alert("Анимация завершена");
             return;
         }
-        if (!grid || isAnimating) return;
+        if (!grid || isAnimating || !algo) return;
 
         setIsAnimating(true);
         setAnimationCompleted(false);
@@ -125,22 +131,26 @@ const AnimationDetail: React.FC = () => {
     };
 
     const saveAnimation = async () => {
-        if (!originalGrid || !grid || isSaving || !idealTime || !validTime || !routes || routes.length === 0) return;
+        if (!originalGrid || !grid || isSaving) return;
 
         if (isAnimationSaved) {
-                alert("Анимация уже сохранена");
+                await renameAnimation();
                 return;
         }
 
         setIsSaving(true);
         try {
+            const nameToSave = animationName.trim() || originalAnimationName;
+
             const statistics = {
                 valid: validTime,
                 ideal: idealTime
             };
-            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics);
-            alert(`Анимация сохранена с ID: ${animationId}`);
+            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics, nameToSave);
+            alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
+            setOriginalAnimationName(nameToSave);
+            setSavedAnimationId(animationId);
         } catch (error) {
             console.error('Ошибка сохранения анимации:', error);
             alert('Ошибка сохранения анимации');
@@ -195,6 +205,19 @@ const AnimationDetail: React.FC = () => {
             setIsAnimating(false);
         }
     };
+
+    const renameAnimation = async () => {
+        try {
+            const nameToSave = animationName.trim() || originalAnimationName;
+            const animationIdToUpdate = savedAnimationId || id;
+            await updateAnimationInBackend(animationIdToUpdate, nameToSave);
+            setOriginalAnimationName(nameToSave);
+            alert('Анимация переименована');
+        } catch (error) {
+            console.error('Ошибка переименования анимации:', error);
+            alert('Ошибка переименования анимации');
+        };
+    }
 
     const restartAnimation = () => {
         if (isAnimating) return;
@@ -389,14 +412,26 @@ const AnimationDetail: React.FC = () => {
     return (
         <div className="App">
             <div className="animation-controls">
-                {animationCompleted && !isSavedAnimation && (
+                {(animationCompleted || isAnimationSaved) && (
+                    <div className="name-input-container">
+                        <input
+                            type="text"
+                            value={animationName}
+                            onChange={(e) => setAnimationName(e.target.value)}
+                            placeholder="Введите название анимации"
+                            className="name-input"
+                            maxLength={35}
+                        />
+                    </div>
+                )}
+                {(animationCompleted || isAnimationSaved) && (
                     <button 
                         onClick={saveAnimation} 
                         disabled={isSaving}
                         className="save-animation-btn"
                     >
                         {isSaving ? "Сохраняется..." :
-                        isAnimationSaved ? "Анимация сохранена" : "Сохранить анимацию"}
+                        isAnimationSaved ? "Переименовать" : "Сохранить анимацию"}
                     </button>
                 )}
 

@@ -16,12 +16,14 @@ def test_person_roundtrip_with_id_int():
 
 def test_mapdoc_roundtrip():
     m = MapDoc(
+        name="Тестовая карта",
         up_right_point=Point(10, 10),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0,0), Point(10,0))],
         persons=[PersonSpec(id=None, position=Point(0,1), goal=Point(1,1))],
     )
     again = MapDoc.from_bson(m.to_bson())
+    assert again.name == "Тестовая карта"
     assert again.up_right_point == m.up_right_point
     assert again.down_left_point == m.down_left_point
     assert again.borders == m.borders

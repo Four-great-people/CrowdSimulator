@@ -4,18 +4,19 @@ import {
   GetMapsFromBackend, 
   deleteMapFromBackend, 
   GetAnimationsFromBackend,
-  deleteAnimationFromBackend
+  deleteAnimationFromBackend,
+  MapAnimItem
 } from './src/services/api';
 
 import './styles/App.css';
 import Grid from './src/models/Grid';
 
 const Maps: React.FC = () => {
-    const [mapList, setMaps] = useState<string[]>([]);
+    const [mapList, setMaps] = useState<MapAnimItem[]>([]);
     const [isLoadingMaps, setIsLoadingMaps] = useState(false);
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [animationList, setAnimations] = useState<MapAnimItem[]>([]);
     const [busyAnimationId, setBusyAnimationId] = useState<string | null>(null);
-    const [animationList, setAnimations] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -65,7 +66,7 @@ const Maps: React.FC = () => {
         try {
             setBusyAnimationId(animationId);
             await deleteAnimationFromBackend(animationId);
-            setAnimations(prev => prev.filter(id => id !== animationId));
+            setAnimations(prev => prev.filter((animItem) => animItem.id !== animationId));
         } catch (err) {
             console.error(err);
             alert('Не удалось удалить анимацию');
@@ -85,7 +86,7 @@ const Maps: React.FC = () => {
         try {
             setBusyId(mapId);
             await deleteMapFromBackend(mapId);
-            setMaps(prev => prev.filter(id => id !== mapId));
+            setMaps(prev => prev.filter(item => item.id !== mapId));
         } catch (err) {
           console.error(err);
           alert('Не удалось удалить карту');
@@ -132,22 +133,22 @@ const Maps: React.FC = () => {
                             </button>
                         </div>
                         <div className="map-list">
-                            {mapList.map(mapId => (
-                                <div key={mapId} className="map-row" onClick={() => handleMapClick(mapId)}>
+                            {mapList.map(mapItem => (
+                                <div key={mapItem.id} className="map-row" onClick={() => handleMapClick(mapItem.id)}>
                                     <button
                                         className="blue-button map-row__title"
                                         disabled={isLoadingMaps || !!busyId}
-                                        title={mapId}
+                                        title={mapItem.name}
                                     >
-                                        {mapId}
+                                        {mapItem.name}
                                     </button>
 
                                     <button
                                         className="icon-button delete"
                                         aria-label="Удалить карту"
                                         title="Удалить карту"
-                                        disabled={busyId === mapId}
-                                        onClick={e => deleteMap(e, mapId)}
+                                        disabled={busyId === mapItem.id}
+                                        onClick={e => deleteMap(e, mapItem.id)}
                                     >
                                         🗑
                                     </button>
@@ -162,21 +163,21 @@ const Maps: React.FC = () => {
                                 Нет сохраненных анимаций
                             </div>
                         ) : (
-                            animationList.map(animationId => ( 
-                                <div key={animationId} className="map-row" onClick={() => handleAnimationClick(animationId)}>
+                            animationList.map((animItem) => ( 
+                                <div key={animItem.id} className="map-row" onClick={() => handleAnimationClick(animItem.id)}>
                                     <button
                                         className="blue-button map-row__title"
                                         disabled={isLoading || !!busyAnimationId}
-                                        title={animationId}
+                                        title={animItem.name}
                                     >
-                                        Анимация {animationId}
+                                        {animItem.name}
                                     </button>
                                     <button
                                         className="icon-button delete"
                                         aria-label="Удалить анимацию"
                                         title="Удалить анимацию"
-                                        disabled={busyAnimationId === animationId}
-                                        onClick={e => deleteAnimation(e, animationId)}
+                                        disabled={busyAnimationId === animItem.id}
+                                        onClick={e => deleteAnimation(e, animItem.id)}
                                     >
                                         🗑
                                     </button>

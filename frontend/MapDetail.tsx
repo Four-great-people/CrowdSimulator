@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate, useAsyncError} from 'react-router-dom';
 import Grid from './src/models/Grid';
 import { GetMapFromBackend, saveMapToBackend, updateMapInBackend, deleteMapFromBackend } from './src/services/api';
 import GridComponent from './src/components/GridComponent';
@@ -23,6 +23,10 @@ const MapDetail: React.FC = () => {
     const [grid, setGrid] = useState<Grid | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isNewMap, setIsNewMap] = useState(false);
+    const [mapName, setMapName] = useState('');
+    const [originalMapName, setOriginalMapName] = useState('');
+    const [showNameInput, setShowNameInput] = useState(false);
+    // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -47,11 +51,14 @@ const MapDetail: React.FC = () => {
             if (mapId =='new') {
                 setIsNewMap(true);
                 setGrid(createNewGrid());
+                setOriginalMapName('Без названия');
             } else {
                 setIsLoadingMap(true);
-                let newGrid = await GetMapFromBackend(mapId);
+                const {grid: newGrid, name} = await GetMapFromBackend(mapId);
                 setGrid(newGrid);
                 setIsNewMap(false);
+                setOriginalMapName(name);
+                setMapName(name);
             }
         } catch (error) {
             setError('Карта не найдена');
@@ -64,15 +71,18 @@ const MapDetail: React.FC = () => {
     const saveMap = async () => {
         if (!grid || isSaving) return;
 
+        const nameToSave = mapName.trim() || originalMapName;
+        setOriginalMapName(nameToSave);
+
         setIsSaving(true);
         try {
             if (isNewMap) {
-                const generatedMapId = await saveMapToBackend(grid);
-                alert("Новая карта сохранена с ID: " + generatedMapId);
+                const generatedMapId = await saveMapToBackend(grid, nameToSave);
+                alert("Новая карта сохранена с именем: " + nameToSave);
                 setIsNewMap(false);
                 navigate(`/map/${generatedMapId}`);
             } else {
-                await updateMapInBackend(id, grid);
+                await updateMapInBackend(id, grid, nameToSave);
                 alert("Карта обновлена");
             }
         } catch (error) {
@@ -85,10 +95,14 @@ const MapDetail: React.FC = () => {
 
     const saveMapAs = async () => {
         if (!grid || isSaving) return;
+
+        const nameToSave = mapName.trim() || originalMapName;
+        setOriginalMapName(nameToSave);
+
         setIsSaving(true);
         try {
-            const generatedMapId = await saveMapToBackend(grid);
-            alert("Карта сохранена как новая с ID: " + generatedMapId);
+            const generatedMapId = await saveMapToBackend(grid, nameToSave);
+            alert("Карта сохранена с именем: " + nameToSave);
             setIsNewMap(false);
             navigate(`/map/${generatedMapId}`);
         } catch (error) {
@@ -100,12 +114,14 @@ const MapDetail: React.FC = () => {
     };
 
     const goToAnimation = async() => {
+        const nameToSave = mapName.trim() || originalMapName;
+
         if (isNewMap) {
             setIsSaving(true);
             try {
                 if (!grid) return;
-                const generatedMapId = await saveMapToBackend(grid);
-                alert("Карта сохранена с ID: " + generatedMapId);
+                const generatedMapId = await saveMapToBackend(grid, nameToSave);
+                alert("Карта сохранена с именем: " + nameToSave);
                 navigate("/animation/new/" + generatedMapId + "/" + selectedAlgo.title);
             } catch (error) {
                 console.error(error);
@@ -153,6 +169,17 @@ const MapDetail: React.FC = () => {
     return (
         <div className="App">
             <div className="controls">
+                <div className="name-input-container">
+                        <input
+                            type="text"
+                            value={mapName}
+                            onChange={(e) => setMapName(e.target.value)}
+                            placeholder="Введите название карты"
+                            className="name-input"
+                            disabled={isSaving}
+                            maxLength={35}
+                        />
+                </div>
                 <button onClick={saveMap} disabled={isSaving}>
                     {isSaving ? "Сохраняется..." : "Сохранить карту"}
                 </button>

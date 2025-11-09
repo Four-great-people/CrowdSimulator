@@ -57,11 +57,13 @@ class MapDoc:
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
     persons: List[PersonSpec] = field(default_factory=list)
+    name: str = "Без названия"
     _id: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
         return {
             "_id": self._id if self._id else ObjectId(),
+            "name": self.name,
             "up_right_point": self.up_right_point.to_bson(),
             "down_left_point": self.down_left_point.to_bson(),
             "borders": [s.to_bson() for s in self.borders],
@@ -75,6 +77,7 @@ class MapDoc:
             down_left_point=Point.from_bson(d["down_left_point"]),
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
+            name=d.get("name", "Без названия"),
             _id=d.get("_id"),
         )
 
@@ -84,10 +87,9 @@ class AnimationDoc:
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
     persons: List[PersonSpec] = field(default_factory=list)
-    
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
-    
+    name: str = "Без названия"
     _id: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
@@ -97,7 +99,8 @@ class AnimationDoc:
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
             "routes": self.routes,
-            "statistics": self.statistics
+            "statistics": self.statistics,
+            "name": self.name
         }
         if self._id:
             doc["_id"] = self._id
@@ -112,5 +115,6 @@ class AnimationDoc:
             persons=[PersonSpec.from_bson(p) for p in d.get("persons", [])],
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
+            name=d.get("name", "Без названия"),
             _id=d.get("_id")
         )

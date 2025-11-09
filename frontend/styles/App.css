@@ -39,7 +39,7 @@
 
 .map-row__title {
   flex: 1;
-  text-align: left;
+  text-align: center;
   font-size: min(1.2vw, 16px);
 }
 
@@ -102,7 +102,7 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: min(1vw, 15px);
+    /* gap: min(1vw, 10px); */
     padding-right: min(1vw, 15px);
     min-height: 0;
     max-height: min(70vh, 650px);
@@ -150,6 +150,12 @@
     min-width: fit-content;
     font-size: min(1.1vw, 14px);
     padding: min(0.6vw, 8px) min(1.2vw, 16px);
+}
+
+.name-input {
+  font-size: 16px;
+  padding: 4px 6px;
+  min-width: 300px;
 }
 
 @media (max-width: 768px) {

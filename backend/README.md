@@ -47,6 +47,7 @@ Request:
 ```
 {
     "_id": "0",
+    "name": "Тестовая карта",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
