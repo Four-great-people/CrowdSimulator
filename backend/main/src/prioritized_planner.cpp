@@ -5,17 +5,14 @@
 #include <queue>
 #include <algorithm>
 
-PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, Grid* grid)
-    : Planner(persons, grid) {}
+PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
+    : Planner(persons, goals, grid) {}
 
 std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;
     
     for (int i = 0; i < _persons.size(); ++i) {
-        Point start = _persons[i].get_position();
-        Point goal = _persons[i].get_goal();
-        int distance = std::abs(start.get_x() - goal.get_x()) + 
-                      std::abs(start.get_y() - goal.get_y());
+        int distance = h(_persons[i].get_position());
         data.push_back({distance, i});
     }
     
@@ -79,11 +76,11 @@ bool PrioritizedPlanner::validate_results(std::vector<std::vector<Action>>& resu
 }
 
 std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Person& person) const {
-    auto start_position = person.get_position();
-    auto goal = person.get_goal();
-    if (start_position == goal) {
-        return std::vector<Action>{};
+    if (is_reached_goal(person.get_position())) {
+        return std::vector<Action>();
     }
+    
+    auto start_position = person.get_position();
 
     const int MAX_TIME = 50000;
     
@@ -94,7 +91,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     std::unordered_set<TimePoint, TimePointHash> visited;
     std::vector<std::shared_ptr<TimedNode>> time_nodes;
     
-    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person, goal), 0, 0, -1);
+    auto start_node = std::make_shared<TimedNode>(start_position, 0, h(person.get_position()), 0, 0);
     time_nodes.push_back(start_node);
     open.push(start_node);
     visited.insert({start_position.get_x(), start_position.get_y(), 0});
@@ -108,7 +105,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
             continue;
         }
         
-        if (current->position == goal) {
+        if (is_reached_goal(current->position)) {
             std::vector<Action> path;
             auto node = current;
             while (node->parent_index != -1) {
@@ -139,7 +136,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
                 continue;
             }
             
-            int new_h = h(person, neighbor);
+            int new_h = h(neighbor);
             auto new_node = std::make_shared<TimedNode>(neighbor, new_g, new_h, new_time, time_nodes.size(), current->self_index);
             time_nodes.push_back(new_node);
             open.push(new_node);

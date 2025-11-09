@@ -4,6 +4,8 @@
 #include "json.hpp"
 #include "planner.h"
 
+using PlannerFactory = std::function<std::unique_ptr<Planner>(const std::vector<Person> &, const std::vector<Goal> &, Grid *)>;
+
 class ApplicationContext {
 public:
     ApplicationContext() noexcept = default;
@@ -20,7 +22,7 @@ public:
 private:
     std::mutex _mutex;
 
-    nlohmann::json calculate_route(nlohmann::json input, std::function<std::unique_ptr<Planner>(const std::vector<Person> &, Grid *)> planner_factory);
+    nlohmann::json calculate_route(nlohmann::json input, PlannerFactory planner_factory);
 };
 
 #endif // APPLICATION_CONTEXT_H

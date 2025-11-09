@@ -37,6 +37,7 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od["down_left_point"] = d["down_left_point"]
     od["borders"] = d.get("borders", [])
     od["persons"] = d.get("persons", [])
+    od["goals"] = d.get("goals", [])
     return od
 
 
@@ -91,6 +92,7 @@ def get_map(map_id: str):
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
     resp["persons"] = [p.to_bson() for p in m.persons]
+    resp["goals"] = [p.to_bson() for p in m.goals]
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),

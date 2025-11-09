@@ -59,8 +59,13 @@ Request:
     "persons": [
         {
             "id": 0,
-            "position": { "x": 0, "y": 1 },
-            "goal": { "x": 20, "y": 1 }
+            "position": { "x": 0, "y": 1 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 20, "y": 1 }
         }
     ]
 }

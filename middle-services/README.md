@@ -41,7 +41,10 @@ curl -X POST http://127.0.0.1:5000/maps \
       {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}}
     ],
     "persons": [
-      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
     ]
   }'
 
@@ -64,7 +67,10 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
       {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
     ],
     "persons": [
-      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
     ]
   }'
 ```
@@ -141,6 +147,7 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
     "down_left_point": {"x": 0, "y": 0},
     "borders": [...],
     "persons": [...],
+    "goals": [...],
     "routes": [...],
     "statistics": {...}
   }'
@@ -273,7 +280,9 @@ python -m scripts.setup_db
 - down_left_point — нижняя левая граница (x, y)
 - borders — список отрезков-препятствий
 - persons — список людей, каждый с полями:
-- id, position (точка), goal (точка)
+- id, position (точка)
+- persons — список целей, каждый с полями:
+- id, position (точка)
 
 ### Пример:
 
@@ -287,7 +296,8 @@ python -m scripts.setup_db
       { first: { x: 0, y: 0 }, second: { x: 10, y: 0 } },
       { first: { x: 10, y: 0 }, second: { x: 10, y: 10 } }
     ],
-    persons: [ { position: { x: 0, y: 1 }, goal: { x: 1, y: 1 }, id: 0 } ]
+    persons: [ { position: { x: 0, y: 1 }, id: 0 } ],
+    goals: [ { position: { x: 1, y: 1 }, id: 0 } ]
   }
 ] 
 ```
