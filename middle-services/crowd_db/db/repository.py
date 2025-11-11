@@ -61,15 +61,17 @@ class MongoMapRepository:
     def get_animations(self, limit: int = 1000) -> builtins.list[AnimationDoc]:
         return [AnimationDoc.from_bson(d) for d in _animations_col().find().limit(limit)]
 
-    def update_animation(self, animation_id: str | ObjectId, animation_data: dict) -> bool:
+    def update_animation_name(self, animation_id: str , new_name: str) -> bool:
         try:
-            animation_doc = AnimationDoc.from_bson(animation_data)
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
-        except (InvalidId, Exception): # pylint: disable=broad-exception-caught
+            result = _animations_col().update_one(
+                {"_id": oid},
+                {"$set": {"name": new_name}}
+            )
+            return result.matched_count > 0
+        except (InvalidId, Exception):
             return False
-
-        result = _animations_col().replace_one({"_id": oid}, animation_doc.to_bson())
-        return result.matched_count == 1
+        
 
     def delete_animation(self, animation_id: str | ObjectId) -> bool:
         try:
@@ -78,3 +80,5 @@ class MongoMapRepository:
             return False
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
+    
+    

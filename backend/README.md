@@ -76,6 +76,7 @@ Request:
 ```
 {
     "_id": "0",
+    "name": "Тестовая карта",
     "up_right_point": { "x": 100, "y": 100 },
     "down_left_point": { "x": 0, "y": 0 },
     "borders": [
@@ -87,8 +88,13 @@ Request:
     "persons": [
         {
             "id": 0,
-            "position": { "x": 0, "y": 1 },
-            "goal": { "x": 20, "y": 1 }
+            "position": { "x": 0, "y": 1 }
+        }
+    ],
+    "goals": [
+        {
+            "id": 0,
+            "position": { "x": 20, "y": 1 }
         }
     ]
 }

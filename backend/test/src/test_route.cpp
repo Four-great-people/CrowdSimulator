@@ -15,10 +15,12 @@ TEST(test_route, calculate_route__same_point__returns_empty_vector) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(1, 1));
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(1, 1));
 
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+   
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -32,10 +34,11 @@ TEST(test_route, calculate_route__another_point__returns_route) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(1, 2));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(1, 2));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -50,10 +53,11 @@ TEST(test_route, calculate_route__far_away_point__returns_route) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(1, 20));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(1, 20));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -71,10 +75,11 @@ TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(3, 3));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(3, 3));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -90,10 +95,11 @@ TEST(test_route,
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(2, 2));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(2, 2));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -108,10 +114,11 @@ TEST(test_route,
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
-    Person person(0, Point(2, 1), Point(1, 2));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(2, 1));
+    Goal goal(0, Point(1, 2));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -127,10 +134,11 @@ TEST(test_route,
         Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(2, 3));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(2, 3));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -148,10 +156,11 @@ TEST(test_route, calculate_route__unreachable_point_inside__returns_nullopt) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 1), Point(1, 20));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 1));
+    Goal goal(0, Point(1, 20));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -164,10 +173,11 @@ TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
         Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
         Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
-    Person person(0, Point(1, 20), Point(1, 1));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(1, 20));
+    Goal goal(0, Point(1, 1));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -178,10 +188,11 @@ TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
 TEST(test_route, calculate_long_route) {
     std::vector border{Border(Point(1, 0), Point(1, 30))};
     Grid grid(border);
-    Person person(0, Point(0, 15), Point(1, 15));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(0, 15));
+    Goal goal(0, Point(1, 15));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 
@@ -197,10 +208,11 @@ TEST(test_route, calculate_one_one_locked_no_route) {
         Border(Point(0, 0), Point(1, 0)), Border(Point(0, 0), Point(0, 1)),
         Border(Point(1, 1), Point(1, 0)), Border(Point(1, 1), Point(0, 1))};
     Grid grid(border);
-    Person person(0, Point(0, 0), Point(3, 3));
-
-    SimplePlanner simple_planner({person}, &grid);
-    PrioritizedPlanner prioritized_planner({person}, &grid);
+    Person person(0, Point(0, 0));
+    Goal goal(0,  Point(3, 3));
+    
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
     auto prioritized_route = prioritized_planner.calculate_route(person);
 

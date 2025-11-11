@@ -45,6 +45,7 @@ flask run --port 5000
 curl -X POST http://127.0.0.1:5000/maps \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "Моя карта",
     "up_right_point": {"x": 10, "y": 10},
     "down_left_point": {"x": 0, "y": 0},
     "borders": [
@@ -52,7 +53,10 @@ curl -X POST http://127.0.0.1:5000/maps \
       {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}}
     ],
     "persons": [
-      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
     ]
   }'
 
@@ -68,13 +72,17 @@ curl -X POST http://127.0.0.1:5000/maps \
 curl -X PUT http://127.0.0.1:5000/maps/<id> \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "Моя карта",
     "up_right_point": {"x": 20, "y": 20},
     "down_left_point": {"x": 0, "y": 0},
     "borders": [
       {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
     ],
     "persons": [
-      {"id": 1, "position": {"x": 1, "y": 1}, "goal": {"x": 5, "y": 5}}
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
     ]
   }'
 ```
@@ -85,7 +93,7 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
 ```bash
 curl -X DELETE http://127.0.0.1:5000/maps/<id>
 ```
-### GET /maps — получить список из ID всех карт
+### GET /maps — получить список из ID и названий всех карт
 ```bash
 curl http://127.0.0.1:5000/maps
 ```
@@ -134,6 +142,58 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 Пустой маршрут тоже возможен. Если добраться невозможно:
 ```
 [{"id":0,"route":null}]
+```
+
+### POST /animations - создать анимацию
+Сохраняет анимацию и возвращает id
+
+```bash
+ curl -X POST http://127.0.0.1:5000/animations
+```
+
+```json
+  -H "Content-Type: application/json"
+  -d '{
+    "name": "Моя анимация",
+    "up_right_point": {"x": 10, "y": 10},
+    "down_left_point": {"x": 0, "y": 0},
+    "borders": [...],
+    "persons": [...],
+    "goals": [...],
+    "routes": [...],
+    "statistics": {...}
+  }'
+```
+Ответ:
+```json
+{ "_id": "..." }
+```
+### GET /animations — получить список всех анимаций
+```bash
+curl http://127.0.0.1:5000/animations
+```
+
+### GET /animations/<id> — получить анимацию по ID
+```bash
+curl http://127.0.0.1:5000/animations/<id>
+```
+
+### PUT /animations/<id> — обновить имя анимации
+Меняет только имя у анимации.
+```bash
+curl -X PUT http://127.0.0.1:5000/animations/<id>
+```
+
+```json
+-H "Content-Type: application/json"
+-d '{"name": "Новое имя"}'
+```
+
+### DELETE /animations/<id> — удалить анимацию по ID
+Удаляет сохранённую анимацию из базы данных.
+Возвращает статус выполнения операции.
+```bash
+curl -X DELETE http://127.0.0.1:5000/animations/<id>
 ```
 
 ## Тесты
@@ -232,7 +292,9 @@ python -m scripts.setup_db
 - down_left_point — нижняя левая граница (x, y)
 - borders — список отрезков-препятствий
 - persons — список людей, каждый с полями:
-- id, position (точка), goal (точка)
+- id, position (точка)
+- persons — список целей, каждый с полями:
+- id, position (точка)
 
 ### Пример:
 
@@ -246,7 +308,8 @@ python -m scripts.setup_db
       { first: { x: 0, y: 0 }, second: { x: 10, y: 0 } },
       { first: { x: 10, y: 0 }, second: { x: 10, y: 10 } }
     ],
-    persons: [ { position: { x: 0, y: 1 }, goal: { x: 1, y: 1 }, id: 0 } ]
+    persons: [ { position: { x: 0, y: 1 }, id: 0 } ],
+    goals: [ { position: { x: 1, y: 1 }, id: 0 } ]
   }
 ] 
 ```

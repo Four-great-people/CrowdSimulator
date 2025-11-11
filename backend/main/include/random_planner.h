@@ -8,9 +8,9 @@
 #include "actions.h"
 #include "planner.h"
 
-class RandomPlanner : public Planner {
- public:
-    RandomPlanner(const std::vector<Person> &persons, Grid *grid);
+class RandomPlanner: public Planner {
+public:
+    RandomPlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid);
     RandomPlanner(const RandomPlanner &) = default;
     RandomPlanner(RandomPlanner &&) noexcept = default;
     RandomPlanner &operator=(const RandomPlanner &) = default;

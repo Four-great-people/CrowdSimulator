@@ -33,10 +33,12 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od = OrderedDict()
     if _id is not None:
         od["_id"] = _id
+    od["name"] = m.name or "Без названия"
     od["up_right_point"] = d["up_right_point"]
     od["down_left_point"] = d["down_left_point"]
     od["borders"] = d.get("borders", [])
     od["persons"] = d.get("persons", [])
+    od["goals"] = d.get("goals", [])
     return od
 
 
@@ -54,9 +56,17 @@ def create_map():
 @app.route("/maps", methods=["GET"])
 def get_maps():
     try:
-        index_list = list(map(lambda m: str(m.identifier),repo.list(limit=1000)))
-        return jsonify(index_list), 200
-    except Exception as e: # pylint: disable=broad-exception-caught
+        maps = repo.list(limit=1000)
+        map_list = [
+            {
+                "id": str(m._id),
+                "name": m.name or "Без названия"
+            }
+            for m in maps
+            if m._id is not None
+        ]
+        return jsonify(map_list), 200
+    except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 @app.route("/maps/<map_id>", methods=["DELETE"])
@@ -76,12 +86,14 @@ def get_map(map_id: str):
         return jsonify({"error": "map not found"}), 400
 
     resp = OrderedDict()
-    if m.identifier is not None:
-        resp["_id"] = str(m.identifier)
+    if m._id is not None:
+        resp["_id"] = str(m._id)
+    resp["name"] = m.name or "Без названия" 
     resp["up_right_point"] = m.up_right_point.to_bson()
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
     resp["persons"] = [p.to_bson() for p in m.persons]
+    resp["goals"] = [p.to_bson() for p in m.goals]
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),
@@ -98,15 +110,23 @@ def calculate_statistics_for_endpoint(endpoint: str,
         )
     result.raise_for_status()
     j = result.json()
-    def extract_person(person) -> int | None:
-        return sum(map(lambda direction: 15 if "_" in direction else 10, person["route"]))\
-            if person["route"] is not None else None
+    def extract_person(person) -> Optional[int]:
+        route = person.get("route")
+        if not route:  
+            return None
+        return sum(15 if "_" in direction else 10 for direction in route)
+
     personal_values = list(map(extract_person, j))
-    count_of_none = len(list(filter(lambda x: x is None, personal_values)))
-    return { "value":
-        (max(filter(lambda x: x is not None,
-            personal_values)) if count_of_none != len(personal_values) else None), # type: ignore
-            "problematic": count_of_none }, j # type: ignore
+    count_of_none = len([x for x in personal_values if x is None])
+
+    return {
+        "value": (
+            max(x for x in personal_values if x is not None)
+            if count_of_none != len(personal_values)
+            else None
+        ),
+        "problematic": count_of_none,
+    }, j     # type: ignore
 
 
 @app.route("/maps/<map_id>/statistics/<algo>", methods=["GET"])
@@ -158,9 +178,16 @@ def create_animation():
 def get_animations():
     try:
         animations = repo.get_animations(limit=1000)
-        animation_ids = [str(anim.identifier) for anim in animations if anim.identifier]
-        return jsonify(animation_ids), 200
-    except Exception as e: # pylint: disable=broad-exception-caught
+        animation_list = [
+            {
+                "id": str(anim._id),
+                "name": anim.name or "Без названия"
+            }
+            for anim in animations
+            if anim._id is not None
+        ]
+        return jsonify(animation_list), 200
+    except Exception as e:
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 @app.route("/animations/<animation_id>", methods=["GET"])
@@ -171,8 +198,33 @@ def get_animation(animation_id: str):
             return jsonify({"error": "Animation was not found"}), 400
         animation_data = animation.to_bson()
 
-        if "_id" in animation_data and isinstance(animation_data["_id"], ObjectId):
-            animation_data["_id"] = str(animation_data["_id"])
+        if '_id' in animation_data and isinstance(animation_data['_id'], ObjectId):
+            animation_data['_id'] = str(animation_data['_id'])
+        if 'name' not in animation_data:
+            animation_data['name'] = animation.name or "Без названия"
+        
         return jsonify(animation_data), 200
-    except Exception as e: # pylint: disable=broad-exception-caught
-        return jsonify({"error": f"Internal server error: {e!s}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route("/animations/<animation_id>", methods=["PUT"])
+def update_animation(animation_id: str):
+    payload = request.get_json(force=True)
+    try:
+        new_name = payload.get('name', '')
+        result = repo.update_animation_name(animation_id, new_name)
+        if not result:
+            return jsonify({"error": "animation not found"}), 400   
+        return jsonify({"message": "animation updated"}), 200
+    except Exception as e:
+        return jsonify({"error": f"invalid animation payload: {e}"}), 400
+
+@app.route("/animations/<animation_id>", methods=["DELETE"])
+def delete_animation(animation_id: str):
+    try:
+        ok = repo.delete_animation(animation_id)
+        if not ok:
+            return jsonify({"error": "animation not found"}), 400
+        return jsonify({"message": "animation deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": f"delete failed: {e}"}), 400

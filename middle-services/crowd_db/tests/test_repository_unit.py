@@ -1,17 +1,19 @@
 import pytest
 from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
-
+from db.models import MapDoc, Point, Segment, NamedPointSpec
 
 @pytest.mark.usefixtures("use_mongomock", "clean_maps_collection")
 def test_crud_maps_unit():
     repo = MongoMapRepository()
 
     m = MapDoc(
+        name="Тестовая карта",
         up_right_point=Point(10, 10),
         down_left_point=Point(0, 0),
         borders=[Segment(Point(0, 0), Point(10, 0))],
-        persons=[PersonSpec(id=0, position=Point(0,1), goal=Point(1,1))],
+        persons=[NamedPointSpec(id=0, position=Point(0,1))],
+        goals=[NamedPointSpec(id=0, position=Point(1,1))],
     )
 
     # create
@@ -21,6 +23,7 @@ def test_crud_maps_unit():
     # get
     got = repo.get(_id)
     assert got is not None
+    assert got.name == "Тестовая карта"
     assert got.up_right_point == Point(10,10)
     assert len(got.persons) == 1
     assert got.persons[0].position == Point(0,1)
@@ -29,8 +32,8 @@ def test_crud_maps_unit():
     lst = repo.list(limit=10)
     assert any(doc.identifier == _id for doc in lst)
 
-    # replace
-    got.persons.append(PersonSpec(id=1, position=Point(1,1), goal=Point(2,2)))
+    # replace 
+    got.persons.append(NamedPointSpec(id=1, position=Point(1,1)))
     assert repo.replace(got) is True
     got2 = repo.get(_id)
     assert got2 and len(got2.persons) == 2

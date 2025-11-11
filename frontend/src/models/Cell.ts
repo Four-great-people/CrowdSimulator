@@ -1,30 +1,30 @@
-import Person from './Person';
+import NamedPoint from './NamedPoint';
 
 class Cell {
     x: number;
     y: number;
     isWall: boolean;
     directionOfWall: string[];
-    persons: Person[];
-    goal: { x: number, y: number } | null;
+    persons: NamedPoint[];
+    goals: NamedPoint[];
     usedTicks: number;
 
-    constructor(x: number, y: number, isWall: boolean = false, goal: { x: number, y: number } | null = null) {
+    constructor(x: number, y: number, isWall: boolean = false) {
         this.x = x;
         this.y = y;
         this.isWall = isWall;
         this.persons = [];
-        this.goal = goal;
+        this.goals = [];
         this.directionOfWall = [];
         this.usedTicks = 0;
     }
 
-    addPerson(person: Person) {
+    addPerson(person: NamedPoint) {
         this.persons.push(person);
     }
 
-    setGoal(goal: { x: number, y: number }) {
-        this.goal = goal;
+    addGoal(goal: NamedPoint) {
+        this.goals.push(goal);
     }
 
     addWallDirection(direction: "horizontal" | "vertical") {
@@ -43,11 +43,11 @@ class Cell {
     }
 
     hasGoal() {
-        return this.goal !== null;
+        return this.goals.length > 0;
     }
 
     removeGoal() {
-        this.goal = null;
+        this.goals = [];
     }
     
     getInfo() {
@@ -56,14 +56,15 @@ class Cell {
             y: this.y,
             isWall: this.isWall,
             persons: this.persons.map(person => person.getInfo()),
-            goal: this.goal,
+            goals: this.goals.map(goal => goal.getInfo()),
         };
     }
 
     clone(): Cell {
-        const newCell = new Cell(this.x, this.y, this.isWall, this.goal ? { ...this.goal } : null);
+        const newCell = new Cell(this.x, this.y, this.isWall);
         newCell.directionOfWall = [...this.directionOfWall];
         newCell.persons = this.persons.map(person => person.clone());
+        newCell.goals = this.goals.map(goal => goal.clone());
         newCell.usedTicks = this.usedTicks;
         return newCell;
     }

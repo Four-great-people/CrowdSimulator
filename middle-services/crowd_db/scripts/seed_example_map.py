@@ -1,5 +1,6 @@
 from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
+from db.models import MapDoc, Point, Segment, NamedPointSpec
 
 if __name__ == "__main__":
     repo = MongoMapRepository()
@@ -12,7 +13,10 @@ if __name__ == "__main__":
             Segment(Point(10, 0), Point(10, 10)),
         ],
         persons=[
-            PersonSpec(id=0, position=Point(0, 1), goal=Point(1, 1)),
+            NamedPointSpec(id=0, position=Point(0, 1)),
+        ],
+        goals=[
+            NamedPointSpec(id=0, position=Point(1, 1)),
         ],
     )
 
