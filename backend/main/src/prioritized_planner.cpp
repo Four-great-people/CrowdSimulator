@@ -13,8 +13,8 @@ PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, const
 std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
     std::vector<std::pair<int, int>> data;
     
-    for (int i = 0; i < _persons.size(); ++i) {
-        int distance = h(_persons[i].get_position());
+    for (int i = 0; i < static_cast<int>(_persons.size()); ++i) {
+        int distance = h(_persons[static_cast<std::size_t>(i)].get_position());
         data.push_back({distance, i});
     }
 

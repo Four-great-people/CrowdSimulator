@@ -28,7 +28,8 @@ run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*' -fix -j 4
 
 Чтобы подавить предупреждение, если вы уверены в своих действиях используйте:
 ```
-// NOLINT - против clang-tidy
+// NOLINTNEXTLINE(check-name)
+// NOLINT(check-name) - против clang-tidy
 // cppcheck-suppress ... - против cppcheck
 ```
 

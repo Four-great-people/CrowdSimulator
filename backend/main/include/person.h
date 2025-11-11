@@ -20,8 +20,8 @@ public:
     }
 
 private:
-    Point _position;
     int _id;
+    Point _position;
 };
 
 // По-хорошему, нужно назвать этот класс NamedPoint, и использовать его.

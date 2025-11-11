@@ -40,8 +40,8 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             if (next_time_to_move[ind] != t) {
                 continue;
             }
-            const auto& person = _persons[ind];
-            const auto& current_position = current_positions[ind];
+            const auto& person = _persons[static_cast<std::size_t>(ind)];
+            const auto& current_position = current_positions[static_cast<std::size_t>(ind)];
             if (is_reached_goal(current_position)) {
                 moving_positions.erase(ind);
             }
@@ -54,16 +54,16 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             auto new_position = new_position_option.value();
             if (busy_positions.contains(new_position) ||
                 next_busy_positions.contains(new_position)) {
-                routes[std::size_t(ind)].push_back(Action::WAIT);
+                routes[static_cast<std::size_t>(ind)].push_back(Action::WAIT);
                 next_time_to_move[ind] += get_cost(Action::WAIT);
                 next_busy_positions.insert(current_position);
                 continue;
             }
             auto action = current_position.to_another(new_position);
-            routes[std::size_t(ind)].push_back(action);
+            routes[static_cast<std::size_t>(ind)].push_back(action);
             next_time_to_move[ind] += get_cost(action);
             next_busy_positions.insert(new_position);
-            current_positions[ind] = new_position;
+            current_positions[static_cast<std::size_t>(ind)] = new_position;
             if (is_reached_goal(new_position)) {
                 moving_positions.erase(ind);
             }
@@ -75,7 +75,7 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
 }
 
 std::optional<Point> RandomPlanner::plan_next_action(
-    const Person& person, const Point& current_position) {
+    const Person& /*person*/, const Point& current_position) {
     auto probable_neighbors = current_position.get_neighbors();
     std::vector<Point> next_positions;
     next_positions.reserve(probable_neighbors.size());
@@ -91,7 +91,7 @@ std::optional<Point> RandomPlanner::plan_next_action(
     std::vector<double> probabilities(next_positions.size());
     std::transform(
         next_positions.begin(), next_positions.end(), probabilities.begin(),
-        [this](const auto& p) { return 1.0 / (h(p) + 1); });
+        [this](const auto& p) { return 1.0 / (this->h(p) + 1); });
     std::partial_sum(probabilities.begin(), probabilities.end(),
                      probabilities.begin(), std::plus<double>());
     double sum = probabilities.back();
