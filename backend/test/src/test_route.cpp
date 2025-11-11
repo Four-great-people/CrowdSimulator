@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <vector>
 
@@ -11,10 +11,9 @@
 #include "simple_planner.h"
 
 TEST(test_route, calculate_route__same_point__returns_empty_vector) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(0, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 1));
@@ -31,10 +30,9 @@ TEST(test_route, calculate_route__same_point__returns_empty_vector) {
 }
 
 TEST(test_route, calculate_route__another_point__returns_route) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(0, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 2));
@@ -51,10 +49,9 @@ TEST(test_route, calculate_route__another_point__returns_route) {
 }
 
 TEST(test_route, calculate_route__far_away_point__returns_route) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(2, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 20));
@@ -66,17 +63,17 @@ TEST(test_route, calculate_route__far_away_point__returns_route) {
 
     ASSERT_TRUE(simple_route.has_value());
     ASSERT_EQ(simple_route.value().size(), 19);
-    for (int i = 0; i < simple_route.value().size(); ++i) {
-        ASSERT_EQ(simple_route.value()[i], Action::UP);
+    for (int i = 0; i < static_cast<int>(simple_route.value().size()); ++i) {
+        ASSERT_EQ(simple_route.value()[static_cast<std::size_t>(i)],
+                  Action::UP);
     }
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
 TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(2, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(3, 3));
@@ -93,7 +90,8 @@ TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
-TEST(test_route, calculate_route__forbidden_corner_move_diagonal_open__returns_not_simple_route) {
+TEST(test_route,
+     calculate_route__fbd_corner_mv_diagonal_op__returns_not_simple_route) {
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
@@ -111,7 +109,8 @@ TEST(test_route, calculate_route__forbidden_corner_move_diagonal_open__returns_n
     ASSERT_GT(prioritized_route.value().size(), 1);
 }
 
-TEST(test_route, calculate_route__forbidden_corner_move_diagonal_close__returns_not_simple_route) {
+TEST(test_route,
+     calculate_route__fbd_corner_mv_diagonal_cl__returns_not_simple_route) {
     std::vector border{Border(Point(0, 2), Point(2, 2)),
                        Border(Point(2, 2), Point(2, 0))};
     Grid grid(border);
@@ -129,11 +128,11 @@ TEST(test_route, calculate_route__forbidden_corner_move_diagonal_close__returns_
     ASSERT_GT(prioritized_route.value().size(), 1);
 }
 
-TEST(test_route, calculate_route__not_only_diagonal_point__returns_efficient_route) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(2, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+TEST(test_route,
+     calculate_route__not_only_diagonal_point__returns_efficient_route) {
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(2, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(2, 3));
@@ -148,14 +147,14 @@ TEST(test_route, calculate_route__not_only_diagonal_point__returns_efficient_rou
     ASSERT_THAT(simple_route.value(), ::testing::Contains(Action::RIGHT_UP));
     ASSERT_TRUE(prioritized_route.has_value());
     ASSERT_EQ(prioritized_route.value().size(), 2);
-    ASSERT_THAT(prioritized_route.value(), ::testing::Contains(Action::RIGHT_UP));
+    ASSERT_THAT(prioritized_route.value(),
+                ::testing::Contains(Action::RIGHT_UP));
 }
 
 TEST(test_route, calculate_route__unreachable_point_inside__returns_nullopt) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(0, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 20));
@@ -170,10 +169,9 @@ TEST(test_route, calculate_route__unreachable_point_inside__returns_nullopt) {
 }
 
 TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
-    std::vector border{Border(Point(0, 0), Point(0, 10)),
-                       Border(Point(0, 10), Point(10, 10)),
-                       Border(Point(10, 10), Point(10, 0)),
-                       Border(Point(0, 0), Point(10, 0))};
+    std::vector border{
+        Border(Point(0, 0), Point(0, 10)), Border(Point(0, 10), Point(10, 10)),
+        Border(Point(10, 10), Point(10, 0)), Border(Point(0, 0), Point(10, 0))};
     Grid grid(border);
     Person person(0, Point(1, 20));
     Goal goal(0, Point(1, 1));
@@ -203,16 +201,12 @@ TEST(test_route, calculate_long_route) {
 
     ASSERT_TRUE(prioritized_route.has_value());
     ASSERT_EQ(prioritized_route->size(), 31);
-
 }
 
 TEST(test_route, calculate_one_one_locked_no_route) {
     std::vector border{
-        Border(Point(0, 0), Point(1, 0)),
-        Border(Point(0, 0), Point(0, 1)),
-        Border(Point(1, 1), Point(1, 0)),
-        Border(Point(1, 1), Point(0, 1))
-    };
+        Border(Point(0, 0), Point(1, 0)), Border(Point(0, 0), Point(0, 1)),
+        Border(Point(1, 1), Point(1, 0)), Border(Point(1, 1), Point(0, 1))};
     Grid grid(border);
     Person person(0, Point(0, 0));
     Goal goal(0,  Point(3, 3));

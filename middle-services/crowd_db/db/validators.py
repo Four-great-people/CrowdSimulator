@@ -1,5 +1,6 @@
 from .client import get_db
-from .config import MAPS_COLLECTION, ANIMATIONS_COLLECTION
+from .config import ANIMATIONS_COLLECTION, MAPS_COLLECTION
+
 
 def apply_collection_validator():
     db = get_db()
@@ -40,7 +41,7 @@ def apply_collection_validator():
             "id": {"bsonType": ["int", "string", "null"]},
             "route": {"bsonType": "array", "items": {"bsonType": "string"}},
         },
-        "additionalProperties": True
+        "additionalProperties": True,
     }
 
     statistics = {
@@ -50,18 +51,18 @@ def apply_collection_validator():
                 "bsonType": "object",
                 "properties": {
                     "value": {"bsonType": ["int", "null"]},
-                    "problematic": {"bsonType": "int"}
-                }
+                    "problematic": {"bsonType": "int"},
+                },
             },
             "ideal": {
-                "bsonType": "object", 
+                "bsonType": "object",
                 "properties": {
                     "value": {"bsonType": ["int", "null"]},
-                    "problematic": {"bsonType": "int"}
-                }
-            }
+                    "problematic": {"bsonType": "int"},
+                },
+            },
         },
-        "additionalProperties": True
+        "additionalProperties": True,
     }
 
     schema = {
@@ -78,7 +79,7 @@ def apply_collection_validator():
                 "name": {"bsonType": "string"},
             },
             "additionalProperties": False,
-        }
+        },
     }
 
     animation_schema = {
@@ -96,10 +97,7 @@ def apply_collection_validator():
             "statistics": statistics,
             "name": {"bsonType": "string"},
         },
-        "additionalProperties": False
-        }
     }
-    
 
     if MAPS_COLLECTION not in db.list_collection_names():
         db.create_collection(MAPS_COLLECTION, validator=schema)
@@ -110,4 +108,3 @@ def apply_collection_validator():
         db.create_collection(ANIMATIONS_COLLECTION, validator=animation_schema)
     else:
         db.command("collMod", ANIMATIONS_COLLECTION, validator=animation_schema)
-

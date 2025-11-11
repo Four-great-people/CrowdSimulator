@@ -1,5 +1,5 @@
 import pytest
-
+from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
 from db.models import MapDoc, Point, Segment, NamedPointSpec
 
@@ -30,7 +30,7 @@ def test_crud_maps_unit():
 
     # list
     lst = repo.list(limit=10)
-    assert any(doc._id == _id for doc in lst)
+    assert any(doc.identifier == _id for doc in lst)
 
     # replace 
     got.persons.append(NamedPointSpec(id=1, position=Point(1,1)))
@@ -41,4 +41,3 @@ def test_crud_maps_unit():
     # delete
     assert repo.delete(_id) is True
     assert repo.get(_id) is None
-

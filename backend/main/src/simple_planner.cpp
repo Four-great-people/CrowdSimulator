@@ -10,7 +10,7 @@ SimplePlanner::SimplePlanner(const std::vector<Person>& persons, const std::vect
 std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes;
     routes.reserve(_persons.size());
-    for (auto person : _persons) {
+    for (auto person : _persons) {  // cppcheck-suppress iterateByValue
         auto route = calculate_route(person);
         if (route) {
             routes.push_back(route.value());
@@ -50,8 +50,10 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
             if (_grid->is_incorrect_move(Segment(current_position, position))) {
                 continue;
             }
-            int new_g = current_f +
-                        (position - current_position).diag_norm_multiplied2();
+            int new_g =
+                current_f +
+                static_cast<int>(
+                    (position - current_position).diag_norm_multiplied2());
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;

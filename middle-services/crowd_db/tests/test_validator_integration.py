@@ -1,13 +1,14 @@
 import pytest
-from pymongo.errors import WriteError
 from db.client import get_db
 from db.config import MAPS_COLLECTION
 from db.validators import apply_collection_validator
+from pymongo.errors import WriteError
 
+# pylint: disable=duplicate-code
 pytestmark = [
     pytest.mark.skipif(
-        not getattr(pytest, "config").getoption("--integration"),
-        reason="run with --integration"
+        not pytest.config.getoption("--integration"),
+        reason="run with --integration",
     ),
 ]
 
@@ -55,4 +56,3 @@ def test_json_schema_allows_id_types():
     # не должно кидать
     res = col.insert_one(good)
     assert res.inserted_id is not None
-

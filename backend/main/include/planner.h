@@ -1,6 +1,8 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
+#include <vector>
+
 #include "grid.h"
 #include "person.h"
 #include <vector>
@@ -16,7 +18,7 @@ public:
     virtual ~Planner() = default;
     virtual std::vector<std::vector<Action>> plan_all_routes() = 0;
 
-protected:
+ protected:
     std::vector<Person> _persons;
     std::unordered_set<Goal> _goals;
     Grid* _grid;
@@ -48,4 +50,4 @@ private:
     }
 };
 
-#endif // PLANNER_H
+#endif  // PLANNER_H

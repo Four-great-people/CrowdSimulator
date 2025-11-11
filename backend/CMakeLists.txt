@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.5)
 project(backend)
 
+add_compile_options(
+   -Werror
+
+   -Wall
+   -Wextra
+   -Wpedantic
+
+   -Wcast-align
+   -Wcast-qual
+   -Wconversion
+   -Wctor-dtor-privacy
+   -Wenum-compare
+   -Wfloat-equal
+   -Wnon-virtual-dtor
+   -Wold-style-cast
+   -Woverloaded-virtual
+   -Wredundant-decls
+   -Wsign-conversion
+   -Wsign-promo
+)
+
 if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/main/include)
 list(APPEND PATH_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/main/include)
 FILE (GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/main/include/*)
@@ -59,7 +80,7 @@ endif()
 add_executable(${PROJECT_NAME}_test_gcov ${TEST_SOURCES} ${TEST_HEADERS} ${TEST_LIB_HEADERS})
 target_link_libraries(${PROJECT_NAME}_test_gcov ${LIBS} ${TEST_LIBS})
 set_target_properties(${PROJECT_NAME}_test_gcov PROPERTIES CXX_STANDARD 20)
-target_compile_options(${PROJECT_NAME}_test_gcov PRIVATE -coverage -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline -O0 -g)
+target_compile_options(${PROJECT_NAME}_test_gcov PRIVATE -coverage -fprofile-arcs -ftest-coverage -fno-inline -O0 -g)
 target_link_options(${PROJECT_NAME}_test_gcov PRIVATE -coverage)
 
 add_executable(${PROJECT_NAME}_test_tsan ${TEST_SOURCES} ${TEST_HEADERS} ${TEST_LIB_HEADERS})
@@ -93,27 +114,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     COMMAND gprof ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test_gprof > ../profile_data.txt
   )
 endif()
-
-add_compile_options(
-   -Werror
-
-   -Wall
-   -Wextra
-   -Wpedantic
-
-   -Wcast-align
-   -Wcast-qual
-   -Wconversion
-   -Wctor-dtor-privacy
-   -Wenum-compare
-   -Wfloat-equal
-   -Wnon-virtual-dtor
-   -Wold-style-cast
-   -Woverloaded-virtual
-   -Wredundant-decls
-   -Wsign-conversion
-   -Wsign-promo
-)
 
 if(NOT CMAKE_CXX_EXTENSIONS)
    set(CMAKE_CXX_EXTENSIONS OFF)

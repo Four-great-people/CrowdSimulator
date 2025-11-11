@@ -7,6 +7,39 @@ on:
     branches: ["*"]
 
 jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install -y wget cmake g++
+          sudo apt install -y libasio-dev zlib1g-dev libssl-dev libgtest-dev libgmock-dev
+          wget https://github.com/CrowCpp/Crow/releases/download/v1.2.1.2/Crow-1.2.1-Linux.deb
+          sudo dpkg -i Crow-1.2.1-Linux.deb
+      
+      - name: set cmake
+        run: |
+          cd backend
+          mkdir build
+          cd build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
+      
+      - name: build
+        run: |
+          cd backend/build
+          make backend
+      
+      - name: lint
+        run: |
+          sudo apt install -y cppcheck clang-tidy cpplint
+          cd backend
+          cppcheck --enable=all --inconclusive -I main/include -I main/lib -I test/include --suppress=missingIncludeSystem main test --inline-suppr --force --error-exitcode=1
+          run-clang-tidy -p build/ -extra-arg=-std=c++20 -warnings-as-errors='*'
+          cpplint --filter=-build/include_subdir,-legal/copyright,-build/header_guard,-runtime/references,-build/c++11  --recursive main/src main/include test/src
+
   build-test-backend:
     runs-on: ubuntu-latest
     steps:
@@ -135,6 +168,24 @@ jobs:
           cd middle-services
           pytest -q tests_api
 
+  lint-middle-end:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: make environment
+        run: |
+          sudo apt update
+          sudo apt install python3-pip
+          python3 -m pip config set global.break-system-packages true
+          cd middle-services
+          pip3 install -r requirements.txt
+
+      - name: lint
+        run: |
+          cd middle-services
+          pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
+          ruff check --select ALL --ignore S101,D103,PLR2004,EXE002,D100,INP001,ANN002,EM102,TRY003,D102,D107,D101,RUF002,BLE001,D104,T201,D400,D200,EM101,S106,PLW0603,PGH003
   test-crowddb-unit:
     runs-on: ubuntu-latest
     steps:

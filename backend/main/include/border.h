@@ -4,7 +4,7 @@
 #include "segment.h"
 
 class Border {
-public:
+ public:
     Border(const Point &first, const Point &second);
     explicit Border(const Segment &segment);
     Border(const Border &) = default;
@@ -16,9 +16,10 @@ public:
     const Point &get_first() const noexcept;
     const Point &get_second() const noexcept;
     bool is_intersecting(const Segment &route) const noexcept;
-private:
+
+ private:
     Point _first;
     Point _second;
 };
 
-#endif // BORDER_H
+#endif  // BORDER_H

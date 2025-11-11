@@ -3,13 +3,16 @@ from db.repository import MongoMapRepository
 from db.models import MapDoc, Point, Segment, NamedPointSpec
 from db.client import get_db
 from db.config import MAPS_COLLECTION
+from db.models import MapDoc, PersonSpec, Point, Segment
+from db.repository import MongoMapRepository
 from db.validators import apply_collection_validator
 
 # run with:  pytest --integration
+# pylint: disable=duplicate-code
 pytestmark = [
     pytest.mark.skipif(
-        not getattr(pytest, "config").getoption("--integration"),
-        reason="run with --integration"
+        not pytest.config.getoption("--integration"),
+        reason="run with --integration",
     ),
 ]
 
@@ -40,4 +43,3 @@ def test_insert_and_read_real_mongo():
     assert got is not None
     assert got.name == "Тестовая карта"
     assert got.persons[0].id == "p-42"
-

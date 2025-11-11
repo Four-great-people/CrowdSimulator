@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <random>
+#include <vector>
 
 #include "actions.h"
 #include "planner.h"
@@ -17,11 +18,12 @@ public:
     ~RandomPlanner() noexcept override = default;
 
     std::vector<std::vector<Action>> plan_all_routes() override;
-    std::optional<Point> plan_next_action(const Person& person, const Point &current_position);
+    std::optional<Point> plan_next_action(const Person &person,
+                                          const Point &current_position);
 
-private:
+ private:
     std::mt19937 rng;
     std::uniform_real_distribution<> dist;
 };
 
-#endif // RANDOM_PLANNER_H
+#endif  // RANDOM_PLANNER_H

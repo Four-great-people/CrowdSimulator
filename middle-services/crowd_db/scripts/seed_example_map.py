@@ -1,3 +1,4 @@
+from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
 from db.models import MapDoc, Point, Segment, NamedPointSpec
 
@@ -21,4 +22,3 @@ if __name__ == "__main__":
 
     _id = repo.create(doc)
     print("✅ Inserted:", _id)
-

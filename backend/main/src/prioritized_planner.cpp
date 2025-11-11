@@ -1,9 +1,11 @@
 #include "prioritized_planner.h"
+
+#include <algorithm>
+#include <queue>
+#include <unordered_set>
+
 #include "catable.h"
 #include "timed_node.h"
-#include <unordered_set>
-#include <queue>
-#include <algorithm>
 
 PrioritizedPlanner::PrioritizedPlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
     : Planner(persons, goals, grid) {}
@@ -15,16 +17,15 @@ std::vector<int> PrioritizedPlanner::get_priorities_shortest_first() const {
         int distance = h(_persons[i].get_position());
         data.push_back({distance, i});
     }
-    
+
     std::sort(data.begin(), data.end());
-    
+
     std::vector<int> indices(_persons.size());
-    for (int i = 0; i < data.size(); ++i) {
-        int length = data[i].first;
-        int pos = data[i].second;
-        indices[i] = pos;
+    for (int i = 0; i < static_cast<int>(data.size()); ++i) {
+        int pos = data[std::size_t(i)].second;
+        indices[std::size_t(i)] = pos;
     }
-    
+
     return indices;
 }
 
@@ -36,38 +37,42 @@ std::vector<std::vector<Action>> PrioritizedPlanner::plan_all_routes() {
     while (changed) {
         ca_table = CATable();
         fill(results.begin(), results.end(), std::vector<Action>());
-        for (int priority = 0; priority < _persons.size(); ++priority) {
-            int agent_id = indices[priority];
-            auto route = calculate_route(_persons[agent_id]);
-            
+        for (int priority = 0; priority < static_cast<int>(_persons.size());
+             ++priority) {
+            int agent_id = indices[std::size_t(priority)];
+            auto route = calculate_route(_persons[std::size_t(agent_id)]);
+
             if (route) {
-                results[agent_id] = *route;
-                
+                results[std::size_t(agent_id)] = *route;
+
                 std::vector<Point> trajectory;
-                Point current = _persons[agent_id].get_position();
+                Point current = _persons[std::size_t(agent_id)].get_position();
                 trajectory.push_back(current);
-                
+
                 for (const auto& action : *route) {
                     current = current + action;
                     trajectory.push_back(current);
                 }
-                
+
                 ca_table.add_trajectory(agent_id, trajectory);
             }
         }
         changed = validate_results(results);
     }
-    
+
     return results;
 }
 
-bool PrioritizedPlanner::validate_results(std::vector<std::vector<Action>>& results) {
+bool PrioritizedPlanner::validate_results(
+    std::vector<std::vector<Action>>&
+        results) {  // cppcheck-suppress constParameterReference
     bool changed = false;
-    for (int agent_id = 0; agent_id < results.size(); ++agent_id) {
-        if (results[agent_id].size() == 0) {
-            auto position = _persons[agent_id].get_position();
+    for (int agent_id = 0; agent_id < static_cast<int>(results.size());
+         ++agent_id) {
+        if (results[std::size_t(agent_id)].size() == 0) {
+            auto position = _persons[std::size_t(agent_id)].get_position();
             if (stops.find(position) == stops.end()) {
-                stops.insert(position);
+                stops.insert(position);  // cppcheck-suppress stlFindInsert
                 changed = true;
             }
         }
@@ -83,10 +88,11 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     auto start_position = person.get_position();
 
     const int MAX_TIME = 50000;
-    
-    using NodeQueue = std::priority_queue<std::shared_ptr<TimedNode>, 
-                                         std::vector<std::shared_ptr<TimedNode>>, 
-                                         TimedNode::Compare>;
+
+    using NodeQueue =
+        std::priority_queue<std::shared_ptr<TimedNode>,
+                            std::vector<std::shared_ptr<TimedNode>>,
+                            TimedNode::Compare>;
     NodeQueue open;
     std::unordered_set<TimePoint, TimePointHash> visited;
     std::vector<std::shared_ptr<TimedNode>> time_nodes;
@@ -95,7 +101,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
     time_nodes.push_back(start_node);
     open.push(start_node);
     visited.insert({start_position.get_x(), start_position.get_y(), 0});
-    
+
     int steps = 0;
     while (!open.empty() && steps < MAX_TIME) {
         auto current = open.top();
@@ -109,29 +115,33 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
             std::vector<Action> path;
             auto node = current;
             while (node->parent_index != -1) {
-                auto parent_node = time_nodes[node->parent_index];
-                path.push_back(parent_node->position.to_another(node->position));
+                auto parent_node = time_nodes[std::size_t(node->parent_index)];
+                path.push_back(
+                    parent_node->position.to_another(node->position));
                 node = parent_node;
             }
             std::reverse(path.begin(), path.end());
             return path;
         }
-        
-        auto neighbors = ca_table.get_neighbors_timestep(current->position, current->time);
-        
+
+        auto neighbors =
+            ca_table.get_neighbors_timestep(current->position, current->time);
+
         for (const auto& neighbor : neighbors) {
-            if (_grid->is_incorrect_move(Segment(current->position, neighbor))) {
+            if (_grid->is_incorrect_move(
+                    Segment(current->position, neighbor))) {
                 continue;
             }
-            
-            int move_cost = (neighbor - current->position).diag_norm_multiplied2();
+
+            int move_cost = static_cast<int>(
+                (neighbor - current->position).diag_norm_multiplied2());
             if (neighbor == current->position) {
                 move_cost += CATable::wait_cost;
             }
             int new_g = current->g + move_cost;
             int new_time = current->time + move_cost;
             TimePoint new_tp = {neighbor.get_x(), neighbor.get_y(), new_time};
-            
+
             if (visited.find(new_tp) != visited.end()) {
                 continue;
             }
@@ -142,9 +152,9 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(const Per
             open.push(new_node);
             visited.insert(new_tp);
         }
-        
+
         steps++;
     }
-    
+
     return std::nullopt;
 }

@@ -29,4 +29,3 @@ def test_mapdoc_roundtrip():
     assert again.down_left_point == m.down_left_point
     assert again.borders == m.borders
     assert again.persons[0].position == m.persons[0].position
-

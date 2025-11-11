@@ -15,26 +15,24 @@
 
 using Action::DOWN;
 using Action::LEFT;
-using Action::RIGHT;
-using Action::UP;
-using Action::RIGHT_DOWN;
 using Action::LEFT_DOWN;
 using Action::LEFT_UP;
+using Action::RIGHT;
+using Action::RIGHT_DOWN;
 using Action::RIGHT_UP;
+using Action::UP;
 using Action::WAIT;
 using nlohmann::json;
 
-NLOHMANN_JSON_SERIALIZE_ENUM(Action, {
-                                         {UP, "UP"},
-                                         {DOWN, "DOWN"},
-                                         {LEFT, "LEFT"},
-                                         {RIGHT, "RIGHT"},
-                                         {RIGHT_UP, "RIGHT_UP"},
-                                         {LEFT_UP, "LEFT_UP"},
-                                         {RIGHT_DOWN, "RIGHT_DOWN"},
-                                         {LEFT_DOWN, "LEFT_DOWN"},
-                                         {WAIT, "WAIT"}
-                                     })
+NLOHMANN_JSON_SERIALIZE_ENUM(Action, {{UP, "UP"},
+                                      {DOWN, "DOWN"},
+                                      {LEFT, "LEFT"},
+                                      {RIGHT, "RIGHT"},
+                                      {RIGHT_UP, "RIGHT_UP"},
+                                      {LEFT_UP, "LEFT_UP"},
+                                      {RIGHT_DOWN, "RIGHT_DOWN"},
+                                      {LEFT_DOWN, "LEFT_DOWN"},
+                                      {WAIT, "WAIT"}})
 
 namespace Convertor {
 struct Point {
@@ -80,9 +78,7 @@ struct RouteResult {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RouteResult, id, route)
 }  // namespace Convertor
 
-Point to_point(const Convertor::Point &p) {
-    return Point(p.x, p.y);
-}
+Point to_point(const Convertor::Point &p) { return Point(p.x, p.y); }
 
 Border to_border(const Convertor::Segment &s) {
     return Border(to_point(s.first), to_point(s.second));
@@ -108,7 +104,8 @@ json ApplicationContext::calculate_route(json input, PlannerFactory planner_fact
     auto all_routes = planner->plan_all_routes();
     std::vector<Convertor::RouteResult> results;
     for (size_t i = 0; i < persons.size(); ++i) {
-        results.push_back(Convertor::RouteResult(persons[i].get_id(), all_routes[i]));
+        results.push_back(
+            Convertor::RouteResult(persons[i].get_id(), all_routes[i]));
     }
     return static_cast<json>(results);
 }

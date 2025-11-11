@@ -25,11 +25,11 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
     constexpr int MAX_ITERATION_NUMBER = 50000;
     std::unordered_set<int> moving_positions;
     std::unordered_map<int, int> next_time_to_move;
-    for (int i = 0; i < _persons.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(_persons.size()); ++i) {
         moving_positions.insert(i);
         next_time_to_move[0] = 0;
-        current_positions.push_back(_persons[i].get_position());
-        busy_positions.insert(_persons[i].get_position());
+        current_positions.push_back(_persons[std::size_t(i)].get_position());
+        busy_positions.insert(_persons[std::size_t(i)].get_position());
     }
     for (int t = 0; t < MAX_ITERATION_NUMBER; ++t) {
         if (moving_positions.empty()) {
@@ -54,13 +54,13 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
             auto new_position = new_position_option.value();
             if (busy_positions.contains(new_position) ||
                 next_busy_positions.contains(new_position)) {
-                routes[ind].push_back(Action::WAIT);
+                routes[std::size_t(ind)].push_back(Action::WAIT);
                 next_time_to_move[ind] += get_cost(Action::WAIT);
                 next_busy_positions.insert(current_position);
                 continue;
             }
             auto action = current_position.to_another(new_position);
-            routes[ind].push_back(action);
+            routes[std::size_t(ind)].push_back(action);
             next_time_to_move[ind] += get_cost(action);
             next_busy_positions.insert(new_position);
             current_positions[ind] = new_position;
@@ -99,8 +99,9 @@ std::optional<Point> RandomPlanner::plan_next_action(
     auto position_iterator =
         std::upper_bound(probabilities.begin(), probabilities.end(), threshold);
     int index = (position_iterator == probabilities.end())
-                    ? (probabilities.size() - 1)
-                    : std::distance(probabilities.begin(), position_iterator);
-    Point new_position = next_positions[index];
+                    ? (static_cast<int>(probabilities.size()) - 1)
+                    : static_cast<int>(std::distance(probabilities.begin(),
+                                                     position_iterator));
+    Point new_position = next_positions[std::size_t(index)];
     return new_position;
 }

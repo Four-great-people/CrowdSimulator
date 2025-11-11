@@ -35,8 +35,7 @@ bool Segment::is_intersecting(const Segment &route) const noexcept {
 }
 
 bool Segment::is_intersecting(const Point &point) const noexcept {
-    if ((get_second() - get_first())
-            .cross_product(get_second() - point) != 0) {
+    if ((get_second() - get_first()).cross_product(get_second() - point) != 0) {
         return false;
     }
     if (get_first().get_y() == get_second().get_y()) {
@@ -50,7 +49,7 @@ bool Segment::is_intersecting(const Point &point) const noexcept {
 }
 
 int Segment::sine_sign(const Point &point) const noexcept {
-    long long cross_product =
+    auto cross_product =
         (get_second() - get_first()).cross_product(point - get_first());
     return (cross_product > 0) - (cross_product < 0);
 }

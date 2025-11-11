@@ -1,15 +1,17 @@
 from __future__ import annotations
-import os
+
 import json
-from typing import Any, Dict, Optional, Tuple
+import os
+from collections import OrderedDict
+from typing import Any
+
 import requests
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, Response
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-from collections import OrderedDict
 
-from crowd_db.db.models import MapDoc, AnimationDoc
+from crowd_db.db.models import AnimationDoc, MapDoc
 from crowd_db.db.repository import MongoMapRepository
 
 load_dotenv()
@@ -17,11 +19,10 @@ load_dotenv()
 CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://localhost:8080/route")
 
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+app.config["JSON_SORT_KEYS"] = False
 CORS(app)
 
 repo = MongoMapRepository()
-
 
 def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     d = m.to_bson()
@@ -48,7 +49,7 @@ def create_map():
         m = MapDoc.from_bson(payload)
         oid = repo.create(m)
         return jsonify({"_id": str(oid)}), 201
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 
@@ -75,7 +76,7 @@ def delete_map(map_id: str):
         if not ok:
             return jsonify({"error": "map not found"}), 400
         return jsonify({"message": "map deleted"}), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"delete failed: {e}"}), 400
 
 @app.route("/maps/<map_id>", methods=["GET"])
@@ -96,10 +97,11 @@ def get_map(map_id: str):
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),
-        mimetype="application/json"
+        mimetype="application/json",
     )
 
-def calculate_statistics_for_endpoint(endpoint: str, payload: str, headers: Dict[str, str]) -> Tuple[Any, Any]:
+def calculate_statistics_for_endpoint(endpoint: str,
+                payload: str, headers: dict[str, str]) -> tuple[Any, Any]:
     result = requests.post(
             f"{CPP_BACKEND_URL}/{endpoint}",
             data=payload,
@@ -153,12 +155,12 @@ def update_map(map_id: str):
     payload = request.get_json(force=True)
     try:
         m = MapDoc.from_bson(payload)
-        m._id = ObjectId(map_id)  
+        m.identifier = ObjectId(map_id)
         ok = repo.replace(m)
         if not ok:
             return jsonify({"error": "map not found"}), 400
         return jsonify({"message": "map updated"}), 200
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid map payload: {e}"}), 400
 
 
@@ -169,7 +171,7 @@ def create_animation():
         animation_doc = AnimationDoc.from_bson(payload)
         animation_id = repo.create_animation(animation_doc.to_bson())
         return jsonify({"_id": str(animation_id)}), 201
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return jsonify({"error": f"invalid animation payload: {e}"}), 400
 
 @app.route("/animations", methods=["GET"])

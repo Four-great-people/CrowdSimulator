@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
 from bson import ObjectId
 
 
@@ -8,11 +9,11 @@ class Point:
     x: int
     y: int
 
-    def to_bson(self) -> Dict[str, int]:
+    def to_bson(self) -> dict[str, int]:
         return {"x": int(self.x), "y": int(self.y)}
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "Point":
+    def from_bson(d: dict[str, Any]) -> "Point":
         return Point(int(d["x"]), int(d["y"]))
 
 
@@ -21,11 +22,11 @@ class Segment:
     first: Point
     second: Point
 
-    def to_bson(self) -> Dict[str, Dict[str, int]]:
+    def to_bson(self) -> dict[str, dict[str, int]]:
         return {"first": self.first.to_bson(), "second": self.second.to_bson()}
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "Segment":
+    def from_bson(d: dict[str, Any]) -> "Segment":
         return Segment(Point.from_bson(d["first"]), Point.from_bson(d["second"]))
 
 @dataclass
@@ -33,8 +34,8 @@ class NamedPointSpec:
     id: Optional[Union[int, str]]
     position: Point
 
-    def to_bson(self) -> Dict[str, Any]:
-        doc: Dict[str, Any] = {
+    def to_bson(self) -> dict[str, Any]:
+        doc: dict[str, Any] = {
             "position": self.position.to_bson(),
         }
         if self.id is not None:
@@ -58,7 +59,7 @@ class MapDoc:
     name: str = "Без названия"
     _id: Optional[ObjectId] = None
 
-    def to_bson(self) -> Dict[str, Any]:
+    def to_bson(self) -> dict[str, Any]:
         return {
             "_id": self._id if self._id else ObjectId(),
             "name": self.name,
@@ -70,7 +71,7 @@ class MapDoc:
         }
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "MapDoc":
+    def from_bson(d: dict[str, Any]) -> "MapDoc":
         return MapDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
@@ -105,12 +106,12 @@ class AnimationDoc:
             "statistics": self.statistics,
             "name": self.name
         }
-        if self._id:
-            doc["_id"] = self._id
+        if self.identifier:
+            doc["_id"] = self.identifier
         return doc
 
     @staticmethod
-    def from_bson(d: Dict[str, Any]) -> "AnimationDoc":
+    def from_bson(d: dict[str, Any]) -> "AnimationDoc":
         return AnimationDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
