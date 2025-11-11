@@ -18,7 +18,6 @@ TEST(test_route, calculate_route__same_point__returns_empty_vector) {
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 1));
 
-   
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -36,7 +35,7 @@ TEST(test_route, calculate_route__another_point__returns_route) {
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 2));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -55,7 +54,7 @@ TEST(test_route, calculate_route__far_away_point__returns_route) {
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 20));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -77,7 +76,7 @@ TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(3, 3));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -97,7 +96,7 @@ TEST(test_route,
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(2, 2));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -116,7 +115,7 @@ TEST(test_route,
     Grid grid(border);
     Person person(0, Point(2, 1));
     Goal goal(0, Point(1, 2));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -136,7 +135,7 @@ TEST(test_route,
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(2, 3));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -158,7 +157,7 @@ TEST(test_route, calculate_route__unreachable_point_inside__returns_nullopt) {
     Grid grid(border);
     Person person(0, Point(1, 1));
     Goal goal(0, Point(1, 20));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -175,7 +174,7 @@ TEST(test_route, calculate_route__unreachable_point_outside__returns_nullopt) {
     Grid grid(border);
     Person person(0, Point(1, 20));
     Goal goal(0, Point(1, 1));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -190,7 +189,7 @@ TEST(test_route, calculate_long_route) {
     Grid grid(border);
     Person person(0, Point(0, 15));
     Goal goal(0, Point(1, 15));
-    
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);
@@ -209,8 +208,8 @@ TEST(test_route, calculate_one_one_locked_no_route) {
         Border(Point(1, 1), Point(1, 0)), Border(Point(1, 1), Point(0, 1))};
     Grid grid(border);
     Person person(0, Point(0, 0));
-    Goal goal(0,  Point(3, 3));
-    
+    Goal goal(0, Point(3, 3));
+
     SimplePlanner simple_planner({person}, {goal}, &grid);
     PrioritizedPlanner prioritized_planner({person}, {goal}, &grid);
     auto simple_route = simple_planner.calculate_route(person);

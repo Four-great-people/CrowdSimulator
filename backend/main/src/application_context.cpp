@@ -67,8 +67,8 @@ struct Map {
     std::string name;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, down_left_point, up_right_point, borders,
-                                   persons, goals, name)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, down_left_point, up_right_point,
+                                   borders, persons, goals, name)
 
 struct RouteResult {
     int id;
@@ -84,7 +84,8 @@ Border to_border(const Convertor::Segment &s) {
     return Border(to_point(s.first), to_point(s.second));
 }
 
-json ApplicationContext::calculate_route(json input, PlannerFactory planner_factory) {
+json ApplicationContext::calculate_route(json input,
+                                         PlannerFactory planner_factory) {
     auto map = input.template get<Convertor::Map>();
     std::vector<Border> borders;
     for (const auto &segment : map.borders) {
@@ -112,15 +113,24 @@ json ApplicationContext::calculate_route(json input, PlannerFactory planner_fact
 
 json ApplicationContext::calculate_route_dense(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
-    return calculate_route(input, [](const std::vector<Person> &ps, const std::vector<Goal> gs, Grid *g){ return std::make_unique<PrioritizedPlanner>(ps, gs, g); });
+    return calculate_route(input, [](const std::vector<Person> &ps,
+                                     const std::vector<Goal> gs, Grid *g) {
+        return std::make_unique<PrioritizedPlanner>(ps, gs, g);
+    });
 }
 
 json ApplicationContext::calculate_route_simple(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
-    return calculate_route(input, [](const std::vector<Person> &ps, const std::vector<Goal> gs, Grid *g){ return std::make_unique<SimplePlanner>(ps, gs, g); });
+    return calculate_route(input, [](const std::vector<Person> &ps,
+                                     const std::vector<Goal> gs, Grid *g) {
+        return std::make_unique<SimplePlanner>(ps, gs, g);
+    });
 }
 
 json ApplicationContext::calculate_route_random(json input) {
     std::lock_guard<std::mutex> lock(_mutex);
-    return calculate_route(input, [](const std::vector<Person> &ps, const std::vector<Goal> gs, Grid *g){ return std::make_unique<RandomPlanner>(ps, gs, g); });
+    return calculate_route(input, [](const std::vector<Person> &ps,
+                                     const std::vector<Goal> gs, Grid *g) {
+        return std::make_unique<RandomPlanner>(ps, gs, g);
+    });
 }

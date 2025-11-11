@@ -4,7 +4,8 @@
 #include <map>
 #include <unordered_map>
 
-SimplePlanner::SimplePlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
+SimplePlanner::SimplePlanner(const std::vector<Person>& persons,
+                             const std::vector<Goal>& goals, Grid* grid)
     : Planner(persons, goals, grid) {}
 
 std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {

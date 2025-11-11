@@ -13,7 +13,8 @@
 #include "actions.h"
 #include "point.h"
 
-RandomPlanner::RandomPlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
+RandomPlanner::RandomPlanner(const std::vector<Person>& persons,
+                             const std::vector<Goal>& goals, Grid* grid)
     : Planner(persons, goals, grid), rng(std::random_device()()), dist(0, 1) {}
 
 std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
@@ -41,7 +42,8 @@ std::vector<std::vector<Action>> RandomPlanner::plan_all_routes() {
                 continue;
             }
             const auto& person = _persons[static_cast<std::size_t>(ind)];
-            const auto& current_position = current_positions[static_cast<std::size_t>(ind)];
+            const auto& current_position =
+                current_positions[static_cast<std::size_t>(ind)];
             if (is_reached_goal(current_position)) {
                 moving_positions.erase(ind);
             }
@@ -79,19 +81,20 @@ std::optional<Point> RandomPlanner::plan_next_action(
     auto probable_neighbors = current_position.get_neighbors();
     std::vector<Point> next_positions;
     next_positions.reserve(probable_neighbors.size());
-    std::copy_if(
-        probable_neighbors.begin(), probable_neighbors.end(),
-        std::back_insert_iterator(next_positions),
-        [this, &current_position](const auto& position) {
-            return !_grid->is_incorrect_move(Segment(current_position, position)) && h(position) != -1;
-        });
+    std::copy_if(probable_neighbors.begin(), probable_neighbors.end(),
+                 std::back_insert_iterator(next_positions),
+                 [this, &current_position](const auto& position) {
+                     return !_grid->is_incorrect_move(
+                                Segment(current_position, position)) &&
+                            h(position) != -1;
+                 });
     if (next_positions.empty()) {
         return std::nullopt;
     }
     std::vector<double> probabilities(next_positions.size());
-    std::transform(
-        next_positions.begin(), next_positions.end(), probabilities.begin(),
-        [this](const auto& p) { return 1.0 / (this->h(p) + 1); });
+    std::transform(next_positions.begin(), next_positions.end(),
+                   probabilities.begin(),
+                   [this](const auto& p) { return 1.0 / (this->h(p) + 1); });
     std::partial_sum(probabilities.begin(), probabilities.end(),
                      probabilities.begin(), std::plus<double>());
     double sum = probabilities.back();

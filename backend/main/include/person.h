@@ -4,7 +4,7 @@
 #include "point.h"
 
 class Person {
-public:
+ public:
     Person(int id, Point position) : _id(id), _position(position) {}
     Person(const Person &) = default;
     Person(Person &&) noexcept = default;
@@ -19,7 +19,7 @@ public:
         return get_position() == other.get_position();
     }
 
-private:
+ private:
     int _id;
     Point _position;
 };
@@ -33,9 +33,10 @@ namespace std {
 template <>
 struct hash<Goal> {
     std::size_t operator()(const Goal &goal) const noexcept {
-        return 239 * std::hash<Point>()(goal.get_position()) + std::hash<int>()(goal.get_id());
+        return 239 * std::hash<Point>()(goal.get_position()) +
+               std::hash<int>()(goal.get_id());
     }
 };
 }  // namespace std
 
-#endif // PERSON_H
+#endif  // PERSON_H

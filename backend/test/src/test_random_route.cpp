@@ -88,18 +88,15 @@ TEST(test_person, random_test_prioritized_planner) {
             int same_coord = static_cast<int>(distribution(generator));
             int diff_coord_2 = static_cast<int>(distribution(generator));
             int diff_coord_1 = static_cast<int>(distribution(generator));
-            int direction = static_cast<int>(wall_direction_distribution(generator));
+            int direction =
+                static_cast<int>(wall_direction_distribution(generator));
             if (direction == 0) {
-                border.push_back(Border(
-                    Point(same_coord, diff_coord_1),
-                    Point(same_coord, diff_coord_2)));
+                border.push_back(Border(Point(same_coord, diff_coord_1),
+                                        Point(same_coord, diff_coord_2)));
+            } else {
+                border.push_back(Border(Point(diff_coord_1, same_coord),
+                                        Point(diff_coord_2, same_coord)));
             }
-            else {
-                border.push_back(Border(
-                    Point(diff_coord_1, same_coord),
-                    Point(diff_coord_2, same_coord)));
-            }
-            
         }
         Grid grid(border);
         Point start(static_cast<int>(distribution(generator)),

@@ -13,7 +13,10 @@
 
 enum class PlannerSetting { SIMPLE, PRIORITIZED, RANDOM };
 
-std::vector<std::vector<Action>> helper(PlannerSetting setting, const std::vector<Person> &persons, const std::vector<Goal> &goals, Grid &grid) {
+std::vector<std::vector<Action>> helper(PlannerSetting setting,
+                                        const std::vector<Person> &persons,
+                                        const std::vector<Goal> &goals,
+                                        Grid &grid) {
     switch (setting) {
         case PlannerSetting::SIMPLE: {
             SimplePlanner planner(persons, goals, &grid);
@@ -46,17 +49,13 @@ std::vector<std::vector<Action>> helper_no_conflicts_test(
     return helper(setting, persons, goals, grid);
 }
 
-std::vector<std::vector<Action>> helper_crossing_routes_test(PlannerSetting setting) {
+std::vector<std::vector<Action>> helper_crossing_routes_test(
+    PlannerSetting setting) {
     std::vector<Border> borders{
-        {Point(0, 1), Point(1, 1)},
-        {Point(1, 1), Point(1, 2)},
-        {Point(1, 2), Point(3, 2)},
-        {Point(3, 2), Point(3, 3)},
-        {Point(3, 3), Point(1, 3)},
-        {Point(1, 3), Point(1, 4)},
-        {Point(1, 4), Point(0, 4)},
-        {Point(0, 4), Point(0, 1)}
-    };
+        {Point(0, 1), Point(1, 1)}, {Point(1, 1), Point(1, 2)},
+        {Point(1, 2), Point(3, 2)}, {Point(3, 2), Point(3, 3)},
+        {Point(3, 3), Point(1, 3)}, {Point(1, 3), Point(1, 4)},
+        {Point(1, 4), Point(0, 4)}, {Point(0, 4), Point(0, 1)}};
     Grid grid(borders, Point(0, 0), Point(5, 5));
     std::vector<Person> persons;
     persons.emplace_back(0, Point(0, 1));
@@ -96,7 +95,7 @@ TEST(
     auto routes = helper_crossing_routes_test(PlannerSetting::PRIORITIZED);
 
     ASSERT_EQ(routes.size(), 2);
-    
+
     bool has_detour = routes[0].size() > 3 || routes[1].size() > 3;
     ASSERT_TRUE(has_detour);
 }
@@ -133,4 +132,5 @@ TEST(test_routes, prioritized_locked_person) {
 }
 
 // There were tests about swap routes
-// As far as I understand, there is no possibility for prioritized planner to generate them
+// As far as I understand, there is no possibility for prioritized planner to
+// generate them
