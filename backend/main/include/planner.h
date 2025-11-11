@@ -1,6 +1,7 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
+#include <algorithm>
 #include <vector>
 
 #include "grid.h"
@@ -37,12 +38,9 @@ public:
     }
 
     bool is_reached_goal(const Point& point) const noexcept {
-        for (auto& goal : _goals) {
-            if (point == goal.get_position()) {
-                return true;
-            }
-        }
-        return false;
+        return std::any_of(_goals.begin(), _goals.end(), [&point](const auto& goal) {
+            return point == goal.get_position();
+        });
     }
 private:
     static int h(const Point& point, const Point &other_point) noexcept {

@@ -10,7 +10,7 @@ SimplePlanner::SimplePlanner(const std::vector<Person>& persons, const std::vect
 std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes;
     routes.reserve(_persons.size());
-    for (auto person : _persons) {  // cppcheck-suppress iterateByValue
+    for (auto person : _persons) {
         auto route = calculate_route(person);
         if (route) {
             routes.push_back(route.value());
