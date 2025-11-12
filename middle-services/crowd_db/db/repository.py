@@ -34,9 +34,9 @@ class MongoMapRepository:
         return [MapDoc.from_bson(d) for d in _col().find().limit(limit)]
 
     def replace(self, m: MapDoc) -> bool:
-        if not m.identifier:
+        if not m.get_id():
             raise ValueError("replace: _id required")
-        res = _col().replace_one({"_id": m.identifier}, m.to_bson())
+        res = _col().replace_one({"_id": m.get_id()}, m.to_bson())
         return res.matched_count == 1
 
     def delete(self, map_id: str | ObjectId) -> bool:
@@ -71,7 +71,7 @@ class MongoMapRepository:
             return result.matched_count > 0
         except (InvalidId, Exception):
             return False
-        
+
 
     def delete_animation(self, animation_id: str | ObjectId) -> bool:
         try:
@@ -80,5 +80,3 @@ class MongoMapRepository:
             return False
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
-    
-    

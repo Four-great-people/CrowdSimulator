@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, List, Optional, Union, Dict
 
 from bson import ObjectId
 
@@ -70,6 +70,9 @@ class MapDoc:
             "goals": [p.to_bson() for p in self.goals],
         }
 
+    def get_id(self) -> Optional[ObjectId]:
+        return self._id
+
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "MapDoc":
         return MapDoc(
@@ -89,7 +92,7 @@ class AnimationDoc:
     borders: List[Segment] = field(default_factory=list)
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
-    
+
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     name: str = "Без названия"
@@ -106,9 +109,12 @@ class AnimationDoc:
             "statistics": self.statistics,
             "name": self.name
         }
-        if self.identifier:
-            doc["_id"] = self.identifier
+        if self._id:
+            doc["_id"] = self._id
         return doc
+
+    def get_id(self) -> Optional[ObjectId]:
+        return self._id
 
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "AnimationDoc":

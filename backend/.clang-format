@@ -6,4 +6,5 @@
     TabWidth: 4,
     InsertBraces: true,
     AllowShortIfStatementsOnASingleLine: Never,
+    InsertNewlineAtEOF: true,
 }

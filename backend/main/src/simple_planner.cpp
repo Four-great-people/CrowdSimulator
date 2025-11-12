@@ -4,13 +4,14 @@
 #include <map>
 #include <unordered_map>
 
-SimplePlanner::SimplePlanner(const std::vector<Person>& persons, const std::vector<Goal>& goals, Grid* grid)
+SimplePlanner::SimplePlanner(const std::vector<Person>& persons,
+                             const std::vector<Goal>& goals, Grid* grid)
     : Planner(persons, goals, grid) {}
 
 std::vector<std::vector<Action>> SimplePlanner::plan_all_routes() {
     std::vector<std::vector<Action>> routes;
     routes.reserve(_persons.size());
-    for (auto person : _persons) {  // cppcheck-suppress iterateByValue
+    for (auto person : _persons) {
         auto route = calculate_route(person);
         if (route) {
             routes.push_back(route.value());
