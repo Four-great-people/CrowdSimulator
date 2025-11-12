@@ -29,7 +29,7 @@ def test_crud_maps_unit():
 
     # list
     lst = repo.list(limit=10)
-    assert any(doc.identifier == _id for doc in lst)
+    assert any(doc.get_id() == _id for doc in lst)
 
     # replace
     got.persons.append(NamedPointSpec(id=1, position=Point(1,1)))
