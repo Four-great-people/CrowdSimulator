@@ -71,7 +71,7 @@ class MongoMapRepository:
             return result.matched_count > 0
         except (InvalidId, Exception):
             return False
-        
+
 
     def delete_animation(self, animation_id: str | ObjectId) -> bool:
         try:
@@ -80,5 +80,3 @@ class MongoMapRepository:
             return False
         result = _animations_col().delete_one({"_id": oid})
         return result.deleted_count == 1
-    
-    

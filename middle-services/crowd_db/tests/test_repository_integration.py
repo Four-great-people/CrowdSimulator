@@ -1,9 +1,7 @@
 import pytest
-from db.repository import MongoMapRepository
 from db.models import MapDoc, Point, Segment, NamedPointSpec
 from db.client import get_db
 from db.config import MAPS_COLLECTION
-from db.models import MapDoc, PersonSpec, Point, Segment
 from db.repository import MongoMapRepository
 from db.validators import apply_collection_validator
 

@@ -37,7 +37,7 @@ def test_get_maps(client):
 
     json_list = resp2.get_json()
     assert isinstance(json_list, list)
-    
+
     found = any(item["id"] == oid for item in json_list)
     assert found, f"Map with id {oid} not found in {json_list}"
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from bson import ObjectId
@@ -59,11 +59,11 @@ def get_maps():
         maps = repo.list(limit=1000)
         map_list = [
             {
-                "id": str(m._id),
+                "id": str(m.get_id()),
                 "name": m.name or "Без названия"
             }
             for m in maps
-            if m._id is not None
+            if m.get_id() is not None
         ]
         return jsonify(map_list), 200
     except Exception as e:
@@ -86,9 +86,9 @@ def get_map(map_id: str):
         return jsonify({"error": "map not found"}), 400
 
     resp = OrderedDict()
-    if m._id is not None:
-        resp["_id"] = str(m._id)
-    resp["name"] = m.name or "Без названия" 
+    if m.get_id() is not None:
+        resp["_id"] = str(m.get_id())
+    resp["name"] = m.name or "Без названия"
     resp["up_right_point"] = m.up_right_point.to_bson()
     resp["down_left_point"] = m.down_left_point.to_bson()
     resp["borders"] = [s.to_bson() for s in m.borders]
@@ -112,7 +112,7 @@ def calculate_statistics_for_endpoint(endpoint: str,
     j = result.json()
     def extract_person(person) -> Optional[int]:
         route = person.get("route")
-        if not route:  
+        if not route:
             return None
         return sum(15 if "_" in direction else 10 for direction in route)
 
@@ -180,11 +180,11 @@ def get_animations():
         animations = repo.get_animations(limit=1000)
         animation_list = [
             {
-                "id": str(anim._id),
+                "id": str(anim.get_id()),
                 "name": anim.name or "Без названия"
             }
             for anim in animations
-            if anim._id is not None
+            if anim.get_id() is not None
         ]
         return jsonify(animation_list), 200
     except Exception as e:
@@ -202,7 +202,7 @@ def get_animation(animation_id: str):
             animation_data['_id'] = str(animation_data['_id'])
         if 'name' not in animation_data:
             animation_data['name'] = animation.name or "Без названия"
-        
+
         return jsonify(animation_data), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
@@ -214,7 +214,7 @@ def update_animation(animation_id: str):
         new_name = payload.get('name', '')
         result = repo.update_animation_name(animation_id, new_name)
         if not result:
-            return jsonify({"error": "animation not found"}), 400   
+            return jsonify({"error": "animation not found"}), 400
         return jsonify({"message": "animation updated"}), 200
     except Exception as e:
         return jsonify({"error": f"invalid animation payload: {e}"}), 400

@@ -45,12 +45,12 @@ def test_json_schema_allows_id_types():
         "persons": [
             {"id": 0, "position": {"x": 0, "y": 1}},
             {"id": "user-1", "position": {"x": 1, "y": 1}},
-            {"position": {"x": 2, "y": 2}},  
+            {"position": {"x": 2, "y": 2}},
         ],
         "goals": [
             {"id": 0, "position": {"x": 1, "y": 1}},
             {"id": "goal-1", "position": {"x": 2, "y": 2}},
-            {"position": {"x": 3, "y": 3}},  
+            {"position": {"x": 3, "y": 3}},
         ],
     }
     # не должно кидать
