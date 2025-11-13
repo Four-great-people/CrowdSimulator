@@ -114,7 +114,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     };
 
     const outsideBorders = (cornerX: number, cornerY: number) => {
-        return cornerX === 0 || cornerX === grid.width || cornerY === 0 || cornerY === grid.height;
+        return cornerX <= 0 || cornerX >= grid.width || cornerY <= 0 || cornerY >= grid.height;
     };
 
 
