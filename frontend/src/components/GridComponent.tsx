@@ -167,8 +167,14 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
     const processDeleteFromCenter = (cellX: number, cellY: number) => {
 
-        if (typeof (grid as any).removeNamedPointAt === 'function') {
-            (grid as any).removeNamedPointAt(cellX, cellY);
+        if (objectPlacing == personType) {
+            if (typeof (grid as any).removePersonAt === 'function') {
+                (grid as any).removePersonAt(cellX, cellY);
+            }
+        } else if (objectPlacing == goalType) {
+            if (typeof (grid as any).removeGoalAt === 'function') {
+                (grid as any).removeGoalAt(cellX, cellY);
+            }
         }
         setDelState(delIdle);
 
@@ -212,7 +218,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
         const offsetX = e.clientX - dimensions.xOffs;
         const offsetY = height - (e.clientY - dimensions.yOffs);
-        // console.log(`2${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
+        // console.log(`2' ${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
         if (state === idleState) {
             processIdle(offsetX, offsetY, localWidth, localHeight, intersectionArea);
         } else if (state === inProcessState) {
@@ -224,28 +230,32 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         forceRerender();
     };
 
-    const handleOnContextMenu = (e: any) => {
+    const handleOnDelete = (e: any) => {
         if (!editable) return;
         if (!isValidCellTarget(e.target)) return;
 
         e.preventDefault(); 
 
-        const localWidth = 30;
-        const localHeight = 30;
-        const intersectionArea = Math.floor((Math.min(localWidth, localHeight) * intersectionAreaRatio));
+        const generalSize = Math.min(dimensions.width / xGridSize, 30);
+        // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
+        const localWidth = generalSize;
+        const localHeight = generalSize;
+        const intersectionArea = generalSize / 2;
         const height = localHeight * grid.height;
 
-        const offsetX = e.clientX - e.currentTarget.offsetLeft;
-        const offsetY = height - (e.clientY - e.currentTarget.offsetTop); 
-        const localOffsetX = offsetX % localWidth;
-        const localOffsetY = localHeight - (offsetY % localHeight); 
+        const offsetX = e.clientX - dimensions.xOffs;
+        const offsetY = height - (e.clientY - dimensions.yOffs);
+        // console.log(`2 ${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
 
-        if (delState === delIdle) {
-            if (isInside(localOffsetX, localOffsetY, localWidth, localHeight, intersectionArea)) {
-                const cellX = Math.floor(offsetX / localWidth);
-                const cellY = Math.floor(offsetY / localHeight);
-                processDeleteFromCenter(cellX, cellY);
-                return;
+        if (objectPlacing !== borderType) {
+            setDelState(delIdle);
+            const cellX = Math.floor(offsetX / localWidth);
+            const cellY = Math.floor(offsetY / localHeight);
+            processDeleteFromCenter(cellX, cellY);
+        } else {
+            // console.log(`state:${state}`)
+            if (delState === delWall) {
+                processDeleteWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
             } else {
                 const cornerX = toCorner(offsetX, localWidth, intersectionArea);
                 const cornerY = toCorner(offsetY, localHeight, intersectionArea);
@@ -257,16 +267,15 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                     setDelState(delWall);
                 }
             }
-        } else if (delState === delWall) {
-            processDeleteWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
         }
+        forceRerender();
     };
 
     return (
         <div ref={gridRef}
             className="grid-container"
             onClick={handleOnClick}
-            onContextMenu={handleOnContextMenu}
+            onContextMenu={handleOnDelete}
             data-tick={renderTick}>
             {grid.cells.map((row) =>
                 row.map((cell) => {
