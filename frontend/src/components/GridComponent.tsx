@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/GridComponent.css';
 import Grid from '../models/Grid';
 import NamedPoint from '../models/NamedPoint';
@@ -33,6 +33,32 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     const outsideBordersMessage = "Устанавливайте стены внутри сетки";
     const diagonalBoardMessage = "Диагональные стены не поддерживаются";
     const sameCellMessage = "Человек и цель не могут находиться в одной клетке";
+
+    const gridRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0, xOffs: 0, yOffs: 0 });
+    const xGridSize = 40;
+    const yGridSize = 22;
+    useEffect(() => {
+        const updateDimensions = () => {
+            if (gridRef.current) {
+                const { width, height, x, y } = gridRef.current.getBoundingClientRect();
+                const xOffs = x;
+                const yOffs = y;
+                // console.log(`WH ${width} ${height} ${xOffs} ${yOffs} ${x} ${y}`);
+                setDimensions({ width, height, xOffs, yOffs });
+            }
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+        window.addEventListener('scroll', updateDimensions);
+
+        return () => {
+            window.removeEventListener('resize', updateDimensions);
+            window.removeEventListener('scroll', updateDimensions);
+        };
+    }, []);
+
 
     useEffect(() => {
         setAnimationKey(prev => prev + 1);
@@ -173,17 +199,20 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal');
     };
 
-    const handleOnClcik = (e: any) => {
+    const handleOnClick = (e: any) => {
         if (!editable) return;
         if (!isValidCellTarget(e.target)) return;
 
-        const localWidth = 30;
-        const localHeight = 30;
-        const intersectionArea = 15;
+        const generalSize = Math.min(dimensions.width / xGridSize, 30);
+        // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
+        const localWidth = generalSize;
+        const localHeight = generalSize;
+        const intersectionArea = generalSize / 2;
         const height = localHeight * grid.height;
 
-        const offsetX = e.clientX - e.currentTarget.offsetLeft;
-        const offsetY = height - (e.clientY - e.currentTarget.offsetTop); 
+        const offsetX = e.clientX - dimensions.xOffs;
+        const offsetY = height - (e.clientY - dimensions.yOffs);
+        // console.log(`2${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
         if (state === idleState) {
             processIdle(offsetX, offsetY, localWidth, localHeight, intersectionArea);
         } else if (state === inProcessState) {
@@ -234,9 +263,9 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     };
 
     return (
-        <div
+        <div ref={gridRef}
             className="grid-container"
-            onClick={handleOnClcik}
+            onClick={handleOnClick}
             onContextMenu={handleOnContextMenu}
             data-tick={renderTick}>
             {grid.cells.map((row) =>
@@ -257,7 +286,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                             {isPersonCell && (
                                 <div
                                     key={`${animationKey}-${personsInCell[0].id}`}
-                                    className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell.id} ${isGoalCell ? 'reached-goal' : ''}`}
+                                    className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
                                 ></div>
                             )}
                         </div>
