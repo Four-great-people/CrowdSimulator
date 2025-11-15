@@ -95,7 +95,7 @@ export class Grid {
       }
       this.walls = newWalls;
     }
-removeNamedPointAt(x: number, y: number) {
+removePersonAt(x: number, y: number) {
     const cell = this.getCell(x, y);
     if (!cell) return;
 
@@ -104,7 +104,13 @@ removeNamedPointAt(x: number, y: number) {
         cell.persons = cell.persons.filter(p => p.id !== person.id);
         this.persons = this.persons.filter(p => p.id !== person.id);
     }
-    else if (cell.goals.length > 0) {
+}
+
+removeGoalAt(x: number, y: number) {
+    const cell = this.getCell(x, y);
+    if (!cell) return;
+
+    if (cell.goals.length > 0) {
         const goal = cell.goals[0];
         cell.goals = cell.goals.filter(g => g.id !== goal.id);
         this.goals = this.goals.filter(g => g.id !== goal.id);
@@ -175,22 +181,20 @@ removeNamedPointAt(x: number, y: number) {
     addPerson(person: NamedPoint) {
         const cell = this.getCell(person.position.x, person.position.y);
         if (cell) {
-            cell.persons = cell.persons.filter(p => p.id !== person.id);
-            cell.addPerson(person);
-        
-            this.persons = this.persons.filter(p => p.id !== person.id);
-            this.persons.push(person);
+            if (cell.persons.length == 0 && cell.goals.length == 0) {
+                cell.addPerson(person);
+                this.persons.push(person);
+            }
         }
     }   
 
     addGoal(goal: NamedPoint) {
         const cell = this.getCell(goal.position.x, goal.position.y);
         if (cell) {
-            cell.goals = cell.goals.filter(p => p.id !== goal.id);
-            cell.addGoal(goal);
-        
-            this.goals = this.goals.filter(p => p.id !== goal.id);
-            this.goals.push(goal);
+            if (cell.persons.length == 0 && cell.goals.length == 0) {
+                cell.addGoal(goal);
+                this.goals.push(goal);
+            }
         }
     }   
 
