@@ -44,6 +44,7 @@ class Planner {
 
  private:
     static int h(const Point& point, const Point& other_point) noexcept {
+        // There should be true distance, not cost of the move
         return static_cast<int>((point - other_point).diag_norm_multiplied2());
     }
 };

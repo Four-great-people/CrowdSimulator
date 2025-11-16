@@ -51,10 +51,7 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
             if (_grid->is_incorrect_move(Segment(current_position, position))) {
                 continue;
             }
-            int new_g =
-                current_f +
-                static_cast<int>(
-                    (position - current_position).diag_norm_multiplied2());
+            int new_g = current_f + current_position.get_move_cost(position);
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;

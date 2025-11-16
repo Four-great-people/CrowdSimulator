@@ -38,8 +38,6 @@ class CATable {
     std::vector<Point> get_neighbors_timestep(const Point& point,
                                               int time) const;
 
-    constexpr static int wait_cost = get_cost(Action::WAIT);
-
  private:
     bool is_cell_available(int x, int y, int t) const;
     bool is_reverse_move_valid(const Point& from, const Point& to, int t_start,

@@ -39,3 +39,9 @@ TEST(test_catable, sequential_standing) {
     table.add_trajectory(0, {Point{1, 1}, Point{1, 2}});
     ASSERT_TRUE(table.check_move(Point{2, 2}, Point{1, 2}, 1));
 }
+
+TEST(test_catable, wait_collision) {
+    CATable table;
+    table.add_trajectory(0, {Point{1, 1}, Point{1, 1}, Point{1, 2}});
+    ASSERT_FALSE(table.check_move(Point{2, 1}, Point{1, 1}, 0));
+}
