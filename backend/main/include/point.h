@@ -27,6 +27,7 @@ class Point {
     std::vector<Point> get_neighbors() const noexcept;
     std::int64_t abs_norm() const noexcept;
     std::int64_t diag_norm_multiplied2() const noexcept;
+    int get_move_cost(const Point& other) const noexcept;
     Action to_another(const Point &point) const;
 
  private:

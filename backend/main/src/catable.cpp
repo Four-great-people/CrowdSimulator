@@ -11,8 +11,7 @@ void CATable::add_trajectory(int /*traj_id*/,
     Point last_point = trajectory[0];
     for (int i = 1; i < static_cast<int>(trajectory.size()); ++i) {
         const Point& coord = trajectory[std::size_t(i)];
-        int move_cost =
-            static_cast<int>((coord - last_point).diag_norm_multiplied2());
+        int move_cost = last_point.get_move_cost(coord);
         for (int add_t = 0; add_t < move_cost; ++add_t) {
             add_time_point(last_point.get_x(), last_point.get_y(), t + add_t);
         }
@@ -32,7 +31,7 @@ void CATable::add_time_point(int x, int y, int t) {
 bool CATable::check_move(const Point& from, const Point& to,
                          int start_time) const {
     if (from == to) {
-        for (int add_time = 1; add_time <= wait_cost; ++add_time) {
+        for (int add_time = 1; add_time <= get_cost(Action::WAIT); ++add_time) {
             if (!is_cell_available(from.get_x(), from.get_y(),
                                    start_time + add_time)) {
                 return false;
@@ -40,8 +39,7 @@ bool CATable::check_move(const Point& from, const Point& to,
         }
         return true;
     }
-    int new_time =
-        start_time + static_cast<int>((to - from).diag_norm_multiplied2());
+    int new_time = start_time + from.get_move_cost(to);
     if (!is_cell_available(to.get_x(), to.get_y(), new_time)) {
         return false;
     }

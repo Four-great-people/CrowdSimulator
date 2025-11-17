@@ -86,6 +86,14 @@ std::int64_t Point::diag_norm_multiplied2() const noexcept {
     return min_coordinate * 3 + (std::max(abs_x, abs_y) - min_coordinate) * 2;
 }
 
+int Point::get_move_cost(const Point& other) const noexcept {
+    if (*this == other) {
+        return get_cost(Action::WAIT);
+    }
+    return static_cast<int>((*this - other).diag_norm_multiplied2());
+}
+
+
 Action Point::to_another(const Point &point) const {
     Point temp = point - *this;
     switch (temp.get_x()) {

@@ -137,11 +137,7 @@ std::optional<std::vector<Action>> PrioritizedPlanner::calculate_route(
                 continue;
             }
 
-            int move_cost = static_cast<int>(
-                (neighbor - current->position).diag_norm_multiplied2());
-            if (neighbor == current->position) {
-                move_cost += CATable::wait_cost;
-            }
+            int move_cost = current->position.get_move_cost(neighbor);
             int new_g = current->g + move_cost;
             int new_time = current->time + move_cost;
             TimePoint new_tp = {neighbor.get_x(), neighbor.get_y(), new_time};
