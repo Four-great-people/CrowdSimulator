@@ -395,7 +395,6 @@ const AnimationDetail: React.FC = () => {
                 }
             });
 
-            console.log(`paused ${animationPausedRef.current}`);
             animationRef.current = setTimeout(() => {
                 let newStepIndex = stepIndex;
 
@@ -407,7 +406,6 @@ const AnimationDetail: React.FC = () => {
                 executeSteps(newGrid, updatedPersons, newStepIndex, routes);
             }, 200);
         } else {
-            console.log(`paused ${animationPausedRef.current}`);
             animationRef.current = setTimeout(() => {
                 let newStepIndex = stepIndex;
                 executeSteps(currentGrid, persons, newStepIndex, routes);
@@ -420,7 +418,6 @@ const AnimationDetail: React.FC = () => {
             return;
         }
         setAnimationPaused(!animationPaused);
-        console.log(`pausedXX ${animationPaused}`);
     }
 
     useEffect(() => {
