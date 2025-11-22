@@ -109,7 +109,6 @@ class MapDoc:
         if self.user_id is not None:
             doc["user_id"] = self.user_id
         return doc
-    
     def set_id(self, oid: ObjectId) -> None:
         self._id = oid
 
