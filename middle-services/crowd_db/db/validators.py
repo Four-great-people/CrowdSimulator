@@ -138,4 +138,3 @@ def apply_collection_validator():
         db.create_collection(USERS_COLLECTION, validator=user_schema)
     else:
         db.command("collMod", USERS_COLLECTION, validator=user_schema)
-

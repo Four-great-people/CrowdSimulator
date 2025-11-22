@@ -191,4 +191,3 @@ class MongoUserRepository:
     def get_by_username(self, username: str) -> Optional[UserDoc]:
         d = _users_col().find_one({"username": username})
         return UserDoc.from_bson(d) if d else None
-
