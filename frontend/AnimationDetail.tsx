@@ -29,6 +29,7 @@ const AnimationDetail: React.FC = () => {
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
     const [completedGoals, setCompletedGoals] = useState<{ [id: number]: boolean }>({});
     const [isAnimating, setIsAnimating] = useState(false);
+    const isAnimatingRef = useRef(isAnimating);
     const [animationCompleted, setAnimationCompleted] = useState(false);
     const [animationPaused, setAnimationPaused] = useState(false);
     const animationPausedRef = useRef(animationPaused);
@@ -56,6 +57,10 @@ const AnimationDetail: React.FC = () => {
     useEffect(() => {
         animationPausedRef.current = animationPaused;
     }, [animationPaused]);
+
+    useEffect(() => {
+        isAnimatingRef.current = isAnimating;
+    }, [isAnimating]);
 
     const loadContent = async (contentId: string) => {
         if (isAnimating || isLoadingMap) return;
@@ -184,7 +189,7 @@ const AnimationDetail: React.FC = () => {
     };
     
     const startSavedAnimation = async (savedGrid: Grid, savedRoutes: any[], savedStatistics: any) => {
-        if (!savedGrid || isAnimating) return;
+        if (!savedGrid || isAnimatingRef.current) return;
 
         setIsAnimating(true);
         setAnimationCompleted(false);
@@ -233,7 +238,14 @@ const AnimationDetail: React.FC = () => {
     }
 
     const restartAnimation = () => {
-        if (isAnimating) return;
+        if (isAnimating && !animationPaused) return;
+        if (animationPaused) {
+            clearTimeout(animationRef.current);
+            setAnimationPaused(false);
+            setIsAnimating(false);
+            isAnimatingRef.current = false;
+            animationPausedRef.current = false;
+        }
 
         if (!originalGrid || routes.length === 0) {
             if (!isSavedAnimation) {
@@ -414,7 +426,7 @@ const AnimationDetail: React.FC = () => {
     useEffect(() => {
         return () => {
             if (animationRef.current) {
-            clearTimeout(animationRef.current);
+                clearTimeout(animationRef.current);
             }
         };
     }, []);
@@ -480,10 +492,10 @@ const AnimationDetail: React.FC = () => {
                 {(
                     <button
                         onClick={restartAnimation}
-                        disabled={!animationCompleted}
+                        disabled={!animationCompleted && !animationPaused}
                         className="save-animation-btn"
                     >
-                        Повторить анимацию
+                        {animationPaused ? "Сбросить анимацию" : "Повторить анимацию"}
                     </button>
                 )}
                 {(
