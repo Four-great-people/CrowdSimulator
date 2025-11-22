@@ -272,7 +272,7 @@ def update_map(map_id: str):
             return jsonify({"error": "invalid user identity"}), 401
 
         m = MapDoc.from_bson(payload)
-        m._id = ObjectId(map_id)
+        m.set_id(ObjectId(map_id))
         m.user_id = user_oid
         ok = repo.replace_for_user(m, user_oid)
         if not ok:
@@ -379,4 +379,3 @@ def delete_animation(animation_id: str):
         return jsonify({"message": "animation deleted"}), 200
     except Exception as e:  # pylint: disable=broad-exception-caught
         return jsonify({"error": f"delete failed: {e}"}), 400
-

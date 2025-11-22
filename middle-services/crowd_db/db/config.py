@@ -9,4 +9,3 @@ DB_NAME = os.getenv("MONGODB_DB", "crowdsim")
 MAPS_COLLECTION = os.getenv("MONGODB_COLLECTION_MAPS", "maps")
 ANIMATIONS_COLLECTION = os.getenv("MONGODB_COLLECTION_ANIMATIONS", "animations")
 USERS_COLLECTION = os.getenv("MONGODB_COLLECTION_USERS", "users")
-

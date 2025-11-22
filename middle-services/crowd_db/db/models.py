@@ -109,6 +109,8 @@ class MapDoc:
         if self.user_id is not None:
             doc["user_id"] = self.user_id
         return doc
+    def set_id(self, oid: ObjectId) -> None:
+        self._id = oid
 
     def get_id(self) -> Optional[ObjectId]:
         return self._id
@@ -175,4 +177,3 @@ class AnimationDoc:
             user_id=d.get("user_id"),
             _id=d.get("_id"),
         )
-
