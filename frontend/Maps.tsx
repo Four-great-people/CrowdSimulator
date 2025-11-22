@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  GetMapsFromBackend, 
-  deleteMapFromBackend, 
-  GetAnimationsFromBackend,
-  deleteAnimationFromBackend,
-  MapAnimItem
+import {
+    GetMapsFromBackend,
+    deleteMapFromBackend,
+    GetAnimationsFromBackend,
+    deleteAnimationFromBackend,
+    MapAnimItem,
+    logoutUser,
 } from './src/services/api';
 
 import './styles/App.css';
@@ -20,21 +21,20 @@ const Maps: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    
 
     const activeTab = location.state?.activeTab || 'maps';
 
     const setActiveTab = (tab: 'maps' | 'animations') => {
         navigate(location.pathname, { state: { activeTab: tab } });
     };
-    
+
     const loadMaps = async () => {
         try {
             setIsLoading(true);
             const maps = await GetMapsFromBackend();
             setMaps(maps);
         } catch (error) {
-            alert("Ошибка при загрузке карт!")
+            alert('Ошибка при загрузке карт!');
         } finally {
             setIsLoading(false);
         }
@@ -46,7 +46,7 @@ const Maps: React.FC = () => {
             const animations = await GetAnimationsFromBackend();
             setAnimations(animations);
         } catch (error) {
-            console.error("Ошибка при загрузке анимаций!");
+            console.error('Ошибка при загрузке анимаций!');
         } finally {
             setIsLoading(false);
         }
@@ -66,7 +66,7 @@ const Maps: React.FC = () => {
         try {
             setBusyAnimationId(animationId);
             await deleteAnimationFromBackend(animationId);
-            setAnimations(prev => prev.filter((animItem) => animItem.id !== animationId));
+            setAnimations(prev => prev.filter(animItem => animItem.id !== animationId));
         } catch (err) {
             console.error(err);
             alert('Не удалось удалить анимацию');
@@ -77,22 +77,27 @@ const Maps: React.FC = () => {
 
     const createNewMap = () => {
         const newGrid = new Grid(40, 22);
-        navigate('/map/new', { state: { activeTab: "maps" } });       
+        navigate('/map/new', { state: { activeTab: 'maps' } });
     };
-      
+
     const deleteMap = async (e: React.MouseEvent, mapId: string) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         if (!confirm('Удалить эту карту безвозвратно?')) return;
         try {
             setBusyId(mapId);
             await deleteMapFromBackend(mapId);
             setMaps(prev => prev.filter(item => item.id !== mapId));
         } catch (err) {
-          console.error(err);
-          alert('Не удалось удалить карту');
+            console.error(err);
+            alert('Не удалось удалить карту');
         } finally {
-          setBusyId(null);
+            setBusyId(null);
         }
+    };
+
+    const handleLogout = () => {
+        logoutUser();
+        navigate('/login', { replace: true });
     };
 
     useEffect(() => {
@@ -105,14 +110,19 @@ const Maps: React.FC = () => {
 
     return (
         <div className="maps">
+            <div className="maps-header">
+                <button className="blue-button" onClick={handleLogout}>
+                    Выйти
+                </button>
+            </div>
             <div className="tabs">
-                <button 
+                <button
                     className={`tab-button ${activeTab === 'maps' ? 'active' : ''}`}
                     onClick={() => setActiveTab('maps')}
                 >
                     Карты
                 </button>
-                <button 
+                <button
                     className={`tab-button ${activeTab === 'animations' ? 'active' : ''}`}
                     onClick={() => setActiveTab('animations')}
                 >
@@ -125,7 +135,7 @@ const Maps: React.FC = () => {
                 ) : activeTab === 'maps' ? (
                     <>
                         <div className="create-map-button-container">
-                            <button 
+                            <button
                                 className="blue-button create-map-button"
                                 onClick={createNewMap}
                             >
@@ -134,7 +144,11 @@ const Maps: React.FC = () => {
                         </div>
                         <div className="map-list">
                             {mapList.map(mapItem => (
-                                <div key={mapItem.id} className="map-row" onClick={() => handleMapClick(mapItem.id)}>
+                                <div
+                                    key={mapItem.id}
+                                    className="map-row"
+                                    onClick={() => handleMapClick(mapItem.id)}
+                                >
                                     <button
                                         className="blue-button map-row__title"
                                         disabled={isLoadingMaps || !!busyId}
@@ -159,15 +173,17 @@ const Maps: React.FC = () => {
                 ) : (
                     <div className="animation-list">
                         {animationList.length === 0 ? (
-                            <div className="empty-state">
-                                Нет сохраненных анимаций
-                            </div>
+                            <div className="empty">Нет сохранённых анимаций</div>
                         ) : (
-                            animationList.map((animItem) => ( 
-                                <div key={animItem.id} className="map-row" onClick={() => handleAnimationClick(animItem.id)}>
+                            animationList.map(animItem => (
+                                <div
+                                    key={animItem.id}
+                                    className="map-row"
+                                    onClick={() => handleAnimationClick(animItem.id)}
+                                >
                                     <button
                                         className="blue-button map-row__title"
-                                        disabled={isLoading || !!busyAnimationId}
+                                        disabled={!!busyAnimationId}
                                         title={animItem.name}
                                     >
                                         {animItem.name}
@@ -190,4 +206,7 @@ const Maps: React.FC = () => {
         </div>
     );
 };
+
 export default Maps;
+
+
