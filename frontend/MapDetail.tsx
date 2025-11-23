@@ -31,6 +31,8 @@ const MapDetail: React.FC = () => {
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [newWidth, setNewWidth] = useState(40);
+    const [newHeight, setNewHeight] = useState(22);
 
     const algorithmsSupported: Algorithm[] = [
         {title: "dense", description: "Считать с учётом пересечений"},
@@ -53,8 +55,11 @@ const MapDetail: React.FC = () => {
             setError(null);
             if (mapId =='new') {
                 setIsNewMap(true);
-                setGrid(createNewGrid());
+                const newGrid = createNewGrid();
+                setGrid(newGrid);
                 setOriginalMapName('Без названия');
+                setNewWidth(newGrid.width);
+                setNewHeight(newGrid.height);
             } else {
                 setIsLoadingMap(true);
                 const {grid: newGrid, name} = await GetMapFromBackend(mapId);
@@ -62,7 +67,10 @@ const MapDetail: React.FC = () => {
                 setIsNewMap(false);
                 setOriginalMapName(name);
                 setMapName(name);
+                setNewWidth(newGrid.width);
+                setNewHeight(newGrid.height);
             }
+            
         } catch (error) {
             setError('Карта не найдена');
             console.log(error);
@@ -155,6 +163,28 @@ const MapDetail: React.FC = () => {
         }
     };
 
+    const handleResize = () => {
+        if (!grid) return;
+        
+        if (newWidth <= 0 || newHeight <= 0) {
+            alert("Размеры должны быть положительными числами");
+            return;
+        }
+
+        if (newWidth > 100 || newHeight > 100) {
+            alert("Максимальный размер 100x100");
+            return;
+        }
+
+        try {
+            const resizedGrid = grid.resize(newWidth, newHeight);
+            setGrid(resizedGrid);
+        } catch (error) {
+            alert("Ошибка при изменении размера сетки");
+            console.error(error);
+        }
+    };
+
     const onObjectClick = async(object: string) => {
         setCurrentObject(object);
     };
@@ -221,6 +251,40 @@ const MapDetail: React.FC = () => {
                             </div>
                         </div>
                         ))}
+                    </div>
+                </div>
+                <div className="resize-controls">
+                    <h3 className="resize-title">Изменение размера сетки</h3>
+                    <div className="size-inputs">
+                        <label>
+                            Ширина:
+                            <input
+                                type="number"
+                                value={newWidth}
+                                onChange={(e) => setNewWidth(parseInt(e.target.value) || 1)}
+                                min="1"
+                                max="100"
+                            />
+                        </label>
+                        <label>
+                            Высота:
+                            <input
+                                type="number"
+                                value={newHeight}
+                                onChange={(e) => setNewHeight(parseInt(e.target.value) || 1)}
+                                min="1"
+                                max="100"
+                            />
+                        </label>
+                    </div>
+                    <div className="current-size-info">
+                        Текущий размер: {grid?.width} × {grid?.height}
+                    </div>
+                    <button onClick={handleResize} className="resize-button">
+                        Применить новый размер
+                    </button>
+                    <div className="size-warning">
+                        ⚠️ Внимание: При уменьшении размера объекты за пределами новой сетки будут удалены!
                     </div>
                 </div>
             </div>

@@ -36,8 +36,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
     const gridRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0, xOffs: 0, yOffs: 0 });
-    const xGridSize = 40;
-    const yGridSize = 22;
+
     useEffect(() => {
         const updateDimensions = () => {
             if (gridRef.current) {
@@ -45,7 +44,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                 const xOffs = x;
                 const yOffs = y;
                 // console.log(`WH ${width} ${height} ${xOffs} ${yOffs} ${x} ${y}`);
-                setDimensions({ width, height, xOffs, yOffs });
+                setDimensions({ width, height, xOffs, yOffs});
             }
         };
 
@@ -57,7 +56,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             window.removeEventListener('resize', updateDimensions);
             window.removeEventListener('scroll', updateDimensions);
         };
-    }, []);
+    }, [grid.width, grid.height]);
 
 
     useEffect(() => {
@@ -209,7 +208,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         if (!editable) return;
         if (!isValidCellTarget(e.target)) return;
 
-        const generalSize = Math.min(dimensions.width / xGridSize, 30);
+        const generalSize = Math.min(dimensions.width / grid.width, 30);
         // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
         const localWidth = generalSize;
         const localHeight = generalSize;
@@ -236,7 +235,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
         e.preventDefault(); 
 
-        const generalSize = Math.min(dimensions.width / xGridSize, 30);
+        const generalSize = Math.min(dimensions.width / grid.width, 30);
         // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
         const localWidth = generalSize;
         const localHeight = generalSize;
@@ -274,6 +273,10 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     return (
         <div ref={gridRef}
             className="grid-container"
+            style={{
+                gridTemplateColumns: `repeat(${grid.width}, min(2vw, 30px))`,
+                gridTemplateRows: `repeat(${grid.height}, min(2vw, 30px))`
+            }}
             onClick={handleOnClick}
             onContextMenu={handleOnDelete}
             data-tick={renderTick}>

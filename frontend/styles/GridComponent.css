@@ -259,3 +259,32 @@
   font-weight: 600;
   border-radius: 12px;
 }
+
+.resize-controls {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.resize-title {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.resize-button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.resize-button:hover {
+    background: #1565c0;
+}

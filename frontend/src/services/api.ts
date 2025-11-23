@@ -211,7 +211,8 @@ async function saveToRealBackend(grid: Grid, name: string): Promise<string> {
 async function updateToRealBackend(mapId: string, grid: Grid, name: string): Promise<void> {
     const requestData = {
         ...grid.getDataForBackend(),
-        name: name
+        name: name,
+        _id: mapId
     }
     const response = await fetch(`http://localhost:5000/maps/${mapId}`, {
         method: 'PUT',

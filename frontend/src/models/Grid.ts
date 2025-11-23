@@ -95,27 +95,27 @@ export class Grid {
       }
       this.walls = newWalls;
     }
-removePersonAt(x: number, y: number) {
-    const cell = this.getCell(x, y);
-    if (!cell) return;
+    removePersonAt(x: number, y: number) {
+        const cell = this.getCell(x, y);
+        if (!cell) return;
 
-    if (cell.persons.length > 0) {
-        const person = cell.persons[0];
-        cell.persons = cell.persons.filter(p => p.id !== person.id);
-        this.persons = this.persons.filter(p => p.id !== person.id);
+        if (cell.persons.length > 0) {
+            const person = cell.persons[0];
+            cell.persons = cell.persons.filter(p => p.id !== person.id);
+            this.persons = this.persons.filter(p => p.id !== person.id);
+        }
     }
-}
 
-removeGoalAt(x: number, y: number) {
-    const cell = this.getCell(x, y);
-    if (!cell) return;
+    removeGoalAt(x: number, y: number) {
+        const cell = this.getCell(x, y);
+        if (!cell) return;
 
-    if (cell.goals.length > 0) {
-        const goal = cell.goals[0];
-        cell.goals = cell.goals.filter(g => g.id !== goal.id);
-        this.goals = this.goals.filter(g => g.id !== goal.id);
+        if (cell.goals.length > 0) {
+            const goal = cell.goals[0];
+            cell.goals = cell.goals.filter(g => g.id !== goal.id);
+            this.goals = this.goals.filter(g => g.id !== goal.id);
+        }
     }
-}
 
     clone(): Grid {
         const newGrid = new Grid(this.width, this.height);
@@ -151,6 +151,38 @@ removeGoalAt(x: number, y: number) {
         return newGrid;
     }
 
+    resize(newWidth: number, newHeight: number): Grid {
+        if (newWidth <= 0 || newHeight <= 0) {
+            throw new Error("Размеры не могут быть отрицательными.");
+        }
+
+        const newGrid = new Grid(newWidth, newHeight);
+
+        this.persons.forEach(person => {
+            if (person.position.x < newWidth && person.position.y < newHeight) {
+                const clonedPerson = person.clone();
+                newGrid.addPerson(clonedPerson);
+            }
+        });
+
+        this.goals.forEach(goal => {
+            if (goal.position.x < newWidth && goal.position.y < newHeight) {
+                const clonedGoal = goal.clone();
+                newGrid.addGoal(clonedGoal);
+            }
+        });
+
+        this.walls.forEach(wall => {
+            if (wall.first.x < newWidth && wall.first.y < newHeight &&
+                wall.second.x < newWidth && wall.second.y < newHeight) {
+                newGrid.addWall(wall.first.x, wall.first.y, wall.second.x, wall.second.y);
+            }
+        });
+
+        newGrid.allTicks = this.allTicks;
+
+        return newGrid;
+    }
 
     getCell(x: number, y: number): Cell | null {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
