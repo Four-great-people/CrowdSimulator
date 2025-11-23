@@ -59,7 +59,7 @@ def client():
 
 
 @pytest.fixture
-def auth_headers(client):
+def auth_headers(client): # pylint: disable=redefined-outer-name
     """Создаём валидный JWT токен без обращения к базе."""
     app = client.application
     with app.app_context():
