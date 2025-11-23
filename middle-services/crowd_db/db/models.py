@@ -89,42 +89,43 @@ class UserDoc:
 class MapDoc:
     up_right_point: Point
     down_left_point: Point
+    user_id: ObjectId
     borders: List[Segment] = field(default_factory=list)
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
     name: str = "Без названия"
-    user_id: ObjectId
     _id: Optional[ObjectId] = None
 
-    def to_bson(self) -> dict[str, Any]:
-        doc: dict[str, Any] = {
-            "_id": self._id if self._id else ObjectId(),
-            "name": self.name,
-            "up_right_point": self.up_right_point.to_bson(),
-            "down_left_point": self.down_left_point.to_bson(),
-            "borders": [s.to_bson() for s in self.borders],
-            "persons": [p.to_bson() for p in self.persons],
-            "goals": [p.to_bson() for p in self.goals],
-        }
-        if self.user_id is not None:
-            doc["user_id"] = self.user_id
-        return doc
     def set_id(self, oid: ObjectId) -> None:
         self._id = oid
 
     def get_id(self) -> Optional[ObjectId]:
         return self._id
 
+    def to_bson(self) -> dict[str, Any]:
+        doc: dict[str, Any] = {
+            "up_right_point": self.up_right_point.to_bson(),
+            "down_left_point": self.down_left_point.to_bson(),
+            "borders": [s.to_bson() for s in self.borders],
+            "persons": [p.to_bson() for p in self.persons],
+            "goals": [p.to_bson() for p in self.goals],
+            "name": self.name,
+            "user_id": self.user_id,
+        }
+        if self._id:
+            doc["_id"] = self._id
+        return doc
+
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "MapDoc":
         return MapDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
+            user_id=d["user_id"],
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
             name=d.get("name", "Без названия"),
-            user_id=d["user_id"],
             _id=d.get("_id"),
         )
 
@@ -133,15 +134,20 @@ class MapDoc:
 class AnimationDoc:
     up_right_point: Point
     down_left_point: Point
+    user_id: ObjectId
     borders: List[Segment] = field(default_factory=list)
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
-
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     name: str = "Без названия"
-    user_id: ObjectId
     _id: Optional[ObjectId] = None
+
+    def set_id(self, oid: ObjectId) -> None:
+        self._id = oid
+
+    def get_id(self) -> Optional[ObjectId]:
+        return self._id
 
     def to_bson(self) -> Dict[str, Any]:
         doc: Dict[str, Any] = {
@@ -153,27 +159,23 @@ class AnimationDoc:
             "routes": self.routes,
             "statistics": self.statistics,
             "name": self.name,
+            "user_id": self.user_id,
         }
-        if self.user_id is not None:
-            doc["user_id"] = self.user_id
         if self._id:
             doc["_id"] = self._id
         return doc
-
-    def get_id(self) -> Optional[ObjectId]:
-        return self._id
 
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "AnimationDoc":
         return AnimationDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
+            user_id=d["user_id"],
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
             name=d.get("name", "Без названия"),
-            user_id=d["user_id"],
             _id=d.get("_id"),
         )
