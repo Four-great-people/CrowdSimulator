@@ -1,3 +1,4 @@
+from bson import ObjectId
 from db.models import Point, Segment, NamedPointSpec, MapDoc
 
 def test_point_roundtrip():
@@ -19,6 +20,7 @@ def test_mapdoc_roundtrip():
         name="Тестовая карта",
         up_right_point=Point(10, 10),
         down_left_point=Point(0, 0),
+        user_id=ObjectId(),
         borders=[Segment(Point(0,0), Point(10,0))],
         persons=[NamedPointSpec(id=None, position=Point(0,1))],
         goals=[NamedPointSpec(id=None, position=Point(1,1))],
