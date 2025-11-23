@@ -1,6 +1,4 @@
-
 from __future__ import annotations
-
 
 def valid_payload():
     return {
@@ -21,18 +19,20 @@ def valid_payload():
         ],
     }
 
-def test_create_map_returns_id(client):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_create_map_returns_id(client, auth_headers):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     assert resp.status_code == 201
     data = resp.get_json()
     assert "_id" in data
     assert len(data["_id"]) == 24
 
-def test_get_maps(client):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_get_maps(client, auth_headers):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get("/maps")
+    resp2 = client.get("/maps", headers=auth_headers)
     assert resp2.status_code == 200
 
     json_list = resp2.get_json()
@@ -41,11 +41,12 @@ def test_get_maps(client):
     found = any(item["id"] == oid for item in json_list)
     assert found, f"Map with id {oid} not found in {json_list}"
 
-def test_get_map_returns_full_document_in_order(client):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_get_map_returns_full_document_in_order(client, auth_headers):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}")
+    resp2 = client.get(f"/maps/{oid}", headers=auth_headers)
     assert resp2.status_code == 200
 
     raw = resp2.get_data(as_text=True).replace(" ", "")
@@ -59,19 +60,26 @@ def test_get_map_returns_full_document_in_order(client):
     i_goals = raw.find('"goals"')
     assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals
 
-def test_get_map_400(client):
-    resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa")
+
+def test_get_map_400(client, auth_headers):
+    resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa", headers=auth_headers)
     assert resp.status_code == 400
 
-def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock_requests):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(
+    client, auth_headers, mock_requests
+):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}/statistics/dense")
+    resp2 = client.get(f"/maps/{oid}/statistics/dense", headers=auth_headers)
     assert resp2.status_code == 200
     statistics_resp = resp2.get_json()
-    assert statistics_resp == {"ideal": {"value": 35, "problematic": 0},
-        "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
+    assert statistics_resp == {
+        "ideal": {"value": 35, "problematic": 0},
+        "valid": {"value": None, "problematic": 1},
+        "routes": [{"id": 1, "route": None}],
+    }
 
     assert len(mock_requests["calls"]) == 2
     call = mock_requests["calls"][0]
@@ -91,43 +99,59 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(client, mock
 
     assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals, packed
 
-def test_simulate_calls_cpp_with_statistics(client, mock_requests):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_simulate_calls_cpp_with_statistics(client, auth_headers, mock_requests):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}/statistics/dense")
+    resp2 = client.get(f"/maps/{oid}/statistics/dense", headers=auth_headers)
     assert resp2.status_code == 200
     statistics = resp2.get_json()
-    assert statistics == {"ideal": {"value": 35, "problematic": 0},
-        "valid": {"value": None, "problematic": 1}, "routes": [{"id": 1,"route": None}]}
+    assert statistics == {
+        "ideal": {"value": 35, "problematic": 0},
+        "valid": {"value": None, "problematic": 1},
+        "routes": [{"id": 1, "route": None}],
+    }
 
     assert len(mock_requests["calls"]) == 2
 
-def test_simulate_calls_cpp_with_statistics_and_simple_routes(client, mock_requests):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_simulate_calls_cpp_with_statistics_and_simple_routes(
+    client, auth_headers, mock_requests
+):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}/statistics/simple")
+    resp2 = client.get(f"/maps/{oid}/statistics/simple", headers=auth_headers)
     assert resp2.status_code == 200
     statistics = resp2.get_json()
-    assert statistics == {"ideal": {"value": 35, "problematic": 0},
+    assert statistics == {
+        "ideal": {"value": 35, "problematic": 0},
         "valid": {"value": 35, "problematic": 0},
-        "routes": [{"id": 1, "route": ["UP", "RIGHT", "LEFT_DOWN"]}]}
+        "routes": [{"id": 1, "route": ["UP", "RIGHT", "LEFT_DOWN"]}],
+    }
 
     assert len(mock_requests["calls"]) == 1
 
-def test_simulate_calls_cpp_with_statistics_and_random_routes(client, mock_requests):
-    resp = client.post("/maps", json=valid_payload())
+
+def test_simulate_calls_cpp_with_statistics_and_random_routes(
+    client, auth_headers, mock_requests
+):
+    resp = client.post("/maps", json=valid_payload(), headers=auth_headers)
     oid = resp.get_json()["_id"]
 
-    resp2 = client.get(f"/maps/{oid}/statistics/random")
+    resp2 = client.get(f"/maps/{oid}/statistics/random", headers=auth_headers)
     assert resp2.status_code == 200
     statistics = resp2.get_json()
-    assert statistics == {"ideal": {"value": 35, "problematic": 0},
-        "valid": {"value": 20, "problematic": 0}, "routes": [{"id": 1, "route": ["UP", "RIGHT"]}]}
+    assert statistics == {
+        "ideal": {"value": 35, "problematic": 0},
+        "valid": {"value": 20, "problematic": 0},
+        "routes": [{"id": 1, "route": ["UP", "RIGHT"]}],
+    }
     assert len(mock_requests["calls"]) == 2
 
-def test_create_map_bad_payload_400(client):
+
+def test_create_map_bad_payload_400(client, auth_headers):
     bad = {"persons": []}
-    resp = client.post("/maps", json=bad)
+    resp = client.post("/maps", json=bad, headers=auth_headers)
     assert resp.status_code == 400

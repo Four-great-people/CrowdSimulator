@@ -18,7 +18,7 @@ from flask_jwt_extended import (
     jwt_required,
 )
 
-from crowd_db.db.models import AnimationDoc, MapDoc, UserDoc
+from crowd_db.db.models import AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec
 from crowd_db.db.repository import MongoMapRepository, MongoUserRepository
 
 load_dotenv()
@@ -126,16 +126,24 @@ def login():
 def create_map():
     payload = request.get_json(force=True)
     try:
-        m = MapDoc.from_bson(payload)
         user_oid = _current_user_oid()
         if user_oid is None:
             return jsonify({"error": "invalid user identity"}), 401
-        m.user_id = user_oid
+
+        m = MapDoc(
+            up_right_point=Point.from_bson(payload["up_right_point"]),
+            down_left_point=Point.from_bson(payload["down_left_point"]),
+            user_id=user_oid,
+            borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
+            persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
+            goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
+            name=payload.get("name", "Без названия"),
+        )
+
         oid = repo.create(m)
         return jsonify({"_id": str(oid)}), 201
     except Exception as e:
         return jsonify({"error": f"invalid map payload: {e}"}), 400
-
 
 @app.route("/maps", methods=["GET"])
 @jwt_required()
@@ -261,7 +269,6 @@ def get_statistics(map_id: str, algo: str):
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     return jsonify({"valid": dense_result, "ideal": simple_result, "routes": route}), 200
 
-
 @app.route("/maps/<map_id>", methods=["PUT"])
 @jwt_required()
 def update_map(map_id: str):
@@ -271,9 +278,17 @@ def update_map(map_id: str):
         if user_oid is None:
             return jsonify({"error": "invalid user identity"}), 401
 
-        m = MapDoc.from_bson(payload)
-        m._id = ObjectId(map_id)
-        m.user_id = user_oid
+        m = MapDoc(
+            up_right_point=Point.from_bson(payload["up_right_point"]),
+            down_left_point=Point.from_bson(payload["down_left_point"]),
+            user_id=user_oid,
+            borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
+            persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
+            goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
+            name=payload.get("name", "Без названия"),
+        )
+        m.set_id(ObjectId(map_id))
+
         ok = repo.replace_for_user(m, user_oid)
         if not ok:
             return jsonify({"error": "map not found"}), 400
@@ -379,4 +394,3 @@ def delete_animation(animation_id: str):
         return jsonify({"message": "animation deleted"}), 200
     except Exception as e:
         return jsonify({"error": f"delete failed: {e}"}), 400
-
