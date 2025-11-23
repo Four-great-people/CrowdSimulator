@@ -12,6 +12,8 @@ export interface MapAnimItem {
 
 interface AuthResponse {
     access_token: string;
+    error?: string;
+    message?: string;
 }
 
 export const getAuthToken = (): string | null => {
@@ -46,29 +48,31 @@ const buildHeaders = (extra: Record<string, string> = {}): Record<string, string
 };
 
 export const registerUser = async (username: string, password: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-    });
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
 
-    let data: any = {};
-    try {
-        data = await response.json();
-    } catch {
-        data = {};
-    }
+  let data: any = {};
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
 
-    if (!response.ok) {
-        const message = data.error || data.message || 'Ошибка регистрации';
-        throw new Error(message);
-    }
+  if (!response.ok) {
+    const message = data.error || data.message || 'Ошибка регистрации';
+    throw new Error(message);
+  }
 
-    if (!data.access_token) {
-        throw new Error('Некорректный ответ сервера при регистрации');
-    }
+  const authData = data as AuthResponse;  
 
-    setAuthToken(data.access_token);
+  if (!authData.access_token) {
+    throw new Error('Некорректный ответ сервера при регистрации');
+  }
+
+  setAuthToken(authData.access_token);
 };
 
 export const loginUser = async (username: string, password: string): Promise<void> => {
