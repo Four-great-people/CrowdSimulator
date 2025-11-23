@@ -93,7 +93,7 @@ class MapDoc:
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
     name: str = "Без названия"
-    user_id: Optional[ObjectId] = None
+    user_id: ObjectId
     _id: Optional[ObjectId] = None
 
     def to_bson(self) -> dict[str, Any]:
@@ -124,7 +124,7 @@ class MapDoc:
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
             name=d.get("name", "Без названия"),
-            user_id=d.get("user_id"),
+            user_id=d["user_id"],
             _id=d.get("_id"),
         )
 
@@ -140,7 +140,7 @@ class AnimationDoc:
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     name: str = "Без названия"
-    user_id: Optional[ObjectId] = None
+    user_id: ObjectId
     _id: Optional[ObjectId] = None
 
     def to_bson(self) -> Dict[str, Any]:
@@ -174,6 +174,6 @@ class AnimationDoc:
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
             name=d.get("name", "Без названия"),
-            user_id=d.get("user_id"),
+            user_id=d["user_id"],
             _id=d.get("_id"),
         )
