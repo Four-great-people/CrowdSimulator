@@ -1,4 +1,3 @@
-from bson import ObjectId
 from db.models import Point, Segment, NamedPointSpec, MapDoc
 from .factories import make_test_mapdoc
 def test_point_roundtrip():

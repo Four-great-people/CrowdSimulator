@@ -1,7 +1,6 @@
 import pytest
-from bson import ObjectId
 from db.repository import MongoMapRepository
-from db.models import MapDoc, Point, Segment, NamedPointSpec
+from db.models import Point, NamedPointSpec
 from .factories import make_test_mapdoc
 @pytest.mark.usefixtures("use_mongomock", "clean_maps_collection")
 def test_crud_maps_unit():
