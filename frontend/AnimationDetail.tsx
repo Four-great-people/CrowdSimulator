@@ -32,7 +32,6 @@ const AnimationDetail: React.FC = () => {
     const [animationCompleted, setAnimationCompleted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isLoadedMap, setIsLoadedMap] = useState(false);
@@ -93,6 +92,7 @@ const AnimationDetail: React.FC = () => {
     }
 
     const startAnimation = async () => {
+        console.log("🚀 START startAnimation");
         if (animationCompleted) {
             alert("Анимация завершена");
             return;
@@ -104,31 +104,81 @@ const AnimationDetail: React.FC = () => {
         setShowStatistics(false);
 
         try {
+            console.log("📡 Запрашиваем маршруты...");
             const statisticsFromBackend = await GetStatisticsFromBackend(id, algo);
+            console.log("✅ Маршруты получены:", statisticsFromBackend.routes);
             setRoutes(statisticsFromBackend.routes || []);
+            
             grid.reset();
             const gridCopy = grid.clone();
+            
+            console.log("🔍 ДО создания людей из групп:", {
+                groupsCount: gridCopy.groups.length,
+                personsCount: gridCopy.persons.length,
+                groups: gridCopy.groups.map(g => ({
+                    position: g.start_position,
+                    personIds: g.person_ids
+                }))
+            });
+            
+            // СОЗДАЕМ ЛЮДЕЙ ИЗ ГРУПП
+            gridCopy.groups.forEach((group, groupIndex) => {
+                console.log(`👥 Обрабатываем группу ${groupIndex}:`, group);
+                group.person_ids.forEach((personId, personIndex) => {
+                    console.log(`👤 Создаем человека ${personId} в (${group.start_position.x}, ${group.start_position.y})`);
+                    const person = new NamedPoint(personId, group.start_position);
+                    const success = gridCopy.addPerson(person);
+                    console.log(`✅ Результат добавления человека ${personId}:`, success);
+                });
+            });
+            
+            console.log("🔍 ПОСЛЕ создания людей из групп:", {
+                personsCount: gridCopy.persons.length,
+                persons: gridCopy.persons.map(p => ({id: p.id, position: p.position})),
+                cellsWithPersons: gridCopy.cells.flat().filter(cell => cell.persons.length > 0).map(cell => ({
+                    x: cell.x, 
+                    y: cell.y, 
+                    persons: cell.persons.map(p => p.id)
+                }))
+            });
+            
             setGrid(gridCopy);
 
+            // СОБИРАЕМ ЛЮДЕЙ ДЛЯ АНИМАЦИИ
             const persons: NamedPoint[] = [];
-            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
-                    }
-                    if (cell.goals.length > 0) {
-                        goals.push(...cell.goals);
+                        console.log(`📍 Клетка (${cell.x},${cell.y}): ${cell.persons.length} человек - ${cell.persons.map(p => p.id)}`);
                     }
                 });
             });
+            
+            console.log("🎯 ИТОГО для анимации:", {
+                personsCount: persons.length,
+                persons: persons.map(p => p.id),
+                routesCount: statisticsFromBackend.routes.length,
+                routes: statisticsFromBackend.routes.map(r => r.id)
+            });
+            
+            // ПРОВЕРЯЕМ СООТВЕТСТВИЕ ЛЮДЕЙ И МАРШРУТОВ
+            const missingRoutes = persons.filter(p => 
+                !statisticsFromBackend.routes.some(r => r.id === p.id)
+            );
+            if (missingRoutes.length > 0) {
+                console.warn("⚠️ Нет маршрутов для людей:", missingRoutes.map(p => p.id));
+            }
+            
             setParticipantsNumber(statisticsFromBackend["routes"].length)
             setIdealTime(statisticsFromBackend["ideal"])
             setValidTime(statisticsFromBackend["valid"])
+            
+            console.log("🎬 Запускаем анимацию...");
             executeSteps(gridCopy, persons, 0, statisticsFromBackend["routes"]);
 
         } catch (error) {
-            console.error('Ошибка при работе с бэкендом:', error);
+            console.error('❌ Ошибка при работе с бэкендом:', error);
             setIsAnimating(false);
         }
     };
@@ -178,6 +228,7 @@ const AnimationDetail: React.FC = () => {
     };
     
     const startSavedAnimation = async (savedGrid: Grid, savedRoutes: any[], savedStatistics: any) => {
+        console.log("🚀 START startSavedAnimation");
         if (!savedGrid || isAnimating) return;
 
         setIsAnimating(true);
@@ -186,19 +237,38 @@ const AnimationDetail: React.FC = () => {
         try {
             savedGrid.reset();
             const gridCopy = savedGrid.clone();
+            
+            console.log("🔍 ДО создания людей из групп (saved):", {
+                groupsCount: gridCopy.groups.length,
+                personsCount: gridCopy.persons.length
+            });
+            
+            gridCopy.groups.forEach(group => {
+                group.person_ids.forEach(personId => {
+                    console.log(`👤 Создаем человека ${personId} из сохраненной группы`);
+                    const person = new NamedPoint(personId, group.start_position);
+                    gridCopy.addPerson(person);
+                });
+            });
+            
+            console.log("🔍 ПОСЛЕ создания людей из групп (saved):", {
+                personsCount: gridCopy.persons.length
+            });
+            
             setGrid(gridCopy);
 
             const persons: NamedPoint[] = [];
-            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
                     }
-                    if (cell.goals.length > 0) {
-                        goals.push(...cell.goals);
-                    }
                 });
+            });
+            
+            console.log("🎯 ИТОГО для анимации (saved):", {
+                personsCount: persons.length,
+                routesCount: savedRoutes.length
             });
             
             setParticipantsNumber(savedRoutes.length);
@@ -253,10 +323,8 @@ const AnimationDetail: React.FC = () => {
 
         startSavedAnimation(baseGrid, freshRoutes, stats);
     };
+
     const isRouteCompleted = (route: any): boolean => {
-        if (route) {
-            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`)
-        }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
 
@@ -310,6 +378,8 @@ const AnimationDetail: React.FC = () => {
     }
 
     const executeSteps = (currentGrid: Grid, persons: NamedPoint[], stepIndex: number, routes: any[]) => {
+        console.log(`🔄 executeSteps: шаг ${stepIndex}, людей: ${persons.length}, маршрутов: ${routes.length}`);
+        
         const allRoutesCompleted = persons.every(person => {
             const route = routes.find(r => r.id === person.id);
             prepareRoute(route);
@@ -317,6 +387,7 @@ const AnimationDetail: React.FC = () => {
         });
 
         if (allRoutesCompleted) {
+            console.log("✅ Все маршруты завершены");
             setIsAnimating(false);
             setAnimationCompleted(true);
             const total = persons.length;
@@ -326,6 +397,7 @@ const AnimationDetail: React.FC = () => {
             }
             return;
         }
+        
         const newGrid = currentGrid.clone();
         newGrid.addTick();
         const updatedPersons: NamedPoint[] = [];
@@ -334,6 +406,12 @@ const AnimationDetail: React.FC = () => {
 
         persons.forEach(person => {
             const route = routes.find(r => r.id === person.id);
+            console.log(`👤 Обрабатываем человека ${person.id}:`, {
+                hasRoute: !!route,
+                routeLength: route?.route?.length,
+                position: person.position
+            });
+            
             prepareRoute(route);
             if (!isRouteCompleted(route)) {
                 const newPosition = { ...person.position };
@@ -362,13 +440,17 @@ const AnimationDetail: React.FC = () => {
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                     updatedSteps[person.id] = stepIndex + 1;
+                    
+                    console.log(`🎯 Человек ${person.id} переместился в (${newPosition.x}, ${newPosition.y})`);
                 } else {
+                    console.warn(`❌ Человек ${person.id} не может переместиться в (${newPosition.x}, ${newPosition.y})`);
                     const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                     newPerson.reachedGoal = person.reachedGoal;
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                 }
             } else {
+                console.log(`✅ Человек ${person.id} завершил маршрут`);
                 const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                 newPerson.reachedGoal = person.reachedGoal;
                 updatedPersons.push(newPerson);
@@ -404,7 +486,6 @@ const AnimationDetail: React.FC = () => {
     if (error) {
         return <NotFound />;
     }
-
 
     const statisticsFormatString = (timeObj: any) => {
         if (!timeObj) {
@@ -486,4 +567,5 @@ const AnimationDetail: React.FC = () => {
         </div>
     );
 };
+
 export default AnimationDetail;

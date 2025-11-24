@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/GridComponent.css';
 import Grid from '../models/Grid';
 import NamedPoint from '../models/NamedPoint';
+import Group from '../models/Group';
 
 interface GridProps {
     grid: Grid;
@@ -27,6 +28,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     const [animationKey, setAnimationKey] = useState(0);
 
     const [renderTick, setRenderTick] = useState(0);
+    const [groupSize, setGroupSize] = useState(5);
     const forceRerender = () => setRenderTick(t => t + 1);
 
     const intersectionAreaRatio = 0.35; 
@@ -159,10 +161,15 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             const point = new NamedPoint(grid.persons.length, position)
             grid.addPerson(point);
         }
-        else {
+        else if (objectPlacing == goalType) {
             const point = new NamedPoint(grid.goals.length, position)
             grid.addGoal(point);
-        }  
+        }  else {
+            const groupId = grid.groups.length;
+            const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i); // уникальные ID
+            const group = new Group(groupId, position, groupSize , personIds);
+            grid.addGroup(group);
+        }
     };
 
     const processDeleteFromCenter = (cellX: number, cellY: number) => {
@@ -174,6 +181,10 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         } else if (objectPlacing == goalType) {
             if (typeof (grid as any).removeGoalAt === 'function') {
                 (grid as any).removeGoalAt(cellX, cellY);
+            }
+        } else {
+            if (typeof (grid as any).removeGroupAt === 'function') {
+                (grid as any).removeGroupAt(cellX, cellY);
             }
         }
         setDelState(delIdle);
@@ -298,6 +309,9 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                                     className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
                                 ></div>
                             )}
+                            {grid.getGroupAt(cell.x, cell.y) && (
+                                    <div className="group-marker">{grid.getGroupAt(cell.x, cell.y)!.total_count}</div>
+                                )}
                         </div>
                     );
                 })

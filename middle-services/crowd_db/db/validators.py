@@ -43,6 +43,17 @@ def apply_collection_validator():
         },
         "additionalProperties": True,
     }
+    group_schema = {
+        "bsonType": "object",
+        "required": ["start_position", "total_count", "person_ids"],
+        "properties": {
+            "id": {"bsonType": ["int", "string", "null"]},
+            "start_position": point,
+            "total_count": {"bsonType": "int"},
+            "person_ids": {"bsonType": "array", "items": {"bsonType": "int"}},
+        },
+        "additionalProperties": False,
+    }
 
     statistics = {
         "bsonType": "object",
@@ -76,6 +87,7 @@ def apply_collection_validator():
                 "borders": {"bsonType": "array", "items": segment},
                 "persons": {"bsonType": "array", "items": named_point},
                 "goals": {"bsonType": "array", "items": named_point},
+                "groups": {"bsonType": "array", "items": group_schema},
                 "name": {"bsonType": "string"},
             },
             "additionalProperties": False,

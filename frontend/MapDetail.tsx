@@ -199,6 +199,7 @@ const MapDetail: React.FC = () => {
                         <img src={"/" + type + ".png"} onClick={() => onObjectClick(type)} width="30" height="30"></img>
                     </button>
                 )}
+                
                 {id !== 'new' && (
                     <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
                         Удалить карту

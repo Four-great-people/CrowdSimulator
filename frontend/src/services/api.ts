@@ -1,5 +1,6 @@
 import { Grid } from '../models/Grid';
 import NamedPoint from '../models/NamedPoint';
+import Group from '../models/Group';
 
 const useFakeCalls = process.env.MODE ? true : false
 
@@ -54,18 +55,51 @@ export const GetMapsFromBackend = async (): Promise<MapAnimItem[]> => {
     }
 }
 
+// export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, name: string}> => {
+//     try {
+//         let map;
+//         if (useFakeCalls) {
+//             map = fakeGetMap(mapId);
+//         } else {
+//             map = await getMap(mapId);
+//         }
+//         let name = map["name"] || "Без названия";   
+//         return {grid: createGridByMap(map), name: name}
+
+//     } catch (error) {
+//         throw error;
+//     }
+// }
 export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, name: string}> => {
     try {
         let map;
         if (useFakeCalls) {
             map = fakeGetMap(mapId);
         } else {
-            map = await getMap(mapId);
+            console.log("🔄 Fetching map from backend, ID:", mapId);
+            const response = await fetch("http://localhost:5000/maps/" + mapId, { method: 'GET' });
+            console.log("📡 Response status:", response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.log("❌ Error response:", errorText);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+            
+            map = await response.json();
+            console.log("✅ Map data received:", map);
         }
+        
+        if (!map || !map.up_right_point) {
+            console.log("❌ Invalid map data:", map);
+            throw new Error("Invalid map data received");
+        }
+        
         let name = map["name"] || "Без названия";   
         return {grid: createGridByMap(map), name: name}
 
     } catch (error) {
+        console.error("💥 Error loading map:", error);
         throw error;
     }
 }
@@ -325,6 +359,16 @@ function createGridByMap(map: any) {
         const g = new NamedPoint(goal["id"], goal["position"]);
         newGrid.addGoal(g);
     });
+    map["groups"].forEach((group: any) => {
+            const g = new Group(
+                group["id"],
+                group["start_position"], 
+                group["total_count"],
+                group["person_ids"] || []
+            );
+            newGrid.addGroup(g);
+    });
+    
     return newGrid;
 }
 

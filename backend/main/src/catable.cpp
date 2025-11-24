@@ -37,6 +37,7 @@ bool CATable::check_move(const Point& from, const Point& to,
                 return false;
             }
         }
+        
         return true;
     }
     int new_time = start_time + from.get_move_cost(to);
@@ -91,6 +92,9 @@ std::vector<Point> CATable::get_neighbors_timestep(const Point& point,
             valid_neighbors.push_back(  // cppcheck-suppress useStlAlgorithm
                 neighbor);
         }
+    }
+    if (valid_neighbors.empty()) {
+        valid_neighbors.push_back(point);
     }
 
     return valid_neighbors;

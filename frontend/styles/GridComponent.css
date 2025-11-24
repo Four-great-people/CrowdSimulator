@@ -259,3 +259,11 @@
   font-weight: 600;
   border-radius: 12px;
 }
+.group-size-control {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.group-size-control input:focus {
+    outline: none;
+    border-color: #007bff;
+}

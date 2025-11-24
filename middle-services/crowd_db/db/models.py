@@ -50,12 +50,36 @@ class NamedPointSpec:
         )
 
 @dataclass
+class GroupSpec:
+    id: Optional[Union[int, str]]
+    start_position: Point
+    total_count: int
+    person_ids: List[int]
+    def to_bson(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "start_position": self.start_position.to_bson(),
+            "total_count": self.total_count,
+            "person_ids": self.person_ids
+        }
+    
+    @staticmethod
+    def from_bson(d: Dict[str, Any]) -> "GroupSpec":
+        return GroupSpec(
+            id=d["id"],
+            start_position=Point.from_bson(d["start_position"]),
+            total_count=d["total_count"],
+            person_ids=d["person_ids"]
+        )
+
+@dataclass
 class MapDoc:
     up_right_point: Point
     down_left_point: Point
     borders: List[Segment] = field(default_factory=list)
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
+    groups: List[GroupSpec] = field(default_factory=list)
     name: str = "Без названия"
     _id: Optional[ObjectId] = None
 
@@ -68,6 +92,7 @@ class MapDoc:
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
             "goals": [p.to_bson() for p in self.goals],
+            "groups": [g.to_bson() for g in self.groups],
         }
 
     def get_id(self) -> Optional[ObjectId]:
@@ -81,6 +106,7 @@ class MapDoc:
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
+            groups=[GroupSpec.from_bson(g) for g in d.get("groups", [])],
             name=d.get("name", "Без названия"),
             _id=d.get("_id"),
         )
