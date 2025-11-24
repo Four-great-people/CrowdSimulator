@@ -55,51 +55,18 @@ export const GetMapsFromBackend = async (): Promise<MapAnimItem[]> => {
     }
 }
 
-// export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, name: string}> => {
-//     try {
-//         let map;
-//         if (useFakeCalls) {
-//             map = fakeGetMap(mapId);
-//         } else {
-//             map = await getMap(mapId);
-//         }
-//         let name = map["name"] || "Без названия";   
-//         return {grid: createGridByMap(map), name: name}
-
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 export const GetMapFromBackend = async (mapId: string): Promise<{grid: Grid, name: string}> => {
     try {
         let map;
         if (useFakeCalls) {
             map = fakeGetMap(mapId);
         } else {
-            console.log("🔄 Fetching map from backend, ID:", mapId);
-            const response = await fetch("http://localhost:5000/maps/" + mapId, { method: 'GET' });
-            console.log("📡 Response status:", response.status);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.log("❌ Error response:", errorText);
-                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
-            }
-            
-            map = await response.json();
-            console.log("✅ Map data received:", map);
+            map = await getMap(mapId);
         }
-        
-        if (!map || !map.up_right_point) {
-            console.log("❌ Invalid map data:", map);
-            throw new Error("Invalid map data received");
-        }
-        
         let name = map["name"] || "Без названия";   
         return {grid: createGridByMap(map), name: name}
 
     } catch (error) {
-        console.error("💥 Error loading map:", error);
         throw error;
     }
 }
