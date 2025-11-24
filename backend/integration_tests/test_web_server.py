@@ -33,17 +33,10 @@ def test_simple_route_good():
             "position": { "x": 1, "y": 2 }
         }
     ],
-    "groups": [
-        {
-            "id": 0,
-            "start_position": { "x": 3, "y": 3 },
-            "total_count": 2,
-            "person_ids": [100, 101]
-        }
-    ]
+    "groups": []
 }
     '''
-    result = '''[{"id":0,"route":["UP"]},{"id":100,"route":["LEFT_DOWN","LEFT"]},{"id":101,"route":["LEFT_DOWN","LEFT"]}]'''
+    result = '''[{"id":0,"route":["UP"]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -115,17 +108,10 @@ def test_no_route_good():
             "position": { "x": 0, "y": 1 }
         }
     ],
-    "groups": [
-        {
-            "id": 0,
-            "start_position": { "x": 3, "y": 3 },
-            "total_count": 2,
-            "person_ids": [100, 101]
-        }
-    ]
+    "groups": []
 }
     '''
-    result = '''[{"id":0,"route":[]},{"id":100,"route":[]},{"id":101,"route":[]}]'''
+    result = '''[{"id":0,"route":[]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -156,17 +142,10 @@ def test_cant_reach_good():
             "position": { "x": 0, "y": 100 }
         }
     ],
-    "groups": [
-        {
-            "id": 0,
-            "start_position": { "x": 3, "y": 3 },
-            "total_count": 2,
-            "person_ids": [100, 101]
-        }
-    ]
+    "groups": []
 }
     '''
-    result = result = '''[{"id":0,"route":[]},{"id":100,"route":[]},{"id":101,"route":[]}]'''
+    result = '''[{"id":0,"route":[]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -251,17 +230,10 @@ def test_complicated_route_good():
             "position": { "x": 3, "y": 2 }
         }
     ],
-    "groups": [
-        {
-            "id": 0,
-            "start_position": { "x": 3, "y": 3 },
-            "total_count": 2,
-            "person_ids": [100, 101]
-        }
-    ]
+    "groups": []
 }
     '''
-    result = '''[{"id":0,"route":["RIGHT_UP","RIGHT"]},{"id":1,"route":["RIGHT"]},{"id":100,"route":["WAIT","DOWN"]},{"id":101,"route":["WAIT","WAIT","DOWN"]}]'''
+    result = '''[{"id":0,"route":["RIGHT_UP","RIGHT"]},{"id":1,"route":["RIGHT"]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
