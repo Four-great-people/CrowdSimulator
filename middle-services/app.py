@@ -18,7 +18,9 @@ from flask_jwt_extended import (
     jwt_required,
 )
 
-from crowd_db.db.models import AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
+from crowd_db.db.models import (
+    AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
+)
 from crowd_db.db.repository import MongoMapRepository, MongoUserRepository
 
 load_dotenv()

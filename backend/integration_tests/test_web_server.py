@@ -43,7 +43,7 @@ def test_simple_route_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":["UP"]},{"id":100,"route":["LEFT_DOWN","LEFT"]},{"id":101,"route":["WAIT","LEFT_DOWN","LEFT"]}]'''
+    result = '''[{"id":0,"route":["UP"]},{"id":100,"route":["LEFT_DOWN","LEFT"]},{"id":101,"route":["LEFT_DOWN","LEFT"]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -125,7 +125,7 @@ def test_no_route_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":[]}]'''
+    result = '''[{"id":0,"route":[]},{"id":100,"route":[]},{"id":101,"route":[]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -166,7 +166,7 @@ def test_cant_reach_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":[]}]'''
+    result = result = '''[{"id":0,"route":[]},{"id":100,"route":[]},{"id":101,"route":[]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200
@@ -261,7 +261,7 @@ def test_complicated_route_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":["RIGHT_UP","RIGHT"]},{"id":1,"route":["RIGHT"]}]'''
+    result = '''[{"id":0,"route":["RIGHT_UP","RIGHT"]},{"id":1,"route":["RIGHT"]},{"id":100,"route":["WAIT","DOWN"]},{"id":101,"route":["WAIT","WAIT","DOWN"]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200

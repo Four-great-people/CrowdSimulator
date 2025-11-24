@@ -27,7 +27,12 @@ def test_crud_maps_unit():
 
     # replace
     got.persons.append(NamedPointSpec(id=1, position=Point(1,1)))
-    got.groups.append(GroupSpec(id=1, start_position=Point(3,3), total_count=2, person_ids=[200,201]))
+    got.groups.append(GroupSpec(
+        id=1, 
+        start_position=Point(3, 3), 
+        total_count=2, 
+        person_ids=[200, 201]
+    ))
     assert repo.replace(got) is True
     got2 = repo.get(_id)
     assert got2 and len(got2.persons) == 2
