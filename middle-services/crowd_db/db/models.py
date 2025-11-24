@@ -143,10 +143,13 @@ class MapDoc:
 
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "MapDoc":
+        user_id= d["user_id"]
+        if isinstance(user_id, str):
+            user_id = ObjectId(user_id)
         return MapDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
-            user_id=d["user_id"],
+            user_id=user_id,
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
@@ -195,10 +198,13 @@ class AnimationDoc:
 
     @staticmethod
     def from_bson(d: dict[str, Any]) -> "AnimationDoc":
+        user_id= d["user_id"]
+        if isinstance(user_id, str):
+            user_id = ObjectId(user_id)
         return AnimationDoc(
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
-            user_id=d["user_id"],
+            user_id=user_id,
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],

@@ -43,7 +43,7 @@ def test_simple_route_good():
     ]
 }
     '''
-    result = '''[{"id":0,"route":["UP"]}]'''
+    result = '''[{"id":0,"route":["UP"]},{"id":100,"route":["LEFT_DOWN","LEFT"]},{"id":101,"route":["WAIT","LEFT_DOWN","LEFT"]}]'''
     for url_post in URL_POSTS:
         response = requests.post(url=url_post, data=data, timeout=10)
         assert response.status_code == 200

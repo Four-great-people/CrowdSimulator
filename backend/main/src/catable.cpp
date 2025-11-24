@@ -37,7 +37,6 @@ bool CATable::check_move(const Point& from, const Point& to,
                 return false;
             }
         }
-        
         return true;
     }
     int new_time = start_time + from.get_move_cost(to);
