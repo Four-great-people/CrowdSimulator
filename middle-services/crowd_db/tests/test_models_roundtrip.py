@@ -1,4 +1,4 @@
-from db.models import Point, Segment, NamedPointSpec, MapDoc
+from db.models import Point, Segment, NamedPointSpec, MapDoc, GroupSpec
 
 def test_point_roundtrip():
     p = Point(1, -2)
@@ -22,10 +22,12 @@ def test_mapdoc_roundtrip():
         borders=[Segment(Point(0,0), Point(10,0))],
         persons=[NamedPointSpec(id=None, position=Point(0,1))],
         goals=[NamedPointSpec(id=None, position=Point(1,1))],
+        groups=[GroupSpec(id=0, start_position=Point(2,2), total_count=5, person_ids=[1,2,3,4,5])]
     )
     again = MapDoc.from_bson(m.to_bson())
     assert again.name == "Тестовая карта"
     assert again.up_right_point == m.up_right_point
     assert again.down_left_point == m.down_left_point
     assert again.borders == m.borders
+    assert len(again.groups) == 1
     assert again.persons[0].position == m.persons[0].position

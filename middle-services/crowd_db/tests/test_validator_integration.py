@@ -52,6 +52,20 @@ def test_json_schema_allows_id_types():
             {"id": "goal-1", "position": {"x": 2, "y": 2}},
             {"position": {"x": 3, "y": 3}},
         ],
+        "groups": [
+            {
+                "id": 0,
+                "start_position": {"x": 3, "y": 3},
+                "total_count": 5,
+                "person_ids": [1, 2, 3, 4, 5]
+            },
+            {
+                "id": "group-1", 
+                "start_position": {"x": 4, "y": 4},
+                "total_count": 3,
+                "person_ids": [10, 11, 12]
+            }
+        ]
     }
     # не должно кидать
     res = col.insert_one(good)

@@ -157,7 +157,7 @@ def update_map(map_id: str):
     payload = request.get_json(force=True)
     try:
         m = MapDoc.from_bson(payload)
-        m.identifier = ObjectId(map_id)
+        m._id = ObjectId(map_id)
         ok = repo.replace(m)
         if not ok:
             return jsonify({"error": "map not found"}), 400
