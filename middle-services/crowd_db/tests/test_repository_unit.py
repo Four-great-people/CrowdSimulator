@@ -1,19 +1,12 @@
 import pytest
 from db.repository import MongoMapRepository
-from db.models import MapDoc, Point, Segment, NamedPointSpec
-
+from db.models import Point, NamedPointSpec
+from .factories import make_test_mapdoc
 @pytest.mark.usefixtures("use_mongomock", "clean_maps_collection")
 def test_crud_maps_unit():
     repo = MongoMapRepository()
 
-    m = MapDoc(
-        name="Тестовая карта",
-        up_right_point=Point(10, 10),
-        down_left_point=Point(0, 0),
-        borders=[Segment(Point(0, 0), Point(10, 0))],
-        persons=[NamedPointSpec(id=0, position=Point(0,1))],
-        goals=[NamedPointSpec(id=0, position=Point(1,1))],
-    )
+    m = make_test_mapdoc()
 
     # create
     _id = repo.create(m)
