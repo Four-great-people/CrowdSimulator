@@ -118,7 +118,7 @@ class AnimationDoc:
     borders: List[Segment] = field(default_factory=list)
     persons: List[NamedPointSpec] = field(default_factory=list)
     goals: List[NamedPointSpec] = field(default_factory=list)
-
+    groups: List[GroupSpec] = field(default_factory=list)
     routes: List[Dict] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     name: str = "Без названия"
@@ -131,6 +131,7 @@ class AnimationDoc:
             "borders": [s.to_bson() for s in self.borders],
             "persons": [p.to_bson() for p in self.persons],
             "goals": [p.to_bson() for p in self.goals],
+            "groups": [g.to_bson() for g in self.groups],
             "routes": self.routes,
             "statistics": self.statistics,
             "name": self.name
@@ -150,6 +151,7 @@ class AnimationDoc:
             borders=[Segment.from_bson(s) for s in d.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
             goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
+            groups=[GroupSpec.from_bson(g) for g in d.get("groups", [])],
             routes=d.get("routes", []),
             statistics=d.get("statistics", {}),
             name=d.get("name", "Без названия"),

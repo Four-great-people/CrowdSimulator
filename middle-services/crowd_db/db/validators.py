@@ -108,6 +108,7 @@ def apply_collection_validator():
                 "borders": {"bsonType": "array", "items": segment},
                 "persons": {"bsonType": "array", "items": named_point},
                 "goals": {"bsonType": "array", "items": named_point},
+                "groups": {"bsonType": "array", "items": group_schema},
                 "routes": {"bsonType": "array", "items": route_person},
                 "statistics": statistics,
                 "name": {"bsonType": "string"}

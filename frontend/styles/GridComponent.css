@@ -33,7 +33,7 @@
     height: min(1.5vw, 20px);
     background-color: #e74c3c;
     border-radius: 50%;
-    z-index: 30;
+    z-index: 2;
     box-shadow: 0 0 5px rgba(231, 76, 60, 0.8);
     transition: transform 0.3s ease;
 }
@@ -69,7 +69,7 @@
     border-right: min(0.8vw, 10px) solid transparent;
     border-bottom: min(1.5vw, 18px) solid #2ecc71;
     background-color: transparent;
-    z-index: 5;
+    z-index: 1;
 }
 
 .body {
@@ -266,4 +266,23 @@
 .group-size-control input:focus {
     outline: none;
     border-color: #007bff;
+}
+
+.group-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #4CAF50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: white;
+    font-size: 14px;
+    z-index: 1000 !important;
 }

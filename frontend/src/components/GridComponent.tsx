@@ -11,9 +11,10 @@ interface GridProps {
     completedGoals?: {[id: number]: boolean};
     editable?: boolean;
     objectPlacing: string;
+    groupSize?: number;
 }
 
-const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "" }) => {
+const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "", groupSize = 5 }) => {
     const [idleState, inProcessState] = ['idle', 'inProcess'];
     const [borderType, personType, goalType] = ['border', 'person', 'goal'] // Да, зависимости протекают. Но этот фронтенд я не понимаю
     const [state, setState] = useState('idle');
@@ -28,7 +29,6 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     const [animationKey, setAnimationKey] = useState(0);
 
     const [renderTick, setRenderTick] = useState(0);
-    const [groupSize, setGroupSize] = useState(5);
     const forceRerender = () => setRenderTick(t => t + 1);
 
     const intersectionAreaRatio = 0.35; 
@@ -166,8 +166,8 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             grid.addGoal(point);
         }  else {
             const groupId = grid.groups.length;
-            const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i); // уникальные ID
-            const group = new Group(groupId, position, groupSize , personIds);
+            const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i);
+            const group = new Group(groupId, position, groupSize, personIds);
             grid.addGroup(group);
         }
     };
@@ -305,8 +305,8 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                             {isGoalCell && !isPersonCell && <div className="goal"></div>}
                             {isPersonCell && (
                                 <div
-                                    key={`${animationKey}-${personsInCell[0].id}`}
-                                    className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
+                                key={`${animationKey}-${personsInCell[0].id}`}
+                                className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
                                 ></div>
                             )}
                             {grid.getGroupAt(cell.x, cell.y) && (
