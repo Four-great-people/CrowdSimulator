@@ -255,6 +255,12 @@ removeGoalAt(x: number, y: number) {
                 id: goal.id,
                 position: goal.position,
             })),
+            groups: this.groups.map(group => ({
+                id: group.id,
+                start_position: { x: group.start_position.x, y: group.start_position.y },
+                total_count: group.total_count,
+                person_ids: group.person_ids || []
+            })),
             routes: cleanRoutes,
             statistics: statistics
         };

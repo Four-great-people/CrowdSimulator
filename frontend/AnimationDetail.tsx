@@ -19,11 +19,9 @@ const AnimationDetail: React.FC = () => {
     const { id, algo } = useParams<{ id: string, algo: string }>();
     const navigate = useNavigate();
     const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
-
     if (!id || !algo && !isSavedAnimation) {
         return <div>ID карты или алгоритм не указан</div>;
     }
-    
     const [grid, setGrid] = useState<Grid | null>(null);
     const [originalGrid, setOriginalGrid] = useState<Grid | null>(null);
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
@@ -148,13 +146,6 @@ const AnimationDetail: React.FC = () => {
             const nameToSave = animationName.trim() || originalAnimationName;
             
             const gridToSave = originalGrid.clone();
-        
-            gridToSave.groups.forEach(group => {
-                group.person_ids.forEach(personId => {
-                    const person = new NamedPoint(personId, group.start_position);
-                    gridToSave.addPerson(person);
-                });
-            });
 
             const statistics = {
                 valid: validTime,

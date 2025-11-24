@@ -445,7 +445,8 @@ function createGridByMap(map: any) {
             border['second']['y']
         );
     });
-    map["groups"].forEach((group: any) => {
+    if (map["groups"] && Array.isArray(map["groups"])) {
+        map["groups"].forEach((group: any) => {
             const g = new Group(
                 group["id"],
                 group["start_position"], 
@@ -453,8 +454,8 @@ function createGridByMap(map: any) {
                 group["person_ids"] || []
             );
             newGrid.addGroup(g);
-    });
-    
+        });
+    }
     map['persons'].forEach(
         (person: { position: { x: number; y: number }; goal: { x: number; y: number }; id: number }
         ) => {
