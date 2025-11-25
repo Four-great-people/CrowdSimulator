@@ -98,7 +98,7 @@ class GroupSpec:
             "total_count": self.total_count,
             "person_ids": self.person_ids
         }
-    
+
     @staticmethod
     def from_bson(d: Dict[str, Any]) -> "GroupSpec":
         return GroupSpec(
