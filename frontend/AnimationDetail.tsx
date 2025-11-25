@@ -19,11 +19,9 @@ const AnimationDetail: React.FC = () => {
     const { id, algo } = useParams<{ id: string, algo: string }>();
     const navigate = useNavigate();
     const isSavedAnimation = window.location.pathname.includes('/animation/saved/');
-
     if (!id || !algo && !isSavedAnimation) {
         return <div>ID карты или алгоритм не указан</div>;
     }
-    
     const [grid, setGrid] = useState<Grid | null>(null);
     const [originalGrid, setOriginalGrid] = useState<Grid | null>(null);
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
@@ -35,7 +33,6 @@ const AnimationDetail: React.FC = () => {
     const animationPausedRef = useRef(animationPaused);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isLoadedMap, setIsLoadedMap] = useState(false);
@@ -117,22 +114,25 @@ const AnimationDetail: React.FC = () => {
         try {
             const statisticsFromBackend = await GetStatisticsFromBackend(id, algo);
             setRoutes(statisticsFromBackend.routes || []);
+            
             grid.reset();
             const gridCopy = grid.clone();
+            gridCopy.groups.forEach((group, groupIndex) => {
+                group.person_ids.forEach((personId, personIndex) => {
+                    const person = new NamedPoint(personId, group.start_position);
+                    const success = gridCopy.addPerson(person);
+                });
+            });
             setGrid(gridCopy);
-
             const persons: NamedPoint[] = [];
-            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
                     }
-                    if (cell.goals.length > 0) {
-                        goals.push(...cell.goals);
-                    }
                 });
             });
+
             setParticipantsNumber(statisticsFromBackend["routes"].length)
             setIdealTime(statisticsFromBackend["ideal"])
             setValidTime(statisticsFromBackend["valid"])
@@ -155,12 +155,14 @@ const AnimationDetail: React.FC = () => {
         setIsSaving(true);
         try {
             const nameToSave = animationName.trim() || originalAnimationName;
+            
+            const gridToSave = originalGrid.clone();
 
             const statistics = {
                 valid: validTime,
                 ideal: idealTime
             };
-            const animationId = await saveAnimationToBackend(originalGrid, routes, statistics, nameToSave);
+            const animationId = await saveAnimationToBackend(gridToSave, routes, statistics, nameToSave);
             alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
             setOriginalAnimationName(nameToSave);
@@ -197,17 +199,20 @@ const AnimationDetail: React.FC = () => {
         try {
             savedGrid.reset();
             const gridCopy = savedGrid.clone();
+            
+            gridCopy.groups.forEach(group => {
+                group.person_ids.forEach(personId => {
+                    const person = new NamedPoint(personId, group.start_position);
+                    gridCopy.addPerson(person);
+                });
+            });
             setGrid(gridCopy);
 
             const persons: NamedPoint[] = [];
-            const goals: NamedPoint[] = [];
             gridCopy.cells.forEach(row => {
                 row.forEach(cell => {
                     if (cell.persons.length > 0) {
                         persons.push(...cell.persons);
-                    }
-                    if (cell.goals.length > 0) {
-                        goals.push(...cell.goals);
                     }
                 });
             });
@@ -271,10 +276,8 @@ const AnimationDetail: React.FC = () => {
 
         startSavedAnimation(baseGrid, freshRoutes, stats);
     };
+
     const isRouteCompleted = (route: any): boolean => {
-        if (route) {
-            console.log(`${route.route.length} ${route.animationIndex} ${route.route}`)
-        }
         return !route || route.animationIndex !== undefined && route.route.length <= route.animationIndex
     }
 
@@ -393,7 +396,23 @@ const AnimationDetail: React.FC = () => {
                     updatedPersons.push(newPerson);
                     newGrid.addPerson(newPerson);
                 }
-            });
+        });
+        newGrid.groups.forEach(group => {
+            const cell = newGrid.getCell(group.start_position.x, group.start_position.y);
+            if (cell) {
+                const personsInGroup = cell.persons.filter(p => 
+                    group.person_ids.includes(p.id)
+                ).length;
+                group.total_count = personsInGroup;
+                
+                if (group.total_count <= 0) {
+                    if (typeof (newGrid as any).removeGroupAt === 'function') {
+                        (newGrid as any).removeGroupAt(group.start_position.x, group.start_position.y);
+                    }
+                }
+            }
+        });
+        
 
             animationRef.current = setTimeout(() => {
                 let newStepIndex = stepIndex;
@@ -439,7 +458,6 @@ const AnimationDetail: React.FC = () => {
     if (error) {
         return <NotFound />;
     }
-
 
     const statisticsFormatString = (timeObj: any) => {
         if (!timeObj) {
@@ -530,5 +548,6 @@ const AnimationDetail: React.FC = () => {
             </div>
         </div>
     );
-};
+};//
+
 export default AnimationDetail;

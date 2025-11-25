@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/GridComponent.css';
 import Grid from '../models/Grid';
 import NamedPoint from '../models/NamedPoint';
+import Group from '../models/Group';
 
 interface GridProps {
     grid: Grid;
@@ -10,9 +11,10 @@ interface GridProps {
     completedGoals?: {[id: number]: boolean};
     editable?: boolean;
     objectPlacing: string;
+    groupSize?: number;
 }
 
-const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "" }) => {
+const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "", groupSize = 5 }) => {
     const [idleState, inProcessState] = ['idle', 'inProcess'];
     const [borderType, personType, goalType] = ['border', 'person', 'goal'] // Да, зависимости протекают. Но этот фронтенд я не понимаю
     const [state, setState] = useState('idle');
@@ -159,10 +161,15 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             const point = new NamedPoint(grid.persons.length, position)
             grid.addPerson(point);
         }
-        else {
+        else if (objectPlacing == goalType) {
             const point = new NamedPoint(grid.goals.length, position)
             grid.addGoal(point);
-        }  
+        }  else {
+            const groupId = grid.groups.length;
+            const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i);
+            const group = new Group(groupId, position, groupSize, personIds);
+            grid.addGroup(group);
+        }
     };
 
     const processDeleteFromCenter = (cellX: number, cellY: number) => {
@@ -174,6 +181,10 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         } else if (objectPlacing == goalType) {
             if (typeof (grid as any).removeGoalAt === 'function') {
                 (grid as any).removeGoalAt(cellX, cellY);
+            }
+        } else {
+            if (typeof (grid as any).removeGroupAt === 'function') {
+                (grid as any).removeGroupAt(cellX, cellY);
             }
         }
         setDelState(delIdle);
@@ -202,7 +213,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
     const isValidCellTarget = (target: any) => {
         const cn = (target?.className || '').toString();
-        return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal');
+        return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal')|| cn.includes('group-marker');;
     };
 
     const handleOnClick = (e: any) => {
@@ -294,10 +305,13 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                             {isGoalCell && !isPersonCell && <div className="goal"></div>}
                             {isPersonCell && (
                                 <div
-                                    key={`${animationKey}-${personsInCell[0].id}`}
-                                    className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
+                                key={`${animationKey}-${personsInCell[0].id}`}
+                                className={`person ${isAnimating && !isGoalCell ? 'animate-movement' : ''} person-${personsInCell[0].id} ${isGoalCell ? 'reached-goal' : ''}`}
                                 ></div>
                             )}
+                            {grid.getGroupAt(cell.x, cell.y) && (
+                                    <div className="group-marker">{grid.getGroupAt(cell.x, cell.y)!.total_count}</div>
+                                )}
                         </div>
                     );
                 })

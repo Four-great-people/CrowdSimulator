@@ -57,6 +57,19 @@ struct NamedPoint {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NamedPoint, id, position)
 
+struct Group {
+    int id;
+    Point start_position;
+    int total_count;
+    std::vector<int> person_ids;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Group,
+                                   id,
+                                   start_position,
+                                   total_count,
+                                   person_ids)
+
 struct Map {
     std::string _id;
     Point down_left_point;
@@ -64,11 +77,12 @@ struct Map {
     std::vector<Segment> borders;
     std::vector<NamedPoint> persons;
     std::vector<NamedPoint> goals;
+    std::vector<Group> groups;
     std::string name;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Map, _id, down_left_point, up_right_point,
-                                   borders, persons, goals, name)
+                                   borders, persons, goals, groups, name)
 
 struct RouteResult {
     int id;
@@ -97,6 +111,11 @@ json ApplicationContext::calculate_route(json input,
     std::vector<Goal> goals;
     for (const auto &person_data : map.persons) {
         persons.emplace_back(person_data.id, to_point(person_data.position));
+    }
+    for (const auto &group : map.groups) {
+        for (int person_id : group.person_ids) {
+            persons.emplace_back(person_id, to_point(group.start_position));
+        }
     }
     for (const auto &goal_data : map.goals) {
         goals.emplace_back(goal_data.id, to_point(goal_data.position));

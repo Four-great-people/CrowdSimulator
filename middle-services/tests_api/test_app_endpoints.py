@@ -17,6 +17,20 @@ def valid_payload():
             {"id": 1, "position": {"x": 5, "y": 5}},
             {"id": 2, "position": {"x": 6, "y": 6}},
         ],
+        "groups": [
+            {
+                "id": 0,
+                "start_position": {"x": 3, "y": 3},
+                "total_count": 3,
+                "person_ids": [10, 11, 12]
+            },
+            {
+                "id": 1,
+                "start_position": {"x": 4, "y": 4},
+                "total_count": 2,
+                "person_ids": [20, 21]
+            }
+        ]
     }
 
 
@@ -58,7 +72,8 @@ def test_get_map_returns_full_document_in_order(client, auth_headers):
     i_borders = raw.find('"borders"')
     i_persons = raw.find('"persons"')
     i_goals = raw.find('"goals"')
-    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals
+    i_groups = raw.find('"groups"')
+    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals < i_groups
 
 
 def test_get_map_400(client, auth_headers):
@@ -96,8 +111,9 @@ def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(
     i_borders = packed.find('"borders"')
     i_persons = packed.find('"persons"')
     i_goals = packed.find('"goals"')
+    i_groups = packed.find('"groups"')
 
-    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals, packed
+    assert 0 <= i_id < i_name < i_up < i_down < i_borders < i_persons < i_goals < i_groups, packed
 
 
 def test_simulate_calls_cpp_with_statistics(client, auth_headers, mock_requests):

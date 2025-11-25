@@ -1,5 +1,6 @@
 import { Grid } from '../models/Grid';
 import NamedPoint from '../models/NamedPoint';
+import Group from '../models/Group';
 
 const useFakeCalls = process.env.MODE ? true : false;
 const API_BASE_URL = 'http://localhost:5000';
@@ -444,6 +445,17 @@ function createGridByMap(map: any) {
             border['second']['y']
         );
     });
+    if (map["groups"] && Array.isArray(map["groups"])) {
+        map["groups"].forEach((group: any) => {
+            const g = new Group(
+                group["id"],
+                group["start_position"], 
+                group["total_count"],
+                group["person_ids"] || []
+            );
+            newGrid.addGroup(g);
+        });
+    }
     map['persons'].forEach(
         (person: { position: { x: number; y: number }; goal: { x: number; y: number }; id: number }
         ) => {

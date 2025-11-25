@@ -18,7 +18,9 @@ from flask_jwt_extended import (
     jwt_required,
 )
 
-from crowd_db.db.models import AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec
+from crowd_db.db.models import (
+    AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
+)
 from crowd_db.db.repository import MongoMapRepository, MongoUserRepository
 
 load_dotenv()
@@ -62,6 +64,7 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od["borders"] = d.get("borders", [])
     od["persons"] = d.get("persons", [])
     od["goals"] = d.get("goals", [])
+    od["groups"] = d.get("groups", [])
     return od
 
 
@@ -137,6 +140,7 @@ def create_map():
             borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
             goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
+            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
             name=payload.get("name", "Без названия"),
         )
 
@@ -201,6 +205,7 @@ def get_map(map_id: str):
     resp["borders"] = [s.to_bson() for s in m.borders]
     resp["persons"] = [p.to_bson() for p in m.persons]
     resp["goals"] = [p.to_bson() for p in m.goals]
+    resp["groups"] = [g.to_bson() for g in m.groups]
 
     return Response(
         json.dumps(resp, ensure_ascii=False, sort_keys=False, indent=2),
@@ -285,6 +290,7 @@ def update_map(map_id: str):
             borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
             goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
+            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
             name=payload.get("name", "Без названия"),
         )
         m.set_id(ObjectId(map_id))
@@ -308,9 +314,8 @@ def create_animation():
         user_oid = _current_user_oid()
         if user_oid is None:
             return jsonify({"error": "invalid user identity"}), 401
-
+        payload["user_id"] = user_oid
         animation_doc = AnimationDoc.from_bson(payload)
-        animation_doc.user_id = user_oid
         animation_id = repo.create_animation(animation_doc.to_bson())
         return jsonify({"_id": str(animation_id)}), 201
     except Exception as e:
@@ -350,14 +355,20 @@ def get_animation(animation_id: str):
         animation = repo.get_animation_for_user(animation_id, user_oid)
         if animation is None:
             return jsonify({"error": "Animation was not found"}), 400
-        animation_data = animation.to_bson()
+        resp = OrderedDict()
+        if animation.get_id() is not None:
+            resp["_id"] = str(animation.get_id())
+        resp["name"] = animation.name or "Без названия"
+        resp["up_right_point"] = animation.up_right_point.to_bson()
+        resp["down_left_point"] = animation.down_left_point.to_bson()
+        resp["borders"] = [s.to_bson() for s in animation.borders]
+        resp["persons"] = [p.to_bson() for p in animation.persons]
+        resp["goals"] = [p.to_bson() for p in animation.goals]
+        resp["groups"] = [g.to_bson() for g in animation.groups]
+        resp["routes"] = animation.routes
+        resp["statistics"] = animation.statistics
 
-        if "_id" in animation_data and isinstance(animation_data["_id"], ObjectId):
-            animation_data["_id"] = str(animation_data["_id"])
-        if "name" not in animation_data:
-            animation_data["name"] = animation.name or "Без названия"
-
-        return jsonify(animation_data), 200
+        return jsonify(resp), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 

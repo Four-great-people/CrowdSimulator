@@ -26,10 +26,12 @@ const MapDetail: React.FC = () => {
     const [mapName, setMapName] = useState('');
     const [originalMapName, setOriginalMapName] = useState('');
     const [showNameInput, setShowNameInput] = useState(false);
+    const [groupSizeInput, setGroupSizeInput] = useState('5');
     // const [mapId, setMapId] = useState<string | null>(null);
     const animationRef = useRef<any>(null);
     const [isLoadingMap, setIsLoadingMap] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [groupSize, setGroupSize] = useState(5);
     const [error, setError] = useState<string | null>(null);
 
     const algorithmsSupported: Algorithm[] = [
@@ -40,7 +42,7 @@ const MapDetail: React.FC = () => {
 
     const [selectedAlgo, setSelectedAlgo] = useState<Algorithm>(algorithmsSupported[0]);
     
-    const objectTypes: string[] = ["border", "person", "goal"];
+    const objectTypes: string[] = ["border", "person", "goal", "group"];
     const [currentObject, setCurrentObject] = useState("border");
 
     const createNewGrid = () => {
@@ -172,6 +174,18 @@ const MapDetail: React.FC = () => {
     if (error) {
         return <NotFound />;
     }
+    const handleGroupSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value === '' || /^\d*$/.test(value)) {
+            setGroupSizeInput(value);
+            if (value !== '') {
+                const numValue = parseInt(value);
+                if (!isNaN(numValue) && numValue >= 1 && numValue <= 50) {
+                    setGroupSize(numValue);
+                }
+            }
+        }
+    };
 
     return (
         <div className="App">
@@ -199,6 +213,32 @@ const MapDetail: React.FC = () => {
                         <img src={"/" + type + ".png"} onClick={() => onObjectClick(type)} width="30" height="30"></img>
                     </button>
                 )}
+                
+                <div className="group-size-input-container" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    marginLeft: '10px',
+                    background: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc'
+                }}>
+                    <label style={{ marginRight: '8px', fontSize: '14px' }}>Людей в группе:</label>
+                    <input
+                        type="text"
+                        value={groupSizeInput}
+                        onChange={handleGroupSizeChange}
+                        style={{
+                            width: '40px',
+                            padding: '2px 5px',
+                            border: '1px solid #ddd',
+                            borderRadius: '3px',
+                            textAlign: 'center'
+                        }}
+                    />
+                </div>
+                
+                
                 {id !== 'new' && (
                     <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
                         Удалить карту
@@ -207,7 +247,7 @@ const MapDetail: React.FC = () => {
             </div>
             <div className="body">
                 <div className="grid-wrapper">
-                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} objectPlacing={currentObject} />}
+                    {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} objectPlacing={currentObject} groupSize={groupSize} />}
                 </div>
                 <div className="algo-list-container">
                     <h2 className="algo-list-title">Выберите алгоритм:</h2>

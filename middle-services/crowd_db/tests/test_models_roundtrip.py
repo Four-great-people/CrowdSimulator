@@ -21,4 +21,5 @@ def test_mapdoc_roundtrip():
     assert again.up_right_point == m.up_right_point
     assert again.down_left_point == m.down_left_point
     assert again.borders == m.borders
+    assert len(again.groups) == 1
     assert again.persons[0].position == m.persons[0].position

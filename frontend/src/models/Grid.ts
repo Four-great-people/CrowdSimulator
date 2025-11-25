@@ -1,7 +1,7 @@
 import Cell from './Cell';
 import NamedPoint from './NamedPoint';
 import Wall from './Wall';
-
+import Group from './Group';
 export class Grid {
     width: number;
     height: number;
@@ -10,6 +10,7 @@ export class Grid {
     goals: NamedPoint[];
     walls: Wall[];
     allTicks: number;
+    groups: Group[] = [];
 
     constructor(width: number, height: number) {
         this.width = width;
@@ -43,6 +44,20 @@ export class Grid {
         } else {
           (cell as any).directionOfWall = '';
         }
+    }
+    addGroup(group: Group) {
+        this.groups.push(group);
+    }
+
+    removeGroupAt(x: number, y: number) {
+        this.groups = this.groups.filter(g => 
+            g.start_position.x !== x || g.start_position.y !== y
+        );
+    }
+    getGroupAt(x: number, y: number): Group | null {
+        return this.groups.find(g => 
+            g.start_position.x === x && g.start_position.y === y
+        ) || null;
     }
 
     removeWall(x1: number, y1: number, x2: number, y2: number) {
@@ -147,6 +162,7 @@ removeGoalAt(x: number, y: number) {
         });
 
         newGrid.allTicks = this.allTicks;
+        newGrid.groups = this.groups.map(group => group.clone());
         
         return newGrid;
     }
@@ -181,7 +197,7 @@ removeGoalAt(x: number, y: number) {
     addPerson(person: NamedPoint) {
         const cell = this.getCell(person.position.x, person.position.y);
         if (cell) {
-            if (cell.persons.length == 0 && cell.goals.length == 0) {
+            if (cell.goals.length == 0) {
                 cell.addPerson(person);
                 this.persons.push(person);
             }
@@ -217,7 +233,8 @@ removeGoalAt(x: number, y: number) {
             goals: this.goals.map(goal => ({
                 id: goal.id,
                 position: goal.position,
-            }))
+            })),
+            groups: this.groups.map(group => group.toJSON())
         };
     }
 
@@ -237,6 +254,12 @@ removeGoalAt(x: number, y: number) {
             goals: this.goals.map(goal => ({
                 id: goal.id,
                 position: goal.position,
+            })),
+            groups: this.groups.map(group => ({
+                id: group.id,
+                start_position: { x: group.start_position.x, y: group.start_position.y },
+                total_count: group.total_count,
+                person_ids: group.person_ids || []
             })),
             routes: cleanRoutes,
             statistics: statistics
