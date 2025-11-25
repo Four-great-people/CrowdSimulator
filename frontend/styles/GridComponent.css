@@ -285,4 +285,8 @@
     background-color: white;
     font-size: 14px;
     z-index: 1000 !important;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }

@@ -213,7 +213,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
     const isValidCellTarget = (target: any) => {
         const cn = (target?.className || '').toString();
-        return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal');
+        return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal')|| cn.includes('group-marker');;
     };
 
     const handleOnClick = (e: any) => {
