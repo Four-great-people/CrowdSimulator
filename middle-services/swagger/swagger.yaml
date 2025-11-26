@@ -1,0 +1,34 @@
+swagger: "2.0"
+info:
+  title: "Middle end API"
+  description: "Crowd simulator middle end API"
+  version: 1.0.0
+servers: 
+  - url: "http://localhost:5000"
+componemts:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /maps:
+    get:
+      description: "Returns list of maps"
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: "Map created"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: string
+                    name: string
+
+
+
