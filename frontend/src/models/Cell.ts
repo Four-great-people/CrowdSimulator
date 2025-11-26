@@ -77,12 +77,12 @@ class Cell {
         this.usedTicks = 0;
     }
 
-    getColorString(allTicks: number) {
-        if (allTicks == 0) {
+    getColorString(maxTicks: number) {
+        if (maxTicks == 0) {
             return "#FFFFFF";
         }
         const maxEffect = 128;
-        const notBlueComponent = 255 - Math.floor(this.usedTicks / allTicks * maxEffect);
+        const notBlueComponent = 255 - Math.floor(this.usedTicks / maxTicks * maxEffect);
         return "#" + notBlueComponent.toString(16) + notBlueComponent.toString(16) + "FF";
     }
 }

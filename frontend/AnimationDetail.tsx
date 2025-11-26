@@ -349,7 +349,6 @@ const AnimationDetail: React.FC = () => {
                 return;
             }
             const newGrid = currentGrid.clone();
-            newGrid.addTick();
             const updatedPersons: NamedPoint[] = [];
             const updatedSteps = { ...currentSteps };
             const updatedCompleted = { ...completedGoals };
