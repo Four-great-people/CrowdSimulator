@@ -66,10 +66,10 @@ curl -X POST http://127.0.0.1:5000/maps \
 { "_id": "..." }
 ```
 
-### PUT /maps/\<id\> — обновить карту
+### PUT /maps/\{id\} — обновить карту
 Обновляет существующую карту в базе по её ID.
 ```bash
-curl -X PUT http://127.0.0.1:5000/maps/<id> \
+curl -X PUT http://127.0.0.1:5000/maps/{id} \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Моя карта",
@@ -87,23 +87,23 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
   }'
 ```
 
-### DELETE /maps/<id> - удалить карту по ID
+### DELETE /maps/{id} - удалить карту по ID
 Удаляет документ из базы по его идентификатору.
 Возвращает статус выполнения операции.
 ```bash
-curl -X DELETE http://127.0.0.1:5000/maps/<id>
+curl -X DELETE http://127.0.0.1:5000/maps/{id}
 ```
 ### GET /maps — получить список из ID и названий всех карт
 ```bash
 curl http://127.0.0.1:5000/maps
 ```
 
-### GET /maps/\<id\> — получить карту по ID
+### GET /maps/\{id\} — получить карту по ID
 Возвращает карту в «правильном» порядке ключей (как выше).
 ```bash
-curl http://127.0.0.1:5000/maps/<id>
+curl http://127.0.0.1:5000/maps/{id}
 ```
-### GET /maps/\<id\>/statistics/{algo name} — получить статистику по маршрутам
+### GET /maps/\{id\}/statistics/{algo name} — получить статистику по маршрутам
 "algo name" - это одно из simple, dense, random
 - Достаёт карту из БД,
 - формирует JSON в нужном порядке ключей,
@@ -112,7 +112,7 @@ curl http://127.0.0.1:5000/maps/<id>
 - считает один шаг за 10 секунд, диагональ - 15 секунд, возвращает ответ в секундах и маршрут valid
 - null - отсутствие маршрута
 ```bash
-curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
+curl -X GET http://127.0.0.1:5000/maps/{id}/statistics/{algo name}
 ```
 ```
 {
@@ -194,10 +194,10 @@ ticks == -1 означает, что статистика проигрывает
 curl http://127.0.0.1:5000/animations
 ```
 
-### GET /animations/<id>/statistics/{algo_name} — обновить сохранённую в бд анимацию и вернуть СУММАРНУЮ статистику
+### GET /animations/{id}/statistics/{algo_name} — обновить сохранённую в бд анимацию и вернуть СУММАРНУЮ статистику
 
 ```bash
-curl -X GET http://127.0.0.1:5000/animations/<id>/statistics/{algo name}
+curl -X GET http://127.0.0.1:5000/animations/{id}/statistics/{algo name}
 ```
 
 Запрос:
@@ -307,15 +307,15 @@ block - новая карта
 Статистика ТОЛЬКО за указанный блок
 Маршруты - ТОЛЬКО указанный блок
 
-### GET /animations/<id> — получить анимацию по ID
+### GET /animations/{id} — получить анимацию по ID
 ```bash
-curl http://127.0.0.1:5000/animations/<id>
+curl http://127.0.0.1:5000/animations/{id}
 ```
 
-### PUT /animations/<id> — обновить имя анимации
+### PUT /animations/{id} — обновить имя анимации
 Меняет только имя у анимации.
 ```bash
-curl -X PUT http://127.0.0.1:5000/animations/<id>
+curl -X PUT http://127.0.0.1:5000/animations/{id}
 ```
 
 ```json
@@ -323,11 +323,11 @@ curl -X PUT http://127.0.0.1:5000/animations/<id>
 -d '{"name": "Новое имя"}'
 ```
 
-### DELETE /animations/<id> — удалить анимацию по ID
+### DELETE /animations/{id} — удалить анимацию по ID
 Удаляет сохранённую анимацию из базы данных.
 Возвращает статус выполнения операции.
 ```bash
-curl -X DELETE http://127.0.0.1:5000/animations/<id>
+curl -X DELETE http://127.0.0.1:5000/animations/{id}
 ```
 
 ## Тесты
