@@ -7,8 +7,8 @@ from typing import List, Optional
 
 import pytest
 from bson import ObjectId
-from crowd_db.db.models import AnimationDoc
 from flask_jwt_extended import create_access_token
+from crowd_db.db.models import AnimationDoc
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -50,7 +50,7 @@ class FakeRepo:
     def get_animation_for_user(
         self,
         animation_id: str | ObjectId,
-        user_id: ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
     ) -> Optional[AnimationDoc]:
         try:
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
@@ -61,8 +61,8 @@ class FakeRepo:
 
     def get_animations_for_user(
         self,
-        user_id: ObjectId,
-        limit: int = 1000,
+        user_id: ObjectId, # pylint: disable=unused-argument
+        limit: int = 1000, # pylint: disable=unused-argument
     ) -> List[AnimationDoc]:
         return [
             AnimationDoc.from_bson(d)
@@ -72,7 +72,7 @@ class FakeRepo:
     def update_animation_name_for_user(
         self,
         animation_id: str,
-        user_id: ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
         new_name: str,
     ) -> bool:
         try:
@@ -81,11 +81,11 @@ class FakeRepo:
             return True
         except Exception:  # noqa: BLE001
             return False
-    
+
     def update_animation_for_user(
         self,
         animation_id: str,
-        user_id: ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
         new_blocks: list,
         new_statistics: dict,
     ) -> bool:
@@ -100,7 +100,7 @@ class FakeRepo:
     def delete_animation_for_user(
         self,
         animation_id: str | ObjectId,
-        user_id: ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
     ) -> bool:
         try:
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id

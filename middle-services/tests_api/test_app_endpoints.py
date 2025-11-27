@@ -124,7 +124,7 @@ def test_simulate_calls_cpp_unsaved_animation_with_returns_routes(
     }
 
     assert len(mock_requests["calls"]) == 2
-    
+
 SAMPLE_ANIMATION = {
         "name": "Моя анимация",
         "up_right_point": {"x": 10, "y": 10},
@@ -188,7 +188,7 @@ def test_clone_animation(client, auth_headers):
     assert clone_resp.status_code == 201
     anim_id2 = clone_resp.get_json()["_id"]
     assert anim_id != anim_id2
-    
+
 def test_simulate_calls_cpp_saved_animation_with_returns_routes(
     client, auth_headers, mock_requests
 ):

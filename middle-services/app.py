@@ -408,7 +408,8 @@ def get_saved_animation_statistics(animation_id: str, algo: str):
     try:
         payload = request.get_json(force=True)
         ticks = int(payload["ticks"])
-        algo_data = block_request_to_json(payload["block"], a.up_right_point.to_bson(), a.down_left_point.to_bson())
+        algo_data = block_request_to_json(
+            payload["block"], a.up_right_point.to_bson(), a.down_left_point.to_bson())
         algo_payload = json.dumps(algo_data, ensure_ascii=False)
         headers = {"Content-Type": "application/json"}
     except Exception as e:
@@ -430,7 +431,7 @@ def get_saved_animation_statistics(animation_id: str, algo: str):
         a.blocks.append(block)
         bls = [b.to_bson() for b in a.blocks]
         if not repo.update_animation_for_user(animation_id, user_oid, bls, new_statistics):
-            return jsonify({"error": f"map was already deleted"}), 400
+            return jsonify({"error": "map was already deleted"}), 400
     except Exception as e:
         return jsonify({"error": f"error wrong payload {e}"}), 400
     return jsonify(new_statistics), 200
@@ -445,7 +446,8 @@ def get_unsaved_animation_statistics(algo: str):
         return jsonify({"error": "invalid user identity"}), 401
     try:
         payload = request.get_json(force=True)
-        algo_data = block_request_to_json(payload["block"], payload["up_right_point"], payload["down_left_point"])
+        algo_data = block_request_to_json(
+            payload["block"], payload["up_right_point"], payload["down_left_point"])
         algo_payload = json.dumps(algo_data, ensure_ascii=False)
         headers = {"Content-Type": "application/json"}
     except Exception as e:
