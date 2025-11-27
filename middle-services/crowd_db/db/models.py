@@ -198,7 +198,7 @@ class AnimationDoc:
     name: str = "Без названия"
     _id: Optional[ObjectId] = None
 
-    def set_id(self, oid: ObjectId) -> None:
+    def set_id(self, oid: ObjectId | None) -> None:
         self._id = oid
 
     def get_id(self) -> Optional[ObjectId]:

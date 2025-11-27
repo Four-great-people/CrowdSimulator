@@ -365,6 +365,7 @@ def clone_animation(animation_id: str):
         animation = repo.get_animation_for_user(animation_id, user_oid)
         if animation is None:
             return jsonify({"error": "Animation was not found"}), 400
+        animation.set_id(None)
         new_animation_id = repo.create_animation(animation.to_bson())
         return jsonify({"_id": str(new_animation_id)}), 201
     except Exception as e:
@@ -401,10 +402,13 @@ def get_saved_animation_statistics(animation_id: str, algo: str):
     user_oid = _current_user_oid()
     if user_oid is None:
         return jsonify({"error": "invalid user identity"}), 401
+    a = repo.get_animation_for_user(animation_id, user_oid)
+    if not a:
+        return jsonify({"error": "map not found"}), 400
     try:
         payload = request.get_json(force=True)
         ticks = int(payload["ticks"])
-        algo_data = block_request_to_json(payload["block"], payload["up_right_point"], payload["down_left_point"])
+        algo_data = block_request_to_json(payload["block"], a.up_right_point.to_bson(), a.down_left_point.to_bson())
         algo_payload = json.dumps(algo_data, ensure_ascii=False)
         headers = {"Content-Type": "application/json"}
     except Exception as e:
@@ -418,12 +422,10 @@ def get_saved_animation_statistics(animation_id: str, algo: str):
     except requests.RequestException as e:  # pragma: no cover
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     new_statistics = {"valid": dense_result, "ideal": simple_result, "routes": route}
-    a = repo.get_animation_for_user(animation_id, user_oid)
-    if not a:
-        return jsonify({"error": "map not found"}), 400
     try:
         a.blocks[-1].ticks = ticks
         payload["block"]["routes"] = route
+        payload["block"]["ticks"] = -1
         block = AnimationBlock.from_bson(payload["block"])
         a.blocks.append(block)
         bls = [b.to_bson() for b in a.blocks]

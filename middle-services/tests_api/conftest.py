@@ -43,6 +43,7 @@ class FakeRepo:
 
     def create_animation(self, d: dict) -> ObjectId:
         oid = d.get("_id") or ObjectId()
+        d["_id"] = oid
         self._store_anims[str(oid)] = d
         return d["_id"]
 

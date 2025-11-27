@@ -129,7 +129,7 @@ SAMPLE_ANIMATION = {
         "name": "Моя анимация",
         "up_right_point": {"x": 10, "y": 10},
         "down_left_point": {"x": 0, "y": 0},
-        "block": {
+        "blocks": [{
             "borders": [
                 {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
                 {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}},
@@ -157,7 +157,7 @@ SAMPLE_ANIMATION = {
                 }
             ],
             "ticks": -1,
-        },
+        }],
         "statistics": {
             "ideal": {"value": 35, "problematic": 0},
             "valid": {"value": None, "problematic": 1},
@@ -173,7 +173,7 @@ def test_create_animation(client, auth_headers):
 
 def test_get_animation(client, auth_headers):
     resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
-    assert resp.status_code == 200
+    assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
     get_resp = client.get(f"/animations/{anim_id}", headers=auth_headers)
@@ -181,19 +181,19 @@ def test_get_animation(client, auth_headers):
 
 def test_clone_animation(client, auth_headers):
     resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
-    assert resp.status_code == 200
+    assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
     clone_resp = client.post(f"/animations/{anim_id}", headers=auth_headers)
-    anim_id2 = id_resp["_id"]
-    assert clone_resp.status_code == 200
+    assert clone_resp.status_code == 201
+    anim_id2 = clone_resp.get_json()["_id"]
     assert anim_id != anim_id2
     
 def test_simulate_calls_cpp_saved_animation_with_returns_routes(
     client, auth_headers, mock_requests
 ):
     resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
-    assert resp.status_code == 200
+    assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
     resp = client.get(f"/animations/{anim_id}/statistics/dense", headers=auth_headers, json={
