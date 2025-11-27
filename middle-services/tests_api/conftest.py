@@ -8,7 +8,6 @@ from typing import List, Optional
 import pytest
 from bson import ObjectId
 from flask_jwt_extended import create_access_token
-from crowd_db.db.models import AnimationDoc
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -51,21 +50,21 @@ class FakeRepo:
         self,
         animation_id: str | ObjectId,
         user_id: ObjectId, # pylint: disable=unused-argument
-    ) -> Optional[AnimationDoc]:
+    ):
         try:
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
         except Exception:
             return None
         d = self._store_anims[str(oid)]
-        return AnimationDoc.from_bson(d) if d else None
+        return app_module.AnimationDoc.from_bson(d) if d else None
 
     def get_animations_for_user(
         self,
         user_id: ObjectId, # pylint: disable=unused-argument
         limit: int = 1000, # pylint: disable=unused-argument
-    ) -> List[AnimationDoc]:
+    ):
         return [
-            AnimationDoc.from_bson(d)
+            app_module.AnimationDoc.from_bson(d)
             for d in self._store_anims.values()
         ]
 

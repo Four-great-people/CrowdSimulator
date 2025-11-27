@@ -96,26 +96,24 @@ def apply_collection_validator():
     }
 
     block = {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "required": [
-                "borders",
-                "persons",
-                "goals",
-                "groups",
-                "routes",
-                "ticks",
-            ],
-            "properties": {
-                "borders": {"bsonType": "array", "items": segment},
-                "persons": {"bsonType": "array", "items": named_point},
-                "goals": {"bsonType": "array", "items": named_point},
-                "groups": {"bsonType": "array", "items": group_schema},
-                "routes": {"bsonType": "array", "items": route_person},
-                "ticks": {"bsonType": "int"},
-            },
-            "additionalProperties": False,
+        "bsonType": "object",
+        "required": [
+            "borders",
+            "persons",
+            "goals",
+            "groups",
+            "routes",
+            "ticks",
+        ],
+        "properties": {
+            "borders": {"bsonType": "array", "items": segment},
+            "persons": {"bsonType": "array", "items": named_point},
+            "goals": {"bsonType": "array", "items": named_point},
+            "groups": {"bsonType": "array", "items": group_schema},
+            "routes": {"bsonType": "array", "items": route_person},
+            "ticks": {"bsonType": "int"},
         },
+        "additionalProperties": False,
     }
 
     animation_schema = {
