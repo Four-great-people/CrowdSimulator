@@ -135,7 +135,7 @@ class MongoMapRepository:
         self,
         animation_id: str,
         user_id: ObjectId,
-        new_blocks: dict,
+        new_blocks: list,
         new_statistics: dict,
     ) -> bool:
         try:
