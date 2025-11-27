@@ -158,17 +158,42 @@ class MapDoc:
             _id=d.get("_id"),
         )
 
+@dataclass
+class AnimationBlock:
+    borders: List[Segment] = field(default_factory=list)
+    persons: List[NamedPointSpec] = field(default_factory=list)
+    goals: List[NamedPointSpec] = field(default_factory=list)
+    groups: List[GroupSpec] = field(default_factory=list)
+    routes: List[Dict] = field(default_factory=list)
+    ticks: int = 0
+
+    def to_bson(self) -> dict:
+        return {
+            "borders": [s.to_bson() for s in self.borders],
+            "persons": [p.to_bson() for p in self.persons],
+            "goals": [p.to_bson() for p in self.goals],
+            "groups": [g.to_bson() for g in self.groups],
+            "routes": self.routes,
+            "ticks": self.ticks,
+        }
+
+    @staticmethod
+    def from_bson(d: dict) -> "AnimationBlock":
+        return AnimationBlock(
+            borders=[Segment.from_bson(s) for s in d.get("borders", [])],
+            persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
+            goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
+            groups=[GroupSpec.from_bson(g) for g in d.get("groups", [])],
+            routes=d.get("routes", []),
+            ticks=int(d["ticks"]),
+        )
 
 @dataclass
 class AnimationDoc:
     up_right_point: Point
     down_left_point: Point
     user_id: ObjectId
-    borders: List[Segment] = field(default_factory=list)
-    persons: List[NamedPointSpec] = field(default_factory=list)
-    goals: List[NamedPointSpec] = field(default_factory=list)
-    groups: List[GroupSpec] = field(default_factory=list)
-    routes: List[Dict] = field(default_factory=list)
+    blocks: List[AnimationBlock] = field(default_factory=list)
     statistics: Dict = field(default_factory=dict)
     name: str = "Без названия"
     _id: Optional[ObjectId] = None
@@ -183,11 +208,7 @@ class AnimationDoc:
         doc: Dict[str, Any] = {
             "up_right_point": self.up_right_point.to_bson(),
             "down_left_point": self.down_left_point.to_bson(),
-            "borders": [s.to_bson() for s in self.borders],
-            "persons": [p.to_bson() for p in self.persons],
-            "goals": [p.to_bson() for p in self.goals],
-            "groups": [g.to_bson() for g in self.groups],
-            "routes": self.routes,
+            "blocks": [b.to_bson() for b in self.blocks],
             "statistics": self.statistics,
             "name": self.name,
             "user_id": self.user_id,
@@ -205,11 +226,7 @@ class AnimationDoc:
             up_right_point=Point.from_bson(d["up_right_point"]),
             down_left_point=Point.from_bson(d["down_left_point"]),
             user_id=user_id,
-            borders=[Segment.from_bson(s) for s in d.get("borders", [])],
-            persons=[NamedPointSpec.from_bson(p) for p in d.get("persons", [])],
-            goals=[NamedPointSpec.from_bson(p) for p in d.get("goals", [])],
-            groups=[GroupSpec.from_bson(g) for g in d.get("groups", [])],
-            routes=d.get("routes", []),
+            blocks=[AnimationBlock.from_bson(b) for b in d["blocks"]],
             statistics=d.get("statistics", {}),
             name=d.get("name", "Без названия"),
             _id=d.get("_id"),
