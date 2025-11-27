@@ -40,7 +40,7 @@ def test_insert_and_read_real_mongo():
         groups=[GroupSpec(id=0, start_position=Point(3,3), total_count=3, person_ids=[100,101,102])]
     )
     _id = repo.create(m)
-    got = repo.get(_id)
+    got = repo.get(_id) # pylint: disable=no-member
     assert got is not None
     assert got.name == "Тестовая карта"
     assert got.persons[0].id == "p-42"

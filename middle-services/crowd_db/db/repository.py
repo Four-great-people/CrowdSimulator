@@ -105,7 +105,7 @@ class MongoMapRepository:
             return result.matched_count > 0
         except (InvalidId, Exception):  # noqa: BLE001
             return False
-    
+
     def update_animation_for_user(
         self,
         animation_id: str,
@@ -153,5 +153,3 @@ class MongoUserRepository:
     def get_by_username(self, username: str) -> Optional[UserDoc]:
         d = _users_col().find_one({"username": username})
         return UserDoc.from_bson(d) if d else None
-
-# TODO: check multithreading

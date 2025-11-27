@@ -396,7 +396,7 @@ def get_animation(animation_id: str):
 
 @app.route("/animations/<animation_id>/statistics/<algo>", methods=["GET"])
 @jwt_required()
-def get_saved_animation_statistics(animation_id: str, algo: str):
+def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disable=too-many-return-statements
     if algo not in {"dense", "simple", "random"}:
         return jsonify({"error": "invalid algorithm"}), 400
     user_oid = _current_user_oid()
