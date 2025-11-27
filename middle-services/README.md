@@ -144,6 +144,17 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 [{"id":0,"route":null}]
 ```
 
+### POST /animations/{id} - сохранить анимацию как
+Копирует анимацию в бд и возвращает id
+
+```bash
+ curl -X POST http://127.0.0.1:5000/animations/1
+```
+
+Ответ:
+```json
+{ "_id": "..." }
+```
 ### POST /animations - создать анимацию
 Сохраняет анимацию и возвращает id
 
@@ -157,13 +168,23 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
     "name": "Моя анимация",
     "up_right_point": {"x": 10, "y": 10},
     "down_left_point": {"x": 0, "y": 0},
-    "borders": [...],
-    "persons": [...],
-    "goals": [...],
-    "routes": [...],
+    "blocks": [
+      {
+        "borders": [...],
+        "persons": [...],
+        "goals": [...],
+        "routes": [...],
+        "ticks": 5,
+      }, ...
+    ],
     "statistics": {...}
   }'
 ```
+
+Статистика суммируется за все блоки
+
+ticks == -1 означает, что статистика проигрывается до конца
+
 Ответ:
 ```json
 { "_id": "..." }
@@ -172,6 +193,119 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 ```bash
 curl http://127.0.0.1:5000/animations
 ```
+
+### GET /animations/<id>/statistics/{algo_name} — обновить сохранённую в бд анимацию и вернуть СУММАРНУЮ статистику
+
+```bash
+curl -X GET http://127.0.0.1:5000/animations/<id>/statistics/{algo name}
+```
+
+Запрос:
+
+```json
+{
+  "block": {
+    "borders": [...],
+    "persons": [...],
+    "goals": [...],
+    "routes": [...],
+  },
+  "ticks": 10,
+}
+```
+
+block - новая карта
+
+ticks - количество тиков, которое прошло начиная с предыдущей карты
+
+Ответ:
+
+```json
+{
+    "ideal": {
+      "value": null,
+      "problematic": 2,
+    },
+    "valid": {
+      "value": 25,
+      "problematic": 3,
+    },
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+  ]
+}
+```
+Пустой маршрут тоже возможен. Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
+Статистика СУММАРНАЯ за всё время
+Маршруты - ТОЛЬКО последний блок
+
+### POST /animations/statistics/{algo_name} — посчитать статистику и маршруты для очередного блока НЕ СОХРАНЁННОЙ анимации
+
+```bash
+curl -X GET http://127.0.0.1:5000/animations/statistics/{algo_name}
+```
+
+Запрос:
+
+```json
+{
+  "block": {
+    "borders": [...],
+    "persons": [...],
+    "goals": [...],
+    "routes": [...],
+  }
+}
+```
+
+block - новая карта
+
+Ответ:
+
+```json
+{
+    "ideal": {
+      "value": null,
+      "problematic": 2,
+    },
+    "valid": {
+      "value": 25,
+      "problematic": 3,
+    },
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+  ]
+}
+```
+Пустой маршрут тоже возможен. Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
+Статистика ТОЛЬКО за указанный блок
+Маршруты - ТОЛЬКО указанный блок
 
 ### GET /animations/<id> — получить анимацию по ID
 ```bash
