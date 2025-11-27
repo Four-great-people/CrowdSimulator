@@ -155,7 +155,6 @@ def create_map():
             groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
             name=payload.get("name", "Без названия"),
         )
-
         oid = repo.create(m)
         return jsonify({"_id": str(oid)}), 201
     except Exception as e:
@@ -428,9 +427,10 @@ def get_saved_animation_statistics(animation_id: str, algo: str):
         block = AnimationBlock.from_bson(payload["block"])
         a.blocks.append(block)
         bls = [b.to_bson() for b in a.blocks]
-        repo.update_animation_for_user(animation_id, user_oid, bls, new_statistics)
+        if not repo.update_animation_for_user(animation_id, user_oid, bls, new_statistics):
+            return jsonify({"error": f"map was already deleted"}), 400
     except Exception as e:
-        return jsonify({"error": "error while working with animation"}), 400
+        return jsonify({"error": f"error wrong payload {e}"}), 400
     return jsonify(new_statistics), 200
 
 @app.route("/animations/statistics/<algo>", methods=["POST"])
@@ -458,8 +458,6 @@ def get_unsaved_animation_statistics(algo: str):
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
     new_statistics = {"valid": dense_result, "ideal": simple_result, "routes": route}
     return jsonify(new_statistics), 200
-
-# TODO: check correct error handling
 
 @app.route("/animations/<animation_id>", methods=["PUT"])
 @jwt_required()
