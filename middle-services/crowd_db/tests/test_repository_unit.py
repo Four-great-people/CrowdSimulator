@@ -13,7 +13,7 @@ def test_crud_maps_unit():
     assert _id is not None
 
     # get
-    got = repo.get(_id)
+    got = repo.get_for_user(_id, m.user_id)
     assert got is not None
     assert got.name == "Тестовая карта"
     assert got.up_right_point == Point(10,10)
@@ -22,7 +22,7 @@ def test_crud_maps_unit():
     assert got.persons[0].position == Point(0,1)
 
     # list
-    lst = repo.list(limit=10)
+    lst = repo.list_for_user(m.user_id, limit=10)
     assert any(doc.get_id() == _id for doc in lst)
 
     # replace
@@ -33,11 +33,11 @@ def test_crud_maps_unit():
         total_count=2,
         person_ids=[200, 201]
     ))
-    assert repo.replace(got) is True
-    got2 = repo.get(_id)
+    assert repo.replace_for_user(got, m.user_id) is True
+    got2 = repo.get_for_user(_id, m.user_id)
     assert got2 and len(got2.persons) == 2
     assert got2 and len(got2.groups) == 2
 
     # delete
-    assert repo.delete(_id) is True
-    assert repo.get(_id) is None
+    assert repo.delete_for_user(_id, m.user_id) is True
+    assert repo.get_for_user(_id, m.user_id) is None

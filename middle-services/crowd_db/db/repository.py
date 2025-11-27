@@ -29,14 +29,6 @@ class MongoMapRepository:
         _col().insert_one(doc)
         return doc["_id"]
 
-    def get(self, map_id: str | ObjectId) -> Optional[MapDoc]: # TODO(verbinna22): remove
-        try:
-            oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
-        except InvalidId:
-            return None
-        d = _col().find_one({"_id": oid})
-        return MapDoc.from_bson(d) if d else None
-
     def get_for_user(self, map_id: str | ObjectId, user_id: ObjectId) -> Optional[MapDoc]:
         try:
             oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
@@ -45,20 +37,11 @@ class MongoMapRepository:
         d = _col().find_one({"_id": oid, "user_id": user_id})
         return MapDoc.from_bson(d) if d else None
 
-    def list(self, limit: int = 50) -> List[MapDoc]: # TODO(verbinna22): remove
-        return [MapDoc.from_bson(d) for d in _col().find().limit(limit)]
-
     def list_for_user(self, user_id: ObjectId, limit: int = 50) -> List[MapDoc]:
         return [
             MapDoc.from_bson(d)
             for d in _col().find({"user_id": user_id}).limit(limit)
         ]
-
-    def replace(self, m: MapDoc) -> bool: # TODO(verbinna22): remove
-        if not m.get_id():
-            raise ValueError("replace: _id required")
-        res = _col().replace_one({"_id": m.get_id()}, m.to_bson())
-        return res.matched_count == 1
 
     def replace_for_user(self, m: MapDoc, user_id: ObjectId) -> bool:
         if not m.get_id():
@@ -68,14 +51,6 @@ class MongoMapRepository:
             m.to_bson(),
         )
         return res.matched_count == 1
-
-    def delete(self, map_id: str | ObjectId) -> bool: # TODO(verbinna22): remove + update README
-        try:
-            oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
-        except InvalidId:
-            return False
-        res = _col().delete_one({"_id": oid})
-        return res.deleted_count == 1
 
     def delete_for_user(self, map_id: str | ObjectId, user_id: ObjectId) -> bool:
         try:
