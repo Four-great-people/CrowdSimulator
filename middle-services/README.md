@@ -174,6 +174,7 @@ curl -X GET http://127.0.0.1:5000/maps/{id}/statistics/{algo name}
         "persons": [...],
         "goals": [...],
         "routes": [...],
+        "groups": [...],
         "ticks": 5,
       }, ...
     ],
@@ -209,6 +210,7 @@ curl -X GET http://127.0.0.1:5000/animations/{id}/statistics/{algo name}
     "persons": [...],
     "goals": [...],
     "routes": [...],
+    "groups": [...],
   },
   "ticks": 10,
 }
@@ -269,6 +271,7 @@ curl -X GET http://127.0.0.1:5000/animations/statistics/{algo_name}
     "persons": [...],
     "goals": [...],
     "routes": [...],
+    "groups": [...],
   }
 }
 ```

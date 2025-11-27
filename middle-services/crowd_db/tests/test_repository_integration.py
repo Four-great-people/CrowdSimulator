@@ -29,18 +29,19 @@ def clean_and_validate():
 
 def test_insert_and_read_real_mongo():
     repo = MongoMapRepository()
+    uid = ObjectId()
     m = MapDoc(
         name="Тестовая карта",
         up_right_point=Point(5, 5),
         down_left_point=Point(0, 0),
-        user_id=ObjectId(),
+        user_id=uid,
         borders=[Segment(Point(0,0), Point(5,0))],
         persons=[NamedPointSpec(id="p-42", position=Point(0,1))],
         goals=[NamedPointSpec(id="p-42", position=Point(1,1))],
         groups=[GroupSpec(id=0, start_position=Point(3,3), total_count=3, person_ids=[100,101,102])]
     )
     _id = repo.create(m)
-    got = repo.get(_id) # pylint: disable=no-member
+    got = repo.get_for_user(_id, uid)
     assert got is not None
     assert got.name == "Тестовая карта"
     assert got.persons[0].id == "p-42"
