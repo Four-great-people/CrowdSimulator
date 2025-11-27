@@ -262,6 +262,8 @@ curl -X GET http://127.0.0.1:5000/animations/statistics/{algo_name}
 
 ```json
 {
+  "up_right_point": {"x": 10, "y": 10},
+  "down_left_point": {"x": 0, "y": 0},
   "block": {
     "borders": [...],
     "persons": [...],
