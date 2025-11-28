@@ -6,7 +6,7 @@ This services are working with many computation-lite requests like signing up, s
 # Включить Pylint
 ```
 pip install pylint ruff
-.venv/bin/pylint --ignore=.venv,pycache,venv  --disable=missing-docstring --recursive=y .
+.venv/bin/pylint --ignore=.venv,pycache,venv  --disable=missing-docstring,too-many-locals,too-many-instance-attributes,broad-exception-caught --recursive=y .
 ruff check --select ALL --ignore S101,D103,PLR2004,EXE002,D100,INP001,ANN002,EM102,TRY003,D102,D107,D101,RUF002,BLE001,D104,T201,D400,D200,EM101,S106,PLW0603,PGH003
 ```
 Подавление:
@@ -66,10 +66,10 @@ curl -X POST http://127.0.0.1:5000/maps \
 { "_id": "..." }
 ```
 
-### PUT /maps/\<id\> — обновить карту
+### PUT /maps/\{id\} — обновить карту
 Обновляет существующую карту в базе по её ID.
 ```bash
-curl -X PUT http://127.0.0.1:5000/maps/<id> \
+curl -X PUT http://127.0.0.1:5000/maps/{id} \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Моя карта",
@@ -87,23 +87,23 @@ curl -X PUT http://127.0.0.1:5000/maps/<id> \
   }'
 ```
 
-### DELETE /maps/<id> - удалить карту по ID
+### DELETE /maps/{id} - удалить карту по ID
 Удаляет документ из базы по его идентификатору.
 Возвращает статус выполнения операции.
 ```bash
-curl -X DELETE http://127.0.0.1:5000/maps/<id>
+curl -X DELETE http://127.0.0.1:5000/maps/{id}
 ```
 ### GET /maps — получить список из ID и названий всех карт
 ```bash
 curl http://127.0.0.1:5000/maps
 ```
 
-### GET /maps/\<id\> — получить карту по ID
+### GET /maps/\{id\} — получить карту по ID
 Возвращает карту в «правильном» порядке ключей (как выше).
 ```bash
-curl http://127.0.0.1:5000/maps/<id>
+curl http://127.0.0.1:5000/maps/{id}
 ```
-### GET /maps/\<id\>/statistics/{algo name} — получить статистику по маршрутам
+### GET /maps/\{id\}/statistics/{algo name} — получить статистику по маршрутам
 "algo name" - это одно из simple, dense, random
 - Достаёт карту из БД,
 - формирует JSON в нужном порядке ключей,
@@ -112,7 +112,7 @@ curl http://127.0.0.1:5000/maps/<id>
 - считает один шаг за 10 секунд, диагональ - 15 секунд, возвращает ответ в секундах и маршрут valid
 - null - отсутствие маршрута
 ```bash
-curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
+curl -X GET http://127.0.0.1:5000/maps/{id}/statistics/{algo name}
 ```
 ```
 {
@@ -144,6 +144,17 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 [{"id":0,"route":null}]
 ```
 
+### POST /animations/{id} - сохранить анимацию как
+Копирует анимацию в бд и возвращает id
+
+```bash
+ curl -X POST http://127.0.0.1:5000/animations/1
+```
+
+Ответ:
+```json
+{ "_id": "..." }
+```
 ### POST /animations - создать анимацию
 Сохраняет анимацию и возвращает id
 
@@ -157,13 +168,24 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
     "name": "Моя анимация",
     "up_right_point": {"x": 10, "y": 10},
     "down_left_point": {"x": 0, "y": 0},
-    "borders": [...],
-    "persons": [...],
-    "goals": [...],
-    "routes": [...],
+    "blocks": [
+      {
+        "borders": [...],
+        "persons": [...],
+        "goals": [...],
+        "routes": [...],
+        "groups": [...],
+        "ticks": 5,
+      }, ...
+    ],
     "statistics": {...}
   }'
 ```
+
+Статистика суммируется за все блоки
+
+ticks == -1 означает, что статистика проигрывается до конца
+
 Ответ:
 ```json
 { "_id": "..." }
@@ -173,15 +195,132 @@ curl -X GET http://127.0.0.1:5000/maps/<id>/statistics/{algo name}
 curl http://127.0.0.1:5000/animations
 ```
 
-### GET /animations/<id> — получить анимацию по ID
+### GET /animations/{id}/statistics/{algo_name} — обновить сохранённую в бд анимацию и вернуть СУММАРНУЮ статистику
+
 ```bash
-curl http://127.0.0.1:5000/animations/<id>
+curl -X GET http://127.0.0.1:5000/animations/{id}/statistics/{algo name}
 ```
 
-### PUT /animations/<id> — обновить имя анимации
+Запрос:
+
+```json
+{
+  "block": {
+    "borders": [...],
+    "persons": [...],
+    "goals": [...],
+    "routes": [...],
+    "groups": [...],
+  },
+  "ticks": 10,
+}
+```
+
+block - новая карта
+
+ticks - количество тиков, которое прошло начиная с предыдущей карты
+
+Ответ:
+
+```json
+{
+    "ideal": {
+      "value": null,
+      "problematic": 2,
+    },
+    "valid": {
+      "value": 25,
+      "problematic": 3,
+    },
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+  ]
+}
+```
+Пустой маршрут тоже возможен. Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
+Статистика СУММАРНАЯ за всё время
+Маршруты - ТОЛЬКО последний блок
+
+### POST /animations/statistics/{algo_name} — посчитать статистику и маршруты для очередного блока НЕ СОХРАНЁННОЙ анимации
+
+```bash
+curl -X GET http://127.0.0.1:5000/animations/statistics/{algo_name}
+```
+
+Запрос:
+
+```json
+{
+  "up_right_point": {"x": 10, "y": 10},
+  "down_left_point": {"x": 0, "y": 0},
+  "block": {
+    "borders": [...],
+    "persons": [...],
+    "goals": [...],
+    "routes": [...],
+    "groups": [...],
+  }
+}
+```
+
+block - новая карта
+
+Ответ:
+
+```json
+{
+    "ideal": {
+      "value": null,
+      "problematic": 2,
+    },
+    "valid": {
+      "value": 25,
+      "problematic": 3,
+    },
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+  ]
+}
+```
+Пустой маршрут тоже возможен. Если добраться невозможно:
+```
+[{"id":0,"route":null}]
+```
+Статистика ТОЛЬКО за указанный блок
+Маршруты - ТОЛЬКО указанный блок
+
+### GET /animations/{id} — получить анимацию по ID
+```bash
+curl http://127.0.0.1:5000/animations/{id}
+```
+
+### PUT /animations/{id} — обновить имя анимации
 Меняет только имя у анимации.
 ```bash
-curl -X PUT http://127.0.0.1:5000/animations/<id>
+curl -X PUT http://127.0.0.1:5000/animations/{id}
 ```
 
 ```json
@@ -189,11 +328,11 @@ curl -X PUT http://127.0.0.1:5000/animations/<id>
 -d '{"name": "Новое имя"}'
 ```
 
-### DELETE /animations/<id> — удалить анимацию по ID
+### DELETE /animations/{id} — удалить анимацию по ID
 Удаляет сохранённую анимацию из базы данных.
 Возвращает статус выполнения операции.
 ```bash
-curl -X DELETE http://127.0.0.1:5000/animations/<id>
+curl -X DELETE http://127.0.0.1:5000/animations/{id}
 ```
 
 ## Тесты
