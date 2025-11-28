@@ -189,7 +189,8 @@ def test_clone_animation(client, auth_headers):
     anim_id2 = clone_resp.get_json()["_id"]
     assert anim_id != anim_id2
 
-def test_simulate_calls_cpp_saved_animation_with_returns_routes(
+
+def test_simulate_calls_cpp_saved_animation_with_none_and_returns_routes(
     client, auth_headers, mock_requests
 ):
     resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
