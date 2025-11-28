@@ -156,12 +156,12 @@ SAMPLE_ANIMATION = {
                     "person_ids": [20, 21]
                 }
             ],
+            "routes": [{"id": 1, "route": None}],
             "ticks": -1,
         }],
         "statistics": {
             "ideal": {"value": 35, "problematic": 0},
             "valid": {"value": None, "problematic": 1},
-            "routes": [{"id": 1, "route": None}],
         }
     }
 
@@ -230,7 +230,7 @@ def test_simulate_calls_cpp_saved_animation_with_returns_routes(
     assert resp.status_code == 200
     statistics_resp = resp.get_json()
     assert statistics_resp == {
-        "ideal": {"value": 35, "problematic": 0},
+        "ideal": {"value": 70, "problematic": 0},
         "valid": {"value": None, "problematic": 1},
         "routes": [{"id": 1, "route": None}],
     }
@@ -241,6 +241,10 @@ def test_simulate_calls_cpp_saved_animation_with_returns_routes(
     assert len(get_resp["blocks"]) == len(SAMPLE_ANIMATION["blocks"]) + 1
     assert get_resp["blocks"][-2]["ticks"] == 10
     assert get_resp["blocks"][-1]["ticks"] == -1
+    assert get_resp["statistics"]["ideal"]["value"] == 70
+    assert get_resp["statistics"]["ideal"]["problematic"] == 0
+    assert get_resp["statistics"]["valid"]["value"] is None
+    assert get_resp["statistics"]["valid"]["problematic"] == 1
 
 
 def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(

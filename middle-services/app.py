@@ -422,7 +422,23 @@ def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disa
             simple_result = dense_result
     except requests.RequestException as e:  # pragma: no cover
         return jsonify({"error": "cpp backend error", "details": str(e)}), 500
-    new_statistics = {"valid": dense_result, "ideal": simple_result, "routes": route}
+    def connect_results(result1: dict, result2: dict) -> dict:
+        if result2["value"] is None:
+            value = None
+        elif result1["value"] is None:
+            value = result2["value"]
+        else:
+            value = result2["value"] + result1["value"]
+        return {
+            "value": value,
+            "problematic" : result2["problematic"],
+        }
+    try:
+        dense_result = connect_results(a.statistics["valid"], dense_result)
+        simple_result = connect_results(a.statistics["ideal"], simple_result)
+    except Exception as e:
+        return jsonify({"error": f"error wrong payload {e}"}), 400
+    new_statistics = {"valid": dense_result, "ideal": simple_result}
     try:
         a.blocks[-1].ticks = ticks
         payload["block"]["routes"] = route
@@ -434,6 +450,7 @@ def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disa
             return jsonify({"error": "map was already deleted"}), 400
     except Exception as e:
         return jsonify({"error": f"error wrong payload {e}"}), 400
+    new_statistics["routes"] = route
     return jsonify(new_statistics), 200
 
 @app.route("/animations/statistics/<algo>", methods=["POST"])
