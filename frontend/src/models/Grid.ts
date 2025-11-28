@@ -9,7 +9,7 @@ export class Grid {
     persons: NamedPoint[];
     goals: NamedPoint[];
     walls: Wall[];
-    allTicks: number;
+    maxTicks: number;
     groups: Group[] = [];
 
     constructor(width: number, height: number) {
@@ -19,7 +19,7 @@ export class Grid {
         this.persons = [];
         this.goals = [];
         this.walls = [];
-        this.allTicks = 0;
+        this.maxTicks = 0;
     }
 
     private createGrid(): Cell[][] {
@@ -161,7 +161,7 @@ removeGoalAt(x: number, y: number) {
             return goal.clone();
         });
 
-        newGrid.allTicks = this.allTicks;
+        newGrid.maxTicks = this.maxTicks;
         newGrid.groups = this.groups.map(group => group.clone());
         
         return newGrid;
@@ -270,16 +270,13 @@ removeGoalAt(x: number, y: number) {
         const cell = this.getCell(x, this.cells.length - 1 - y); // Inverted y for now, needs to be refactored
         if (cell) {
             cell.mark();
+            this.maxTicks = Math.max(this.maxTicks, cell.usedTicks);
         }
-    }
-
-    addTick() {
-        this.allTicks += 1;
     }
 
     reset() {
         this.cells.forEach(row => row.forEach(cell => cell.reset()));
-        this.allTicks = 0;
+        this.maxTicks = 0;
     }
 
 }

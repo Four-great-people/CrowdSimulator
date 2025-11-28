@@ -300,7 +300,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                         <div
                             key={`${cell.x}-${cell.y}`}
                             className={`cell ${isWallCell ? 'wall' : ''} ${direction.includes("vertical") ? 'vertical' : ''} ${direction.includes("horizontal") ? 'horizontal' : ''}`}
-                            style={{backgroundColor: cell.getColorString(grid.allTicks)}}
+                            style={{backgroundColor: cell.getColorString(grid.maxTicks)}}
                         >
                             {isGoalCell && !isPersonCell && <div className="goal"></div>}
                             {isPersonCell && (
