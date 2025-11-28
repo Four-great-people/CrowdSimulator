@@ -29,7 +29,7 @@ class MongoMapRepository:
         _col().insert_one(doc)
         return doc["_id"]
 
-    def get_for_user(self, map_id: str | ObjectId, user_id: ObjectId) -> Optional[MapDoc]:
+    def get_map_for_user(self, map_id: str | ObjectId, user_id: ObjectId) -> Optional[MapDoc]:
         try:
             oid = ObjectId(map_id) if isinstance(map_id, str) else map_id
         except InvalidId:

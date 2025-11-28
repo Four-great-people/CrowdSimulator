@@ -203,7 +203,7 @@ def get_map(map_id: str):
     if user_oid is None:
         return jsonify({"error": "invalid user identity"}), 401
 
-    m = repo.get_for_user(map_id, user_oid)
+    m = repo.get_map_for_user(map_id, user_oid)
     if not m:
         return jsonify({"error": "map not found"}), 400
 
@@ -268,7 +268,7 @@ def get_statistics(map_id: str, algo: str):
     if user_oid is None:
         return jsonify({"error": "invalid user identity"}), 401
 
-    m = repo.get_for_user(map_id, user_oid)
+    m = repo.get_map_for_user(map_id, user_oid)
     if not m:
         return jsonify({"error": "map not found"}), 400
 

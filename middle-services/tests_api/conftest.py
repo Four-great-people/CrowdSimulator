@@ -110,7 +110,7 @@ class FakeRepo:
         except Exception:
             return False
 
-    def get_for_user(self, map_id, user_id: ObjectId):  # pylint: disable=unused-argument
+    def get_map_for_user(self, map_id, user_id: ObjectId):  # pylint: disable=unused-argument
         return self.get(map_id)
 
 @pytest.fixture(autouse=True)
