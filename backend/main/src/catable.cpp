@@ -92,6 +92,9 @@ std::vector<Point> CATable::get_neighbors_timestep(const Point& point,
                 neighbor);
         }
     }
+    if (valid_neighbors.empty()) {
+        valid_neighbors.push_back(point);
+    }
 
     return valid_neighbors;
 }

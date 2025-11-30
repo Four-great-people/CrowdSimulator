@@ -1,7 +1,7 @@
 import Cell from './Cell';
 import NamedPoint from './NamedPoint';
 import Wall from './Wall';
-
+import Group from './Group';
 export class Grid {
     width: number;
     height: number;
@@ -9,7 +9,8 @@ export class Grid {
     persons: NamedPoint[];
     goals: NamedPoint[];
     walls: Wall[];
-    allTicks: number;
+    maxTicks: number;
+    groups: Group[] = [];
 
     constructor(width: number, height: number) {
         this.width = width;
@@ -18,7 +19,7 @@ export class Grid {
         this.persons = [];
         this.goals = [];
         this.walls = [];
-        this.allTicks = 0;
+        this.maxTicks = 0;
     }
 
     private createGrid(): Cell[][] {
@@ -43,6 +44,20 @@ export class Grid {
         } else {
           (cell as any).directionOfWall = '';
         }
+    }
+    addGroup(group: Group) {
+        this.groups.push(group);
+    }
+
+    removeGroupAt(x: number, y: number) {
+        this.groups = this.groups.filter(g => 
+            g.start_position.x !== x || g.start_position.y !== y
+        );
+    }
+    getGroupAt(x: number, y: number): Group | null {
+        return this.groups.find(g => 
+            g.start_position.x === x && g.start_position.y === y
+        ) || null;
     }
 
     removeWall(x1: number, y1: number, x2: number, y2: number) {
@@ -146,7 +161,8 @@ export class Grid {
             return goal.clone();
         });
 
-        newGrid.allTicks = this.allTicks;
+        newGrid.maxTicks = this.maxTicks;
+        newGrid.groups = this.groups.map(group => group.clone());
         
         return newGrid;
     }
@@ -179,7 +195,14 @@ export class Grid {
             }
         });
 
-        newGrid.allTicks = this.allTicks;
+        this.groups.forEach(group => {
+            if (group.start_position.x < newWidth && group.start_position.y < newHeight) {
+                const clonedGroup = group.clone();
+                newGrid.addGroup(clonedGroup);
+            }
+        });
+
+        newGrid.maxTicks = this.maxTicks;
 
         return newGrid;
     }
@@ -213,7 +236,7 @@ export class Grid {
     addPerson(person: NamedPoint) {
         const cell = this.getCell(person.position.x, person.position.y);
         if (cell) {
-            if (cell.persons.length == 0 && cell.goals.length == 0) {
+            if (cell.goals.length == 0) {
                 cell.addPerson(person);
                 this.persons.push(person);
             }
@@ -249,7 +272,8 @@ export class Grid {
             goals: this.goals.map(goal => ({
                 id: goal.id,
                 position: goal.position,
-            }))
+            })),
+            groups: this.groups.map(group => group.toJSON())
         };
     }
 
@@ -270,6 +294,12 @@ export class Grid {
                 id: goal.id,
                 position: goal.position,
             })),
+            groups: this.groups.map(group => ({
+                id: group.id,
+                start_position: { x: group.start_position.x, y: group.start_position.y },
+                total_count: group.total_count,
+                person_ids: group.person_ids || []
+            })),
             routes: cleanRoutes,
             statistics: statistics
         };
@@ -279,16 +309,13 @@ export class Grid {
         const cell = this.getCell(x, this.cells.length - 1 - y); // Inverted y for now, needs to be refactored
         if (cell) {
             cell.mark();
+            this.maxTicks = Math.max(this.maxTicks, cell.usedTicks);
         }
-    }
-
-    addTick() {
-        this.allTicks += 1;
     }
 
     reset() {
         this.cells.forEach(row => row.forEach(cell => cell.reset()));
-        this.allTicks = 0;
+        this.maxTicks = 0;
     }
 
 }

@@ -32,7 +32,8 @@ def test_simple_route_good():
             "id": 0,
             "position": { "x": 1, "y": 2 }
         }
-    ]
+    ],
+    "groups": []
 }
     '''
     result = '''[{"id":0,"route":["UP"]}]'''
@@ -67,6 +68,14 @@ def test_no_type_error():
             "id": 0,
             "position": { "x": 1, "y": 2 }
         }
+    ],
+    "groups": [
+        {
+            "id": 0,
+            "start_position": { "x": 3, "y": 3 },
+            "total_count": 2,
+            "person_ids": [100, 101]
+        }
     ]
 }
     '''
@@ -98,7 +107,8 @@ def test_no_route_good():
             "id": 0,
             "position": { "x": 0, "y": 1 }
         }
-    ]
+    ],
+    "groups": []
 }
     '''
     result = '''[{"id":0,"route":[]}]'''
@@ -131,7 +141,8 @@ def test_cant_reach_good():
             "id": 0,
             "position": { "x": 0, "y": 100 }
         }
-    ]
+    ],
+    "groups": []
 }
     '''
     result = '''[{"id":0,"route":[]}]'''
@@ -162,6 +173,14 @@ def test_missed_json_field_bad():
     "goals": [
         {
             "position": { "x": 0, "y": 100 }
+        }
+    ],
+    "groups": [
+        {
+            "id": 0,
+            "start_position": { "x": 3, "y": 3 },
+            "total_count": 2,
+            "person_ids": [100, 101]
         }
     ]
 }
@@ -210,7 +229,8 @@ def test_complicated_route_good():
             "id": 1,
             "position": { "x": 3, "y": 2 }
         }
-    ]
+    ],
+    "groups": []
 }
     '''
     result = '''[{"id":0,"route":["RIGHT_UP","RIGHT"]},{"id":1,"route":["RIGHT"]}]'''

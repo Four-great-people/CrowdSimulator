@@ -1,5 +1,6 @@
 import pytest
-from db.models import MapDoc, Point, Segment, NamedPointSpec
+from bson import ObjectId
+from db.models import MapDoc, Point, Segment, NamedPointSpec, GroupSpec
 from db.client import get_db
 from db.config import MAPS_COLLECTION
 from db.repository import MongoMapRepository
@@ -32,12 +33,15 @@ def test_insert_and_read_real_mongo():
         name="Тестовая карта",
         up_right_point=Point(5, 5),
         down_left_point=Point(0, 0),
+        user_id=ObjectId(),
         borders=[Segment(Point(0,0), Point(5,0))],
         persons=[NamedPointSpec(id="p-42", position=Point(0,1))],
-        goals=[NamedPointSpec(id="p-42", position=Point(1,1))]
+        goals=[NamedPointSpec(id="p-42", position=Point(1,1))],
+        groups=[GroupSpec(id=0, start_position=Point(3,3), total_count=3, person_ids=[100,101,102])]
     )
     _id = repo.create(m)
     got = repo.get(_id)
     assert got is not None
     assert got.name == "Тестовая карта"
     assert got.persons[0].id == "p-42"
+    assert len(got.groups) == 1
