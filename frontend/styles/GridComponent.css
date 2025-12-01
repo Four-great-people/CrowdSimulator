@@ -1,17 +1,14 @@
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(40, min(2vw, 30px));
-    grid-template-rows: repeat(22, min(2vw, 30px));
-    width: fit-content;
-    height: fit-content;
     margin: 0;
     gap: 0;
-    border: 1px solid black;
+    transform-origin: center;
+    transition: transform 0.2s ease;
 }
 
 .cell {
-    width: 100%;
-    height: 100%;
+    width: 30px;
+    height: 30px;
     border: 1px solid #ccc;
     position: relative;
     display: flex;
@@ -137,9 +134,56 @@
 }
 
 .grid-wrapper {
-    flex: 0 1 auto;
-    min-width: 0;
+    width: min(1200px, 95vw);
+    height: min(660px, calc(95vw * 0.55));
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #f8f9fa;
+    margin: 0 auto;
+}
+
+.grid-wrapper.scrollable {
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: auto;
+    width: min(1200px, 95vw);
+    height: min(660px, calc(95vw * 0.55));
+}
+
+.grid-wrapper::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+.grid-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+}
+
+.grid-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+}
+
+.grid-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+.grid-wrapper.scrollable {
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.grid-container.large {
     margin: 0;
+    transform: none;
+}
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: min(14vw, 300px);
 }
 
 .blue-button {
@@ -258,6 +302,55 @@
   font-size: 16px;
   font-weight: 600;
   border-radius: 12px;
+}
+
+.resize-controls {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.resize-title {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.resize-button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.resize-button:hover {
+    background: #1565c0;
+}
+
+.size-inputs input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.size-inputs input:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.size-inputs label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 .group-size-control {
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);

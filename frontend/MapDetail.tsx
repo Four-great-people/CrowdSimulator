@@ -33,6 +33,8 @@ const MapDetail: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [groupSize, setGroupSize] = useState(5);
     const [error, setError] = useState<string | null>(null);
+    const [newWidth, setNewWidth] = useState(40);
+    const [newHeight, setNewHeight] = useState(22);
 
     const algorithmsSupported: Algorithm[] = [
         {title: "dense", description: "Считать с учётом пересечений"},
@@ -55,8 +57,11 @@ const MapDetail: React.FC = () => {
             setError(null);
             if (mapId =='new') {
                 setIsNewMap(true);
-                setGrid(createNewGrid());
+                const newGrid = createNewGrid();
+                setGrid(newGrid);
                 setOriginalMapName('Без названия');
+                setNewWidth(newGrid.width);
+                setNewHeight(newGrid.height);
             } else {
                 setIsLoadingMap(true);
                 const {grid: newGrid, name} = await GetMapFromBackend(mapId);
@@ -64,7 +69,10 @@ const MapDetail: React.FC = () => {
                 setIsNewMap(false);
                 setOriginalMapName(name);
                 setMapName(name);
+                setNewWidth(newGrid.width);
+                setNewHeight(newGrid.height);
             }
+            
         } catch (error) {
             setError('Карта не найдена');
             console.log(error);
@@ -157,6 +165,28 @@ const MapDetail: React.FC = () => {
         }
     };
 
+    const handleResize = () => {
+        if (!grid) return;
+        
+        if (newWidth <= 0 || newHeight <= 0) {
+            alert("Размеры должны быть положительными числами");
+            return;
+        }
+
+        if (newWidth > 150 || newHeight > 150) {
+            alert("Максимальный размер 150x150");
+            return;
+        }
+
+        try {
+            const resizedGrid = grid.resize(newWidth, newHeight);
+            setGrid(resizedGrid);
+        } catch (error) {
+            alert("Ошибка при изменении размера сетки");
+            console.error(error);
+        }
+    };
+
     const onObjectClick = async(object: string) => {
         setCurrentObject(object);
     };
@@ -187,6 +217,9 @@ const MapDetail: React.FC = () => {
         }
     };
 
+    const shouldShowScroll = () => {
+        return grid && (grid.width > 40 || grid.height > 22);
+    };
     return (
         <div className="App">
             <div className="controls">
@@ -246,21 +279,81 @@ const MapDetail: React.FC = () => {
                 )}
             </div>
             <div className="body">
-                <div className="grid-wrapper">
+                <div className={`grid-wrapper ${shouldShowScroll() ? 'scrollable' : ''}`}>
                     {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} objectPlacing={currentObject} groupSize={groupSize} />}
                 </div>
-                <div className="algo-list-container">
-                    <h2 className="algo-list-title">Выберите алгоритм:</h2>
-                    <div className="algo-list">
-                        {algorithmsSupported.map((item) => (
-                        <div
-                            className={`algo-item`}
-                            onClick={() => handleItemClick(item)}>
-                            <div className="algo-item-content">
-                            <p className={selectedAlgo.title === item.title ? "algo-item-title-selected" : "algo-item-title"}>{item.description}</p>
+                <div className="side-panel">
+                    <div className="algo-list-container">
+                        <h2 className="algo-list-title">Выберите алгоритм:</h2>
+                        <div className="algo-list">
+                            {algorithmsSupported.map((item) => (
+                            <div
+                                className={`algo-item`}
+                                onClick={() => handleItemClick(item)}>
+                                <div className="algo-item-content">
+                                <p className={selectedAlgo.title === item.title ? "algo-item-title-selected" : "algo-item-title"}>{item.description}</p>
+                                </div>
                             </div>
+                            ))}
                         </div>
-                        ))}
+                    </div>
+                    <div className="resize-controls">
+                        <h3 className="resize-title">Изменение размера сетки</h3>
+                        <div className="size-inputs">
+                            <label>
+                                Ширина:
+                                <input
+                                    type='text'
+                                    value={newWidth === 0 ? '' : newWidth.toString()}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^\d*$/.test(value)) {
+                                            if (value === '') {
+                                                setNewWidth(0);
+                                            } else {
+                                                const numValue = parseInt(value, 10);
+                                                if (numValue >= 1 && numValue <= 150) {
+                                                    setNewWidth(numValue);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    placeholder='40'
+                                />
+                            </label>
+                            <label>
+                                Высота:
+                                <input
+                                    type="text"
+                                    value={newHeight === 0 ? '' : newHeight.toString()}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^\d*$/.test(value)) {
+                                            if (value === '') {
+                                                setNewHeight(0);
+                                            } else {
+                                                const numValue = parseInt(value, 10);
+                                                if (numValue >= 1 && numValue <= 150) {
+                                                    setNewHeight(numValue);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    min="0"
+                                    max="150"
+                                    placeholder='22'
+                                />
+                            </label>
+                        </div>
+                        <div className="current-size-info">
+                            Текущий размер: {grid?.width} × {grid?.height}
+                        </div>
+                        <button onClick={handleResize} className="resize-button">
+                            Применить новый размер
+                        </button>
+                        <div className="size-warning">
+                            Внимание: При уменьшении размера объекты за пределами новой сетки будут удалены!
+                        </div>
                     </div>
                 </div>
             </div>

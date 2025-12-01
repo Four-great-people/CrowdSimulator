@@ -38,28 +38,34 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 
     const gridRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0, xOffs: 0, yOffs: 0 });
-    const xGridSize = 40;
-    const yGridSize = 22;
+
     useEffect(() => {
         const updateDimensions = () => {
             if (gridRef.current) {
-                const { width, height, x, y } = gridRef.current.getBoundingClientRect();
-                const xOffs = x;
-                const yOffs = y;
-                // console.log(`WH ${width} ${height} ${xOffs} ${yOffs} ${x} ${y}`);
-                setDimensions({ width, height, xOffs, yOffs });
+                const rect = gridRef.current.getBoundingClientRect();
+                setDimensions({ 
+                    width: rect.width, 
+                    height: rect.height, 
+                    xOffs: rect.left,
+                    yOffs: rect.top
+                });
             }
         };
 
         updateDimensions();
+        const resizeObserver = new ResizeObserver(updateDimensions);
+        if (gridRef.current) {
+            resizeObserver.observe(gridRef.current);
+        }
         window.addEventListener('resize', updateDimensions);
         window.addEventListener('scroll', updateDimensions);
 
         return () => {
+            resizeObserver.disconnect();
             window.removeEventListener('resize', updateDimensions);
             window.removeEventListener('scroll', updateDimensions);
         };
-    }, []);
+    }, [grid.width, grid.height]);
 
 
     useEffect(() => {
@@ -215,25 +221,31 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         const cn = (target?.className || '').toString();
         return cn.startsWith('cell') || cn.startsWith('person') || cn.startsWith('goal')|| cn.includes('group-marker');;
     };
-
+    
     const handleOnClick = (e: any) => {
         if (!editable) return;
         if (!isValidCellTarget(e.target)) return;
 
-        const generalSize = Math.min(dimensions.width / xGridSize, 30);
-        // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
-        const localWidth = generalSize;
-        const localHeight = generalSize;
-        const intersectionArea = generalSize / 2;
-        const height = localHeight * grid.height;
+        const gridContainer = gridRef.current;
+        if (!gridContainer) return;
 
-        const offsetX = e.clientX - dimensions.xOffs;
-        const offsetY = height - (e.clientY - dimensions.yOffs);
-        // console.log(`2' ${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
+        const rect = gridContainer.getBoundingClientRect();
+        const scrollLeft = gridContainer.scrollLeft;
+        const scrollTop = gridContainer.scrollTop;
+        
+        const offsetX = e.clientX - rect.left + scrollLeft;
+        const offsetY = e.clientY - rect.top + scrollTop;
+
+        const invertedOffsetY = gridContainer.scrollHeight - offsetY;
+
+        const cellWidth = gridContainer.scrollWidth / grid.width;
+        const cellHeight = gridContainer.scrollHeight / grid.height;
+        const intersectionArea = Math.min(cellWidth, cellHeight) / 2;
+
         if (state === idleState) {
-            processIdle(offsetX, offsetY, localWidth, localHeight, intersectionArea);
+            processIdle(offsetX, invertedOffsetY, cellWidth, cellHeight, intersectionArea);
         } else if (state === inProcessState) {
-            processWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
+            processWall(offsetX, invertedOffsetY, cellWidth, cellHeight, intersectionArea);
         }
         else {
             alert("Некорректное состояние сервиса");
@@ -245,31 +257,35 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         if (!editable) return;
         if (!isValidCellTarget(e.target)) return;
 
-        e.preventDefault(); 
+        e.preventDefault();
 
-        const generalSize = Math.min(dimensions.width / xGridSize, 30);
-        // console.log(`1${generalSize} ${dimensions.width} ${xGridSize}`);
-        const localWidth = generalSize;
-        const localHeight = generalSize;
-        const intersectionArea = generalSize / 2;
-        const height = localHeight * grid.height;
+        const gridContainer = gridRef.current;
+        if (!gridContainer) return;
 
-        const offsetX = e.clientX - dimensions.xOffs;
-        const offsetY = height - (e.clientY - dimensions.yOffs);
-        // console.log(`2 ${generalSize} width:${dimensions.width} gridSize:${xGridSize} calcX:${offsetX} calcY:${offsetY} xOffs:${dimensions.xOffs} yOffs:${dimensions.yOffs}`);
+        const rect = gridContainer.getBoundingClientRect();
+        const scrollLeft = gridContainer.scrollLeft;
+        const scrollTop = gridContainer.scrollTop;
+        
+        const offsetX = e.clientX - rect.left + scrollLeft;
+        const offsetY = e.clientY - rect.top + scrollTop;
+
+        const invertedOffsetY = gridContainer.scrollHeight - offsetY;
+
+        const cellWidth = gridContainer.scrollWidth / grid.width;
+        const cellHeight = gridContainer.scrollHeight / grid.height;
+        const intersectionArea = Math.min(cellWidth, cellHeight) / 2;
 
         if (objectPlacing !== borderType) {
             setDelState(delIdle);
-            const cellX = Math.floor(offsetX / localWidth);
-            const cellY = Math.floor(offsetY / localHeight);
+            const cellX = Math.floor(offsetX / cellWidth);
+            const cellY = Math.floor(invertedOffsetY / cellHeight);
             processDeleteFromCenter(cellX, cellY);
         } else {
-            // console.log(`state:${state}`)
             if (delState === delWall) {
-                processDeleteWall(offsetX, offsetY, localWidth, localHeight, intersectionArea);
+                processDeleteWall(offsetX, invertedOffsetY, cellWidth, cellHeight, intersectionArea);
             } else {
-                const cornerX = toCorner(offsetX, localWidth, intersectionArea);
-                const cornerY = toCorner(offsetY, localHeight, intersectionArea);
+                const cornerX = toCorner(offsetX, cellWidth, intersectionArea);
+                const cornerY = toCorner(invertedOffsetY, cellHeight, intersectionArea);
                 setDelSavedX(cornerX);
                 setDelSavedY(cornerY);
                 if (outsideBorders(cornerX, cornerY)) {
@@ -282,9 +298,31 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         forceRerender();
     };
 
+    const getScaleFactor = () => {
+
+        if (grid.width > 40 || grid.height > 22) {
+            return 1;
+        }
+        const containerWidth = dimensions.width || 1200;
+        const containerHeight = dimensions.height || 660;
+        const scaleX = containerWidth / (grid.width * 30);
+        const scaleY = containerHeight / (grid.height * 30);
+        return Math.min(scaleX, scaleY, 1);
+    };
+    const shouldShowScroll = grid.width > 40 || grid.height > 22;
+    const cellSize = 30;
+    
     return (
+
         <div ref={gridRef}
             className="grid-container"
+            style={{
+                gridTemplateColumns: `repeat(${grid.width}, ${cellSize}px)`,
+                gridTemplateRows: `repeat(${grid.height}, ${cellSize}px)`,
+                width: shouldShowScroll ? `${grid.width * 30}px` : 'auto',
+                height: shouldShowScroll ? `${grid.height * 30}px` : 'auto',
+                transform: shouldShowScroll ? 'none' : `scale(${getScaleFactor()})`
+            }}
             onClick={handleOnClick}
             onContextMenu={handleOnDelete}
             data-tick={renderTick}>

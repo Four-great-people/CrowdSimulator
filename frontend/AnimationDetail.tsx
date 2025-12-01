@@ -466,6 +466,10 @@ const AnimationDetail: React.FC = () => {
         const reached = participantsNumber - (timeObj.problematic);
         return `${timeObj.value} с\nдошло ${reached} из ${participantsNumber}`;
     };
+    const shouldShowScroll = () => {
+        return grid && (grid.width > 40 || grid.height > 22);
+    };
+
 
     return (
         <div className="App">
@@ -524,7 +528,7 @@ const AnimationDetail: React.FC = () => {
             </div>
 
             <div className="body">
-                <div className="grid-wrapper">
+                <div className={`grid-wrapper ${shouldShowScroll() ? 'scrollable' : ''}`}>
                     {grid && <GridComponent grid={grid} isAnimating={isAnimating} currentSteps={currentSteps} completedGoals={completedGoals} objectPlacing='' />}
                 </div>
                 <div className="text-table-wrapper">

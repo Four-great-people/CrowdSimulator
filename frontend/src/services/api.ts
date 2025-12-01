@@ -32,6 +32,9 @@ export const setAuthToken = (token: string | null): void => {
 };
 
 export const isAuthenticated = (): boolean => {
+    if (useFakeCalls) {
+        return true;
+    }
     return !!getAuthToken();
 };
 
