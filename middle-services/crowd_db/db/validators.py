@@ -95,6 +95,27 @@ def apply_collection_validator():
         },
     }
 
+    block = {
+        "bsonType": "object",
+        "required": [
+            "borders",
+            "persons",
+            "goals",
+            "groups",
+            "routes",
+            "ticks",
+        ],
+        "properties": {
+            "borders": {"bsonType": "array", "items": segment},
+            "persons": {"bsonType": "array", "items": named_point},
+            "goals": {"bsonType": "array", "items": named_point},
+            "groups": {"bsonType": "array", "items": group_schema},
+            "routes": {"bsonType": "array", "items": route_person},
+            "ticks": {"bsonType": "int"},
+        },
+        "additionalProperties": False,
+    }
+
     animation_schema = {
         "$jsonSchema": {
             "bsonType": "object",
@@ -111,11 +132,7 @@ def apply_collection_validator():
                 "_id": {},
                 "up_right_point": point,
                 "down_left_point": point,
-                "borders": {"bsonType": "array", "items": segment},
-                "persons": {"bsonType": "array", "items": named_point},
-                "goals": {"bsonType": "array", "items": named_point},
-                "groups": {"bsonType": "array", "items": group_schema},
-                "routes": {"bsonType": "array", "items": route_person},
+                "blocks": {"bsonType": "array", "items": block},
                 "statistics": statistics,
                 "name": {"bsonType": "string"},
                 "user_id": {"bsonType": "objectId"},

@@ -19,7 +19,7 @@ from flask_jwt_extended import (
 )
 
 from crowd_db.db.models import (
-    AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
+    AnimationBlock, AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
 )
 from crowd_db.db.repository import MongoMapRepository, MongoUserRepository
 
@@ -65,6 +65,18 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od["persons"] = d.get("persons", [])
     od["goals"] = d.get("goals", [])
     od["groups"] = d.get("groups", [])
+    return od
+
+def block_request_to_json(b: dict, up_right_point: dict, down_left_point: dict) -> OrderedDict:
+    od = OrderedDict()
+    od["_id"] = ""
+    od["name"] = ""
+    od["up_right_point"] = up_right_point
+    od["down_left_point"] = down_left_point
+    od["borders"] = b.get("borders", [])
+    od["persons"] = b.get("persons", [])
+    od["goals"] = b.get("goals", [])
+    od["groups"] = b.get("groups", [])
     return od
 
 
@@ -143,7 +155,6 @@ def create_map():
             groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
             name=payload.get("name", "Без названия"),
         )
-
         oid = repo.create(m)
         return jsonify({"_id": str(oid)}), 201
     except Exception as e:
@@ -192,7 +203,7 @@ def get_map(map_id: str):
     if user_oid is None:
         return jsonify({"error": "invalid user identity"}), 401
 
-    m = repo.get_for_user(map_id, user_oid)
+    m = repo.get_map_for_user(map_id, user_oid)
     if not m:
         return jsonify({"error": "map not found"}), 400
 
@@ -257,7 +268,7 @@ def get_statistics(map_id: str, algo: str):
     if user_oid is None:
         return jsonify({"error": "invalid user identity"}), 401
 
-    m = repo.get_for_user(map_id, user_oid)
+    m = repo.get_map_for_user(map_id, user_oid)
     if not m:
         return jsonify({"error": "map not found"}), 400
 
@@ -344,6 +355,22 @@ def get_animations():
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 
+@app.route("/animations/<animation_id>", methods=["POST"])
+@jwt_required()
+def clone_animation(animation_id: str):
+    try:
+        user_oid = _current_user_oid()
+        if user_oid is None:
+            return jsonify({"error": "invalid user identity"}), 401
+        animation = repo.get_animation_for_user(animation_id, user_oid)
+        if animation is None:
+            return jsonify({"error": "Animation was not found"}), 400
+        animation.set_id(None)
+        new_animation_id = repo.create_animation(animation.to_bson())
+        return jsonify({"_id": str(new_animation_id)}), 201
+    except Exception as e:
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
 @app.route("/animations/<animation_id>", methods=["GET"])
 @jwt_required()
 def get_animation(animation_id: str):
@@ -351,7 +378,6 @@ def get_animation(animation_id: str):
         user_oid = _current_user_oid()
         if user_oid is None:
             return jsonify({"error": "invalid user identity"}), 401
-
         animation = repo.get_animation_for_user(animation_id, user_oid)
         if animation is None:
             return jsonify({"error": "Animation was not found"}), 400
@@ -361,21 +387,102 @@ def get_animation(animation_id: str):
         resp["name"] = animation.name or "Без названия"
         resp["up_right_point"] = animation.up_right_point.to_bson()
         resp["down_left_point"] = animation.down_left_point.to_bson()
-        resp["borders"] = [s.to_bson() for s in animation.borders]
-        resp["persons"] = [p.to_bson() for p in animation.persons]
-        resp["goals"] = [p.to_bson() for p in animation.goals]
-        resp["groups"] = [g.to_bson() for g in animation.groups]
-        resp["routes"] = animation.routes
+        resp["blocks"] = [b.to_bson() for b in animation.blocks]
         resp["statistics"] = animation.statistics
-
         return jsonify(resp), 200
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 
+@app.route("/animations/<animation_id>/statistics/<algo>", methods=["GET"])
+@jwt_required()
+def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disable=too-many-return-statements
+    if algo not in {"dense", "simple", "random"}:
+        return jsonify({"error": "invalid algorithm"}), 400
+    user_oid = _current_user_oid()
+    if user_oid is None:
+        return jsonify({"error": "invalid user identity"}), 401
+    a = repo.get_animation_for_user(animation_id, user_oid)
+    if not a:
+        return jsonify({"error": "map not found"}), 400
+    try:
+        payload = request.get_json(force=True)
+        ticks = int(payload["ticks"])
+        algo_data = block_request_to_json(
+            payload["block"], a.up_right_point.to_bson(), a.down_left_point.to_bson())
+        algo_payload = json.dumps(algo_data, ensure_ascii=False)
+        headers = {"Content-Type": "application/json"}
+    except Exception as e:
+        return jsonify({"error": f"wrong payload {e}"}), 400
+    try:
+        dense_result, route = calculate_statistics_for_endpoint(algo, algo_payload, headers)
+        if algo != "simple":
+            simple_result, _ = calculate_statistics_for_endpoint("simple", algo_payload, headers)
+        else:
+            simple_result = dense_result
+    except requests.RequestException as e:  # pragma: no cover
+        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
+    def connect_results(result1: dict, result2: dict) -> dict:
+        if result2["value"] is None:
+            value = None
+        elif result1["value"] is None:
+            value = result2["value"]
+        else:
+            value = result2["value"] + result1["value"]
+        return {
+            "value": value,
+            "problematic" : result2["problematic"],
+        }
+    try:
+        dense_result = connect_results(a.statistics["valid"], dense_result)
+        simple_result = connect_results(a.statistics["ideal"], simple_result)
+    except Exception as e:
+        return jsonify({"error": f"error wrong payload {e}"}), 400
+    new_statistics = {"valid": dense_result, "ideal": simple_result}
+    try:
+        a.blocks[-1].ticks = ticks
+        payload["block"]["routes"] = route
+        payload["block"]["ticks"] = -1
+        block = AnimationBlock.from_bson(payload["block"])
+        a.blocks.append(block)
+        bls = [b.to_bson() for b in a.blocks]
+        if not repo.update_animation_for_user(animation_id, user_oid, bls, new_statistics):
+            return jsonify({"error": "map was already deleted"}), 400
+    except Exception as e:
+        return jsonify({"error": f"error wrong payload {e}"}), 400
+    new_statistics["routes"] = route
+    return jsonify(new_statistics), 200
+
+@app.route("/animations/statistics/<algo>", methods=["POST"])
+@jwt_required()
+def get_unsaved_animation_statistics(algo: str):
+    if algo not in {"dense", "simple", "random"}:
+        return jsonify({"error": "invalid algorithm"}), 400
+    user_oid = _current_user_oid()
+    if user_oid is None:
+        return jsonify({"error": "invalid user identity"}), 401
+    try:
+        payload = request.get_json(force=True)
+        algo_data = block_request_to_json(
+            payload["block"], payload["up_right_point"], payload["down_left_point"])
+        algo_payload = json.dumps(algo_data, ensure_ascii=False)
+        headers = {"Content-Type": "application/json"}
+    except Exception as e:
+        return jsonify({"error": f"wrong payload {e}"}), 400
+    try:
+        dense_result, route = calculate_statistics_for_endpoint(algo, algo_payload, headers)
+        if algo != "simple":
+            simple_result, _ = calculate_statistics_for_endpoint("simple", algo_payload, headers)
+        else:
+            simple_result = dense_result
+    except requests.RequestException as e:  # pragma: no cover
+        return jsonify({"error": "cpp backend error", "details": str(e)}), 500
+    new_statistics = {"valid": dense_result, "ideal": simple_result, "routes": route}
+    return jsonify(new_statistics), 200
+
 @app.route("/animations/<animation_id>", methods=["PUT"])
 @jwt_required()
-def update_animation(animation_id: str):
+def update_animation_name(animation_id: str):
     payload = request.get_json(force=True)
     try:
         user_oid = _current_user_oid()

@@ -80,6 +80,173 @@ def test_get_map_400(client, auth_headers):
     resp = client.get("/maps/66aaaaaaaaaaaaaaaaaaaaaa", headers=auth_headers)
     assert resp.status_code == 400
 
+def test_simulate_calls_cpp_unsaved_animation_with_returns_routes(
+    client, auth_headers, mock_requests
+):
+    resp = client.post("/animations/statistics/dense", headers=auth_headers, json={
+        "up_right_point": {"x": 10, "y": 10},
+        "down_left_point": {"x": 0, "y": 0},
+        "block": {
+            "borders": [
+                {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
+                {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}},
+            ],
+            "persons": [
+                {"id": 1, "position": {"x": 1, "y": 1}},
+                {"id": 2, "position": {"x": 2, "y": 2}},
+            ],
+            "goals": [
+                {"id": 1, "position": {"x": 5, "y": 5}},
+                {"id": 2, "position": {"x": 6, "y": 6}},
+            ],
+            "groups": [
+                {
+                    "id": 0,
+                    "start_position": {"x": 3, "y": 3},
+                    "total_count": 3,
+                    "person_ids": [10, 11, 12]
+                },
+                {
+                    "id": 1,
+                    "start_position": {"x": 4, "y": 4},
+                    "total_count": 2,
+                    "person_ids": [20, 21]
+                }
+            ]
+        }
+    })
+    assert resp.status_code == 200
+    statistics_resp = resp.get_json()
+    assert statistics_resp == {
+        "ideal": {"value": 35, "problematic": 0},
+        "valid": {"value": None, "problematic": 1},
+        "routes": [{"id": 1, "route": None}],
+    }
+
+    assert len(mock_requests["calls"]) == 2
+
+SAMPLE_ANIMATION = {
+        "name": "Моя анимация",
+        "up_right_point": {"x": 10, "y": 10},
+        "down_left_point": {"x": 0, "y": 0},
+        "blocks": [{
+            "borders": [
+                {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
+                {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}},
+            ],
+            "persons": [
+                {"id": 1, "position": {"x": 1, "y": 1}},
+                {"id": 2, "position": {"x": 2, "y": 2}},
+            ],
+            "goals": [
+                {"id": 1, "position": {"x": 5, "y": 5}},
+                {"id": 2, "position": {"x": 6, "y": 6}},
+            ],
+            "groups": [
+                {
+                    "id": 0,
+                    "start_position": {"x": 3, "y": 3},
+                    "total_count": 3,
+                    "person_ids": [10, 11, 12]
+                },
+                {
+                    "id": 1,
+                    "start_position": {"x": 4, "y": 4},
+                    "total_count": 2,
+                    "person_ids": [20, 21]
+                }
+            ],
+            "routes": [{"id": 1, "route": None}],
+            "ticks": -1,
+        }],
+        "statistics": {
+            "ideal": {"value": 35, "problematic": 0},
+            "valid": {"value": None, "problematic": 1},
+        }
+    }
+
+def test_create_animation(client, auth_headers):
+    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    assert resp.status_code == 201
+    id_resp = resp.get_json()
+    assert "_id" in id_resp
+
+def test_get_animation(client, auth_headers):
+    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    assert resp.status_code == 201
+    id_resp = resp.get_json()
+    anim_id = id_resp["_id"]
+    get_resp = client.get(f"/animations/{anim_id}", headers=auth_headers)
+    assert get_resp.status_code == 200
+
+def test_clone_animation(client, auth_headers):
+    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    assert resp.status_code == 201
+    id_resp = resp.get_json()
+    anim_id = id_resp["_id"]
+    clone_resp = client.post(f"/animations/{anim_id}", headers=auth_headers)
+    assert clone_resp.status_code == 201
+    anim_id2 = clone_resp.get_json()["_id"]
+    assert anim_id != anim_id2
+
+
+def test_simulate_calls_cpp_saved_animation_with_none_and_returns_routes(
+    client, auth_headers, mock_requests
+):
+    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    assert resp.status_code == 201
+    id_resp = resp.get_json()
+    anim_id = id_resp["_id"]
+    resp = client.get(f"/animations/{anim_id}/statistics/dense", headers=auth_headers, json={
+        "block": {
+            "borders": [
+                {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
+                {"first": {"x": 10, "y": 0}, "second": {"x": 10, "y": 10}},
+            ],
+            "persons": [
+                {"id": 1, "position": {"x": 1, "y": 1}},
+                {"id": 2, "position": {"x": 2, "y": 2}},
+            ],
+            "goals": [
+                {"id": 1, "position": {"x": 5, "y": 5}},
+                {"id": 2, "position": {"x": 6, "y": 6}},
+            ],
+            "groups": [
+                {
+                    "id": 0,
+                    "start_position": {"x": 3, "y": 3},
+                    "total_count": 3,
+                    "person_ids": [10, 11, 12]
+                },
+                {
+                    "id": 1,
+                    "start_position": {"x": 4, "y": 4},
+                    "total_count": 2,
+                    "person_ids": [20, 21]
+                }
+            ]
+        },
+        "ticks": 10,
+    })
+    assert resp.status_code == 200
+    statistics_resp = resp.get_json()
+    assert statistics_resp == {
+        "ideal": {"value": 70, "problematic": 0},
+        "valid": {"value": None, "problematic": 1},
+        "routes": [{"id": 1, "route": None}],
+    }
+    assert len(mock_requests["calls"]) == 2
+    get_resp = client.get(f"/animations/{anim_id}", headers=auth_headers)
+    assert get_resp.status_code == 200
+    get_resp = get_resp.get_json()
+    assert len(get_resp["blocks"]) == len(SAMPLE_ANIMATION["blocks"]) + 1
+    assert get_resp["blocks"][-2]["ticks"] == 10
+    assert get_resp["blocks"][-1]["ticks"] == -1
+    assert get_resp["statistics"]["ideal"]["value"] == 70
+    assert get_resp["statistics"]["ideal"]["problematic"] == 0
+    assert get_resp["statistics"]["valid"]["value"] is None
+    assert get_resp["statistics"]["valid"]["problematic"] == 1
+
 
 def test_simulate_calls_cpp_with_ordered_payload_and_returns_routes(
     client, auth_headers, mock_requests

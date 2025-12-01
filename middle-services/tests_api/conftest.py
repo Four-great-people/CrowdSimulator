@@ -39,7 +39,78 @@ class FakeRepo:
         d = self._store_maps.get(str(map_id))
         return app_module.MapDoc.from_bson(d) if d else None
 
-    def get_for_user(self, map_id, user_id: ObjectId):  # pylint: disable=unused-argument
+    def create_animation(self, d: dict) -> ObjectId:
+        oid = d.get("_id") or ObjectId()
+        d["_id"] = oid
+        self._store_anims[str(oid)] = d
+        return d["_id"]
+
+    def get_animation_for_user(
+        self,
+        animation_id: str | ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
+    ):
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+        except Exception:
+            return None
+        d = self._store_anims[str(oid)]
+        return app_module.AnimationDoc.from_bson(d) if d else None
+
+    def get_animations_for_user(
+        self,
+        user_id: ObjectId, # pylint: disable=unused-argument
+        limit: int = 1000, # pylint: disable=unused-argument
+    ):
+        return [
+            app_module.AnimationDoc.from_bson(d)
+            for d in self._store_anims.values()
+        ]
+
+    def update_animation_name_for_user(
+        self,
+        animation_id: str,
+        user_id: ObjectId, # pylint: disable=unused-argument
+        new_name: str,
+    ) -> bool:
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+            self._store_anims[str(oid)]["name"] = new_name
+            return True
+        except Exception:  # noqa: BLE001
+            return False
+
+    def update_animation_for_user(
+        self,
+        animation_id: str,
+        user_id: ObjectId, # pylint: disable=unused-argument
+        new_blocks: list,
+        new_statistics: dict,
+    ) -> bool:
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+            self._store_anims[str(oid)]["blocks"] = new_blocks
+            self._store_anims[str(oid)]["statistics"] = new_statistics
+            return True
+        except Exception:  # noqa: BLE001
+            return False
+
+    def delete_animation_for_user(
+        self,
+        animation_id: str | ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
+    ) -> bool:
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+        except Exception:
+            return False
+        try:
+            del self._store_anims[str(oid)]
+            return True
+        except Exception:
+            return False
+
+    def get_map_for_user(self, map_id, user_id: ObjectId):  # pylint: disable=unused-argument
         return self.get(map_id)
 
 @pytest.fixture(autouse=True)
