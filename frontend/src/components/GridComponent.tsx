@@ -12,9 +12,19 @@ interface GridProps {
     editable?: boolean;
     objectPlacing: string;
     groupSize?: number;
+    onModify?: () => void;
 }
 
-const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, currentSteps = {}, completedGoals = {}, editable = false, objectPlacing = "", groupSize = 5 }) => {
+const GridComponent: React.FC<GridProps> = ({
+    grid,
+    isAnimating = false,
+    currentSteps = {},
+    completedGoals = {},
+    editable = false,
+    objectPlacing = "",
+    groupSize = 5,
+    onModify
+}) => {
     const [idleState, inProcessState] = ['idle', 'inProcess'];
     const [borderType, personType, goalType] = ['border', 'person', 'goal'] // Да, зависимости протекают. Но этот фронтенд я не понимаю
     const [state, setState] = useState('idle');
@@ -155,6 +165,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         }
         if (savedX === cornerX || savedY === cornerY) {
             grid.addWall(savedX, savedY, cornerX, cornerY);
+            if (onModify) onModify();
         } else {
             alert(diagonalBoardMessage);
         }
@@ -176,6 +187,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             const group = new Group(groupId, position, groupSize, personIds);
             grid.addGroup(group);
         }
+        if (onModify) onModify();
     };
 
     const processDeleteFromCenter = (cellX: number, cellY: number) => {
@@ -195,6 +207,8 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
         }
         setDelState(delIdle);
 
+        if (onModify) onModify();
+
         forceRerender();
 
     };
@@ -210,6 +224,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
             if (typeof (grid as any).removeWall === 'function') {
                 (grid as any).removeWall(delSavedX, delSavedY, cornerX, cornerY);
             }
+            if (onModify) onModify();
         } else {
             alert(diagonalBoardMessage);
         }
@@ -359,4 +374,6 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
 };
 
 export default GridComponent;
+
+
 
