@@ -143,17 +143,23 @@ class MongoMapRepository:
                 doc = animation_doc.to_bson()
                 map_bson = _col().find_one({"_id": map_id, "user_id": animation_data["user_id"]}, session = session)
                 if map_bson is None:
-                    raise ValueError("no such id") # TODO if not found use the first one
-                first_draft_id = map_bson["draft_id"]
-                increment_draft(first_draft_id, session=session)
-                drafts = transform_animation_to_db_schema(doc)
-                drafts_copy = drafts[1:]
-                for draft in drafts_copy:
-                    _drafts_col().insert_one(draft, session=session)
-                drafts_copy = [{"_id": first_draft_id}] + drafts
-                replace_draft_ids_in_animation(doc, drafts_copy)
-                _animations_col().insert_one(doc, session=session)
-                return doc["_id"]
+                    drafts = transform_animation_to_db_schema(doc)
+                    for draft in drafts:
+                        _drafts_col().insert_one(draft, session=session)
+                    replace_draft_ids_in_animation(doc, drafts)
+                    _animations_col().insert_one(doc, session=session)
+                    return doc["_id"]
+                else:
+                    first_draft_id = map_bson["draft_id"]
+                    increment_draft(first_draft_id, session=session)
+                    drafts = transform_animation_to_db_schema(doc)
+                    drafts_copy = drafts[1:]
+                    for draft in drafts_copy:
+                        _drafts_col().insert_one(draft, session=session)
+                    drafts_copy = [{"_id": first_draft_id}] + drafts
+                    replace_draft_ids_in_animation(doc, drafts_copy)
+                    _animations_col().insert_one(doc, session=session)
+                    return doc["_id"]
 
     def get_animation_for_user(
         self,
@@ -217,7 +223,7 @@ class MongoMapRepository:
         self,
         animation_id: str,
         user_id: ObjectId,
-        new_blocks: list, # TODO only one is ok!!!
+        new_block: dict,
         new_statistics: dict,
     ) -> bool:
         try:
@@ -227,7 +233,6 @@ class MongoMapRepository:
                     d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
                     if d is None:
                         return False
-                    new_block = new_blocks[-1]
                     draft = transform_to_db_schema(new_block)
                     _drafts_col().insert_one(draft, session=session)
                     new_block["draft_id"] = draft["_id"]
