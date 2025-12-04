@@ -1,5 +1,5 @@
 from .client import get_db
-from .config import ANIMATIONS_COLLECTION, MAPS_COLLECTION, USERS_COLLECTION
+from .config import ANIMATIONS_COLLECTION, MAPS_COLLECTION, USERS_COLLECTION, DRAFTS_COLLECTION
 
 
 def apply_collection_validator():
@@ -76,6 +76,22 @@ def apply_collection_validator():
         "additionalProperties": True,
     }
 
+    draft_schema = {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["borders", "persons", "goals"],
+            "properties": {
+                "_id": {},
+                "counter": {"bsonType": "int"},
+                "borders": {"bsonType": "array", "items": segment}, #
+                "persons": {"bsonType": "array", "items": named_point}, #
+                "goals": {"bsonType": "array", "items": named_point}, #
+                "groups": {"bsonType": "array", "items": group_schema}, #
+            },
+            "additionalProperties": False,
+        },
+    }
+
     map_schema = {
         "$jsonSchema": {
             "bsonType": "object",
@@ -84,10 +100,7 @@ def apply_collection_validator():
                 "_id": {},
                 "up_right_point": point,
                 "down_left_point": point,
-                "borders": {"bsonType": "array", "items": segment},
-                "persons": {"bsonType": "array", "items": named_point},
-                "goals": {"bsonType": "array", "items": named_point},
-                "groups": {"bsonType": "array", "items": group_schema},
+                "draft_id": {"bsonType": "objectId"},
                 "name": {"bsonType": "string"},
                 "user_id": {"bsonType": "objectId"},
             },
@@ -106,10 +119,7 @@ def apply_collection_validator():
             "ticks",
         ],
         "properties": {
-            "borders": {"bsonType": "array", "items": segment},
-            "persons": {"bsonType": "array", "items": named_point},
-            "goals": {"bsonType": "array", "items": named_point},
-            "groups": {"bsonType": "array", "items": group_schema},
+            "draft_id": {"bsonType": "objectId"},
             "routes": {"bsonType": "array", "items": route_person},
             "ticks": {"bsonType": "int"},
         },
@@ -122,11 +132,6 @@ def apply_collection_validator():
             "required": [
                 "up_right_point",
                 "down_left_point",
-                "borders",
-                "persons",
-                "goals",
-                "routes",
-                "statistics",
             ],
             "properties": {
                 "_id": {},
@@ -168,3 +173,7 @@ def apply_collection_validator():
         db.create_collection(USERS_COLLECTION, validator=user_schema)
     else:
         db.command("collMod", USERS_COLLECTION, validator=user_schema)
+    if DRAFTS_COLLECTION not in db.list_collection_names():
+        db.create_collection(DRAFTS_COLLECTION, validator=draft_schema)
+    else:
+        db.command("collMod", DRAFTS_COLLECTION, validator=draft_schema)

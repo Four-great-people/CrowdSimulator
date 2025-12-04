@@ -158,6 +158,27 @@ class MapDoc:
             _id=d.get("_id"),
         )
 
+def transform_map_doc(map_doc_bson: dict) -> dict:
+    draft = {}
+    draft["borders"] = map_doc_bson["borders"]
+    draft["persons"] = map_doc_bson["persons"]
+    draft["goals"] = map_doc_bson["goals"]
+    draft["groups"] = map_doc_bson["groups"]
+    draft["counter"] = 1
+    del map_doc_bson["borders"]
+    del map_doc_bson["persons"]
+    del map_doc_bson["goals"]
+    del map_doc_bson["groups"]
+    map_doc_bson["draft_id"] = 0
+    return draft
+
+def transform_to_map_doc(map_bson: dict, draft_bson: dict):
+    map_bson["borders"] = draft_bson["borders"]
+    map_bson["persons"] = draft_bson["persons"]
+    map_bson["goals"] = draft_bson["goals"]
+    map_bson["groups"] = draft_bson["groups"]
+    del map_bson["draft_id"]
+
 @dataclass
 class AnimationBlock:
     borders: List[Segment] = field(default_factory=list)
