@@ -95,7 +95,7 @@ def apply_collection_validator():
     map_schema = {
         "$jsonSchema": {
             "bsonType": "object",
-            "required": ["up_right_point", "down_left_point", "borders", "persons", "goals"],
+            "required": ["up_right_point", "down_left_point", "draft_id"],
             "properties": {
                 "_id": {},
                 "up_right_point": point,

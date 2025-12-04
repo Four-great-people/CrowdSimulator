@@ -1,6 +1,6 @@
 import pytest
 from db.client import get_db
-from db.config import MAPS_COLLECTION
+from db.config import DRAFTS_COLLECTION, MAPS_COLLECTION
 from db.validators import apply_collection_validator
 from pymongo.errors import WriteError
 
@@ -37,10 +37,8 @@ def test_json_schema_blocks_bad_doc_missing_required():
 
 def test_json_schema_allows_id_types():
     col = get_db()[MAPS_COLLECTION]
-    good = {
-        "name": "Тестовая карта",
-        "up_right_point": {"x": 10, "y": 10},
-        "down_left_point": {"x": 0, "y": 0},
+    drafts = get_db()[DRAFTS_COLLECTION]
+    draft = {
         "borders": [],
         "persons": [
             {"id": 0, "position": {"x": 0, "y": 1}},
@@ -66,6 +64,13 @@ def test_json_schema_allows_id_types():
                 "person_ids": [10, 11, 12]
             }
         ]
+    }
+    res = drafts.insert_one(draft)
+    good = {
+        "name": "Тестовая карта",
+        "up_right_point": {"x": 10, "y": 10},
+        "down_left_point": {"x": 0, "y": 0},
+        "draft_id": res.inserted_id
     }
     # не должно кидать
     res = col.insert_one(good)
