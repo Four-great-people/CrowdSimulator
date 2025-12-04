@@ -228,12 +228,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Apply validator
-        working-directory: middle-services
-        env:
-          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
-          MONGODB_DB: crowdsim_test
-        run: python3 -m crowd_db.scripts.setup_db || true
+      # - name: Apply validator
+      #   working-directory: middle-services
+      #   env:
+      #     MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
+      #     MONGODB_DB: crowdsim_test
+      #   run: 
 
       - name: Run integration tests
         working-directory: middle-services
@@ -265,4 +265,5 @@ jobs:
           mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
           sleep 1;
           mongo -u user -p password --verbose --eval \"rs.initiate()\";
+          python3 -m crowd_db.scripts.setup_db || true
           pytest -q crowd_db/tests --integration 
