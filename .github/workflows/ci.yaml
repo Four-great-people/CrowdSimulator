@@ -217,7 +217,6 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: password
         ports:
           - 27017:27017
-        command: mongod --replSet rs0 && mongo --username user --password password --authenticationDatabase admin --eval 'rs.initiate()'
         options: >-
           --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
           --health-interval 5s
