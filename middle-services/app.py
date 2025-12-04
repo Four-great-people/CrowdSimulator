@@ -317,7 +317,7 @@ def update_map(map_id: str):
 # ---------- Анимации ----------
 
 
-@app.route("/animations/maps/<map_id>", methods=["POST"])
+@app.route("/animations/map/<map_id>", methods=["POST"])
 @jwt_required()
 def create_animation(map_id: str):
     payload = request.get_json(force=True)
