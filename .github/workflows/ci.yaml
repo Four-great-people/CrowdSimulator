@@ -241,7 +241,7 @@ jobs:
           MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
         run: |
-          mongod --shutdown || 0;
+          mongod --shutdown;
           if [ ! -f /data/keyfile ]; then
               echo \"Генерация keyfile для реплика-сета...\"
               mkdir -p /data
