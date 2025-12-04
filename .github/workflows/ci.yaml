@@ -217,6 +217,43 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: password
         ports:
           - 27017:27017
+        options: >-
+          --entrypoint "/bin/bash -c '
+            if [ ! -f /data/keyfile ]; then
+                echo \"Генерация keyfile для реплика-сета...\"
+                mkdir -p /data
+                openssl rand -base64 756 > /data/keyfile
+                chmod 400 /data/keyfile
+                echo \"Keyfile создан\"
+            fi;
+            mongod --fork --logpath /dev/null --bind_ip_all --auth;
+            sleep 1;
+            mongo --eval \"
+                db = db.getSiblingDB(\"admin\");
+                db.createUser({
+                user: \"user\",
+                pwd: \"password\",
+                roles: [{ role: \"root\", db: \"admin\" }]
+                });
+            \";
+            sleep 1;
+            mongod --shutdown;
+            sleep 1;
+            mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
+            sleep 1;
+            mongo -u user -p password --verbose --eval \"rs.initiate()\";
+            mongod --shutdown;
+            sleep 1;
+            echo \"-----------------finish-------------------\";
+            mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth
+          '
+          "
+          --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 5s
+
 
     steps:
       - uses: actions/checkout@v4
@@ -228,42 +265,16 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # - name: Apply validator
-      #   working-directory: middle-services
-      #   env:
-      #     MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
-      #     MONGODB_DB: crowdsim_test
-      #   run: 
+      - name: Apply validator
+        working-directory: middle-services
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
+          MONGODB_DB: crowdsim_test
+        run:  python3 -m crowd_db.scripts.setup_db || true
 
       - name: Run integration tests
         working-directory: middle-services
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
-        run: |
-          mongod --shutdown;
-          if [ ! -f /data/keyfile ]; then
-              echo \"Генерация keyfile для реплика-сета...\"
-              mkdir -p /data
-              openssl rand -base64 756 > /data/keyfile
-              chmod 400 /data/keyfile
-              echo \"Keyfile создан\"
-          fi;
-          mongod --fork --logpath /dev/null --bind_ip_all --auth;
-          sleep 1;
-          mongo --eval \"
-              db = db.getSiblingDB(\"admin\");
-              db.createUser({
-              user: \"user\",
-              pwd: \"password\",
-              roles: [{ role: \"root\", db: \"admin\" }]
-              });
-          \";
-          sleep 1;
-          mongod --shutdown;
-          sleep 1;
-          mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
-          sleep 1;
-          mongo -u user -p password --verbose --eval \"rs.initiate()\";
-          python3 -m crowd_db.scripts.setup_db || true
-          pytest -q crowd_db/tests --integration 
+        run: pytest -q crowd_db/tests --integration 
