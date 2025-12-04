@@ -223,13 +223,14 @@ export const saveAnimationToBackend = async (
     grid: Grid,
     routes: any[],
     statistics: any,
-    name: string
+    name: string,
+    mapId: string
 ): Promise<string> => {
     try {
         if (useFakeCalls) {
             return fakeSaveAnimation();
         }
-        return await saveAnimationToRealBackend(grid, routes, statistics, name);
+        return await saveAnimationToRealBackend(grid, routes, statistics, name, mapId);
     } catch (error) {
         throw error;
     }
@@ -296,14 +297,15 @@ async function saveAnimationToRealBackend(
     grid: Grid,
     routes: any[],
     statistics: any,
-    name: string
+    name: string,
+    mapId: string
 ): Promise<string> {
     const animationData = {
         ...grid.getAnimationDataForBackend(routes, statistics),
         name: name,
     };
 
-    const response = await fetch(`${API_BASE_URL}/animations`, {
+    const response = await fetch(`${API_BASE_URL}/animations/map/${mapId}`, {
         method: 'POST',
         headers: buildHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(animationData),

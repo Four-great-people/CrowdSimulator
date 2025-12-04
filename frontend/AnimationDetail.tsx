@@ -162,7 +162,7 @@ const AnimationDetail: React.FC = () => {
                 valid: validTime,
                 ideal: idealTime
             };
-            const animationId = await saveAnimationToBackend(gridToSave, routes, statistics, nameToSave);
+            const animationId = await saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
             alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
             setOriginalAnimationName(nameToSave);
