@@ -217,6 +217,7 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: password
         ports:
           - 27017:27017
+        command: mongod --replSet rs0 && mongo --username user --password password --authenticationDatabase admin --eval 'rs.initiate()'
         options: >-
           --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
           --health-interval 5s
@@ -236,13 +237,13 @@ jobs:
       - name: Apply validator
         working-directory: middle-services
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
         run: python3 -m crowd_db.scripts.setup_db || true
 
       - name: Run integration tests
         working-directory: middle-services
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
         run: pytest -q crowd_db/tests --integration 

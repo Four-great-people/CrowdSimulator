@@ -14,8 +14,10 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - backend
-      - db
+      backend:
+        condition: service_started
+      db:
+        condition: service_started
     networks:
       - app-network
   backend:
@@ -35,6 +37,31 @@ services:
       - app-network
     volumes:
       - $HOME/mongo_db/data/db
+    entrypoint: >
+      sh -c '
+      if [ ! -f /data/keyfile ]; then
+        echo "Генерация keyfile для реплика-сета..."
+        mkdir -p /data
+        openssl rand -base64 756 > /data/keyfile
+        chmod 400 /data/keyfile
+        echo "Keyfile создан"
+      fi;
+      mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
+      sleep 10;
+      mongo -u user -p password --verbose --eval "rs.initiate()"
+      '
+    healthcheck:
+      test: >
+        echo 'try {
+          rs.conf().members[0].host
+        } catch(e) {
+          // Если реплика-сет не инициирован - инициируем
+          rs.initiate()
+        }' | mongo -u user -p password --authenticationDatabase admin --verbose
+      interval: 10s
+      start_period: 10s
+      timeout: 10s
+      retries: 5
 
 volumes:
   mongo_db:
