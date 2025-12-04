@@ -167,6 +167,26 @@ class MongoMapRepository:
         d = _animations_col().find_one({"_id": oid, "user_id": user_id})
         return AnimationDoc.from_bson(get_animation_bson(d)) if d else None
 
+    def clone_animation_for_user(
+        self,
+        animation_id: str | ObjectId,
+        user_id: ObjectId,
+    ) -> ObjectId | None:
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+        except InvalidId:
+            return None
+        with get_client().start_session() as session:
+            with session.start_transaction():
+                d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
+                if d is None:
+                    return None
+                d["_id"] = None
+                for block in d["blocks"]:
+                    increment_draft(block["draft_id"], session=session)
+                _animations_col().insert_one(d, session=session)
+                return d["_id"]
+
     def get_animations_for_user(
         self,
         user_id: ObjectId,

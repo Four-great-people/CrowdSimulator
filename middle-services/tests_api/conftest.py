@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import os
 import sys
@@ -56,6 +57,20 @@ class FakeRepo:
             return None
         d = self._store_anims[str(oid)]
         return app_module.AnimationDoc.from_bson(d) if d else None
+
+    def clone_animation_for_user(
+        self,
+        animation_id: str | ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
+    ):
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+        except Exception:
+            return None
+        d = self._store_anims[str(oid)]
+        new_id = ObjectId()
+        self._store_anims[str(new_id)] = deepcopy(d)
+        return new_id
 
     def get_animations_for_user(
         self,

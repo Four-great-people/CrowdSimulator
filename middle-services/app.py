@@ -362,12 +362,10 @@ def clone_animation(animation_id: str):
         user_oid = _current_user_oid()
         if user_oid is None:
             return jsonify({"error": "invalid user identity"}), 401
-        animation = repo.get_animation_for_user(animation_id, user_oid)
-        if animation is None:
+        new_animation_id = repo.clone_animation_for_user(animation_id, user_oid)
+        if new_animation_id is None:
             return jsonify({"error": "Animation was not found"}), 400
-        animation.set_id(None)
-        # new_animation_id = repo.create_animation(animation.to_bson())
-        # return jsonify({"_id": str(new_animation_id)}), 201
+        return jsonify({"_id": str(new_animation_id)}), 201
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
