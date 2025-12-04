@@ -158,7 +158,7 @@ class MapDoc:
             _id=d.get("_id"),
         )
 
-def transform_map_doc(map_doc_bson: dict) -> dict:
+def transform_to_db_schema(map_doc_bson: dict) -> dict:
     draft = {}
     draft["borders"] = map_doc_bson["borders"]
     draft["persons"] = map_doc_bson["persons"]
@@ -172,7 +172,7 @@ def transform_map_doc(map_doc_bson: dict) -> dict:
     map_doc_bson["draft_id"] = 0
     return draft
 
-def transform_to_map_doc(map_bson: dict, draft_bson: dict):
+def transform_from_db_schema(map_bson: dict, draft_bson: dict):
     map_bson["borders"] = draft_bson["borders"]
     map_bson["persons"] = draft_bson["persons"]
     map_bson["goals"] = draft_bson["goals"]
@@ -252,3 +252,13 @@ class AnimationDoc:
             name=d.get("name", "Без названия"),
             _id=d.get("_id"),
         )
+
+def transform_animation_to_db_schema(a: dict) -> list[dict]:
+    return [transform_to_db_schema(block) for block in a["blocks"]]
+
+def transform_animation_from_db_schema(a: dict, drafts_bsons: list[dict]):
+    a["blocks"] = [transform_from_db_schema(block, draft) for (block, draft) in zip(a["blocks"], drafts_bsons)]
+
+def replace_draft_ids_in_animation(a: dict, drafts_bsons: list[dict]):
+    for block, draft in zip(a["blocks"], drafts_bsons):
+        block["draft_id"] = draft["_id"]

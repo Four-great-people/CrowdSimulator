@@ -327,7 +327,7 @@ def create_animation(map_id: str):
             return jsonify({"error": "invalid user identity"}), 401
         payload["user_id"] = user_oid
         animation_doc = AnimationDoc.from_bson(payload)
-        animation_id = repo.create_animation(animation_doc.to_bson())
+        animation_id = repo.create_animation(animation_doc.to_bson(), map_id=map_id)
         return jsonify({"_id": str(animation_id)}), 201
     except Exception as e:
         return jsonify({"error": f"invalid animation payload: {e}"}), 400
@@ -366,8 +366,8 @@ def clone_animation(animation_id: str):
         if animation is None:
             return jsonify({"error": "Animation was not found"}), 400
         animation.set_id(None)
-        new_animation_id = repo.create_animation(animation.to_bson())
-        return jsonify({"_id": str(new_animation_id)}), 201
+        # new_animation_id = repo.create_animation(animation.to_bson())
+        # return jsonify({"_id": str(new_animation_id)}), 201
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 

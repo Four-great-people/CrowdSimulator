@@ -8,7 +8,7 @@ from pymongo.collection import Collection
 
 from .client import get_db, get_client
 from .config import ANIMATIONS_COLLECTION, MAPS_COLLECTION, USERS_COLLECTION, DRAFTS_COLLECTION
-from .models import AnimationDoc, MapDoc, UserDoc, transform_map_doc, transform_to_map_doc
+from .models import AnimationDoc, MapDoc, UserDoc, replace_draft_ids_in_animation, transform_animation_to_db_schema, transform_to_db_schema, transform_from_db_schema
 
 
 def _col() -> Collection:
@@ -36,15 +36,24 @@ def remove_draft(did: ObjectId, session: Any):
         d["counter"] -= 1
         _drafts_col().replace_one({"_id": did}, d, session=session)
 
-def get_map_bson(map_bson: dict) -> dict:
+# must be called only inside transaction
+def increment_draft(did: ObjectId, session: Any) -> dict:
+    d = _drafts_col().find_one({"_id": did}, session=session)
+    if d is None:
+        raise ValueError("draft not found")
+    d["counter"] += 1
+    _drafts_col().replace_one({"_id": did}, d, session=session)
+    return d
+
+def get_map_or_block_bson(map_bson: dict) -> dict:
     d = _drafts_col().find_one({"_id": map_bson["draft_id"]})
     if d is None:
         raise ValueError("draft not found")
-    transform_to_map_doc(map_bson, d)
+    transform_from_db_schema(map_bson, d)
     return map_bson
 
-def get_fake_map_bson(map_bson: dict) -> dict:
-    transform_to_map_doc(map_bson,
+def get_fake_map_or_block_bson(map_bson: dict) -> dict:
+    transform_from_db_schema(map_bson,
                          {
                              "borders": [],
                              "persons": [],
@@ -53,12 +62,22 @@ def get_fake_map_bson(map_bson: dict) -> dict:
                          })
     return map_bson
 
+def get_animation_bson(a: dict) -> dict:
+    for block in a["blocks"]:
+        get_map_or_block_bson(block)
+    return a
+
+def get_fake_animation_bson(a: dict) -> dict:
+    for block in a["blocks"]:
+        get_fake_map_or_block_bson(block)
+    return a
+
 class MongoMapRepository:
     def create(self, m: MapDoc) -> ObjectId:
         with get_client().start_session() as session:
             with session.start_transaction():
                 doc = m.to_bson()
-                draft = transform_map_doc(doc)
+                draft = transform_to_db_schema(doc)
                 _drafts_col().insert_one(draft, session=session)
                 doc["draft_id"] = draft["_id"]
                 _col().insert_one(doc, session=session)
@@ -70,11 +89,11 @@ class MongoMapRepository:
         except InvalidId:
             return None
         d = _col().find_one({"_id": oid, "user_id": user_id})
-        return MapDoc.from_bson(get_map_bson(d)) if d else None
+        return MapDoc.from_bson(get_map_or_block_bson(d)) if d else None
 
     def list_for_user(self, user_id: ObjectId, limit: int = 50) -> List[MapDoc]:
         return [
-            MapDoc.from_bson(get_fake_map_bson(d))
+            MapDoc.from_bson(get_fake_map_or_block_bson(d))
             for d in _col().find({"user_id": user_id}).limit(limit)
         ]
 
@@ -88,7 +107,7 @@ class MongoMapRepository:
                     raise ValueError("no such id")
                 old_draft_id = old_map["draft_id"]
                 d = m.to_bson()
-                draft = transform_map_doc(d)
+                draft = transform_to_db_schema(d)
                 _drafts_col().insert_one(draft, session=session)
                 d["draft_id"] = draft["_id"]
                 res = _col().replace_one(
@@ -116,11 +135,25 @@ class MongoMapRepository:
 
     # ------- Анимации -------
 
-    def create_animation(self, animation_data: dict) -> ObjectId:
-        animation_doc = AnimationDoc.from_bson(animation_data)
-        doc = animation_doc.to_bson()
-        _animations_col().insert_one(doc)
-        return doc["_id"]
+    def create_animation(self, animation_data: dict, map_id: str | ObjectId) -> ObjectId:
+        map_id = ObjectId(map_id) if isinstance(map_id, str) else map_id
+        with get_client().start_session() as session:
+            with session.start_transaction():
+                animation_doc = AnimationDoc.from_bson(animation_data)
+                doc = animation_doc.to_bson()
+                map_bson = _col().find_one({"_id": map_id, "user_id": animation_data["user_id"]}, session = session)
+                if map_bson is None:
+                    raise ValueError("no such id") # TODO if not found use the first one
+                first_draft_id = map_bson["draft_id"]
+                increment_draft(first_draft_id, session=session)
+                drafts = transform_animation_to_db_schema(doc)
+                drafts_copy = drafts[1:]
+                for draft in drafts_copy:
+                    _drafts_col().insert_one(draft, session=session)
+                drafts_copy = [{"_id": first_draft_id}] + drafts
+                replace_draft_ids_in_animation(doc, drafts_copy)
+                _animations_col().insert_one(doc, session=session)
+                return doc["_id"]
 
     def get_animation_for_user(
         self,
@@ -132,7 +165,7 @@ class MongoMapRepository:
         except InvalidId:
             return None
         d = _animations_col().find_one({"_id": oid, "user_id": user_id})
-        return AnimationDoc.from_bson(d) if d else None
+        return AnimationDoc.from_bson(get_animation_bson(d)) if d else None
 
     def get_animations_for_user(
         self,
@@ -140,7 +173,7 @@ class MongoMapRepository:
         limit: int = 1000,
     ) -> List[AnimationDoc]:
         return [
-            AnimationDoc.from_bson(d)
+            AnimationDoc.from_bson(get_fake_animation_bson(d))
             for d in _animations_col().find({"user_id": user_id}).limit(limit)
         ]
 
@@ -164,16 +197,26 @@ class MongoMapRepository:
         self,
         animation_id: str,
         user_id: ObjectId,
-        new_blocks: list,
+        new_blocks: list, # TODO only one is ok!!!
         new_statistics: dict,
     ) -> bool:
         try:
-            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
-            result = _animations_col().update_one(
-                {"_id": oid, "user_id": user_id},
-                {"$set": {"blocks": new_blocks, "statistics": new_statistics}},
-            )
-            return result.matched_count > 0
+            with get_client().start_session() as session:
+                with session.start_transaction():
+                    oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+                    d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
+                    if d is None:
+                        return False
+                    new_block = new_blocks[-1]
+                    draft = transform_to_db_schema(new_block)
+                    _drafts_col().insert_one(draft, session=session)
+                    new_block["draft_id"] = draft["_id"]
+                    result = _animations_col().update_one(
+                        {"_id": oid, "user_id": user_id},
+                        {"$set": {"blocks": d["blocks"] + [new_block], "statistics": new_statistics}},
+                        session=session
+                    )
+                    return result.matched_count > 0
         except (InvalidId, Exception):  # noqa: BLE001
             return False
 
@@ -186,8 +229,15 @@ class MongoMapRepository:
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
         except InvalidId:
             return False
-        result = _animations_col().delete_one({"_id": oid, "user_id": user_id})
-        return result.deleted_count == 1
+        with get_client().start_session() as session:
+            with session.start_transaction():
+                d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
+                if d is None:
+                    return False
+                result = _animations_col().delete_one(
+                    {"_id": oid, "user_id": user_id}, session=session)
+                remove_draft(d["draft_id"], session=session)
+                return result.deleted_count == 1
 
 
 class MongoUserRepository:
