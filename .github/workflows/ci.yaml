@@ -217,7 +217,7 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: password
         ports:
           - 27017:27017
-        entrypoint: >
+        command: >
           sh -c '
           if [ ! -f /data/keyfile ]; then
             echo "Генерация keyfile для реплика-сета..."
