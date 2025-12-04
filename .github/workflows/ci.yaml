@@ -218,8 +218,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --entrypoint sh -c '
-            if [ ! -f /data/keyfile ]; then
+          --entrypoint sh -c 'if [ ! -f /data/keyfile ]; then
               echo "Генерация keyfile для реплика-сета..."
               mkdir -p /data
               openssl rand -base64 756 > /data/keyfile
