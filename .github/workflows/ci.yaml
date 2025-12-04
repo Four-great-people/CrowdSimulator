@@ -224,7 +224,7 @@ jobs:
                 mkdir -p /data
                 openssl rand -base64 756 > /data/keyfile
                 chmod 400 /data/keyfile
-                echo "Keyfile создан"
+                echo \"Keyfile создан\"
             fi;
             mongod --fork --logpath /dev/null --bind_ip_all --auth;
             sleep 1;
