@@ -141,7 +141,8 @@ class MongoMapRepository:
             with session.start_transaction():
                 animation_doc = AnimationDoc.from_bson(animation_data)
                 doc = animation_doc.to_bson()
-                map_bson = _col().find_one({"_id": map_id, "user_id": animation_data["user_id"]}, session = session)
+                map_bson = _col().find_one(
+                    {"_id": map_id, "user_id": animation_data["user_id"]}, session = session)
                 if map_bson is None:
                     drafts = transform_animation_to_db_schema(doc)
                     for draft in drafts:
