@@ -221,7 +221,7 @@ class MongoMapRepository:
         except (InvalidId, Exception):  # noqa: BLE001
             return False
 
-    def update_animation_for_user(
+    def update_animation_for_user(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         animation_id: str,
         user_id: ObjectId,
