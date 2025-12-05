@@ -240,7 +240,11 @@ jobs:
         working-directory: middle-services/crowd_db
         run: |
           chmod +x scripts/install_mongodb_ubuntu.sh 
-          ./scripts/install_mongodb_ubuntu.sh 
+          ./scripts/install_mongodb_ubuntu.sh && false
+          mongosh --eval 'db.adminCommand({ ping: 1 })' || {
+            echo " mongod is not responding. Check: sudo systemctl status mongod"
+            exit 1
+          }
           if [ ! -f /data/keyfile ]; then
               echo "Генерация keyfile для реплика-сета..."
               mkdir -p /data
@@ -250,7 +254,7 @@ jobs:
           fi;
           mongod --fork --logpath /dev/null --bind_ip_all --auth;
           sleep 1;
-          mongo --eval "
+          mongosh --eval "
               db = db.getSiblingDB(\"admin\");
               db.createUser({
               user: \"user\",
@@ -263,7 +267,7 @@ jobs:
           sleep 1;
           mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
           sleep 1;
-          mongo -u user -p password --verbose --eval "rs.initiate()";
+          mongosh -u user -p password --verbose --eval "rs.initiate()";
 
       - name: Apply validator
         working-directory: middle-services
