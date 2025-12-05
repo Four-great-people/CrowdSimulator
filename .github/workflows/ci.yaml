@@ -246,11 +246,11 @@ jobs:
             echo " mongod is not responding. Check: sudo systemctl status mongod"
             exit 1
           }
-          if [ ! -f /data/keyfile ]; then
+          if [ ! -f data/keyfile ]; then
               echo "Генерация keyfile для реплика-сета..."
-              mkdir -p /data
-              openssl rand -base64 756 > /data/keyfile
-              chmod 400 /data/keyfile
+              mkdir -p data
+              openssl rand -base64 756 > data/keyfile
+              chmod 400 data/keyfile
               echo "Keyfile создан"
           fi;
           mongod --fork --logpath /dev/null --bind_ip_all --auth;
@@ -266,7 +266,7 @@ jobs:
           sleep 1;
           mongod --shutdown;
           sleep 1;
-          mongod --replSet rs0 --keyFile /data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
+          mongod --replSet rs0 --keyFile data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
           sleep 1;
           mongosh -u user -p password --verbose --eval "rs.initiate()";
 
