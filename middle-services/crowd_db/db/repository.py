@@ -227,6 +227,7 @@ class MongoMapRepository:
         user_id: ObjectId,
         new_block: dict,
         new_statistics: dict,
+        ticks: int,
     ) -> bool:
         try:
             with get_client().start_session() as session:
@@ -239,6 +240,7 @@ class MongoMapRepository:
                     draft = transform_to_db_schema(new_block)
                     _drafts_col().insert_one(draft, session=session)
                     new_block["draft_id"] = draft["_id"]
+                    d["blocks"][-1]["ticks"] = ticks
                     result = _animations_col().update_one(
                         {"_id": oid, "user_id": user_id},
                         {"$set": {"blocks": d["blocks"] + [new_block],

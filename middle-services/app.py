@@ -438,13 +438,11 @@ def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disa
         return jsonify({"error": f"error wrong payload {e}"}), 400
     new_statistics = {"valid": dense_result, "ideal": simple_result}
     try:
-        a.blocks[-1].ticks = ticks
         payload["block"]["routes"] = route
         payload["block"]["ticks"] = -1
         block = AnimationBlock.from_bson(payload["block"])
-        a.blocks.append(block)
         if not repo.update_animation_for_user(animation_id,
-                                              user_oid, block.to_bson(), new_statistics):
+                                              user_oid, block.to_bson(), new_statistics, ticks):
             return jsonify({"error": "map was already deleted"}), 400
     except Exception as e:
         return jsonify({"error": f"error wrong payload {e}"}), 400
