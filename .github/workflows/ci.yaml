@@ -253,7 +253,7 @@ jobs:
               chmod 400 data/keyfile
               echo "Keyfile создан"
           fi;
-          mongod --fork --logpath /dev/null --bind_ip_all --auth;
+          mongod --bind_ip_all --auth &
           sleep 1;
           echo "EVAL"
           mongosh --eval "
