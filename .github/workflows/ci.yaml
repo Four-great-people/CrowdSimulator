@@ -255,6 +255,7 @@ jobs:
           fi;
           mongod --fork --logpath /dev/null --bind_ip_all --auth;
           sleep 1;
+          echo "EVAL"
           mongosh --eval "
               db = db.getSiblingDB(\"admin\");
               db.createUser({
@@ -264,7 +265,7 @@ jobs:
               });
           ";
           sleep 1;
-          mongod --shutdown;
+          mongod --shutdown && false;
           sleep 1;
           mongod --replSet rs0 --keyFile data/keyfile --bind_ip_all --auth --fork --logpath /dev/null;
           sleep 1;
