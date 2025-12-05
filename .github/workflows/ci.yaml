@@ -241,6 +241,7 @@ jobs:
         run: |
           chmod +x scripts/install_mongodb_ubuntu.sh 
           ./scripts/install_mongodb_ubuntu.sh && false
+          sleep 1;
           sudo systemctl status mongod
           mongosh --eval 'db.adminCommand({ ping: 1 })' || {
             echo " mongod is not responding. Check: sudo systemctl status mongod"
