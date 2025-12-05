@@ -1,6 +1,7 @@
+from bson import ObjectId
 from db.repository import MongoMapRepository
 from db.models import MapDoc, Point, Segment, NamedPointSpec
-from bson import ObjectId
+
 if __name__ == "__main__":
     repo = MongoMapRepository()
     user_id = ObjectId("000000000000000000000000")

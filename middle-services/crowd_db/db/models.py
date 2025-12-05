@@ -257,7 +257,8 @@ def transform_animation_to_db_schema(a: dict) -> list[dict]:
     return [transform_to_db_schema(block) for block in a["blocks"]]
 
 def transform_animation_from_db_schema(a: dict, drafts_bsons: list[dict]):
-    a["blocks"] = [transform_from_db_schema(block, draft) for (block, draft) in zip(a["blocks"], drafts_bsons)]
+    a["blocks"] = [transform_from_db_schema(block, draft) for (block, draft) in zip(a["blocks"],
+                                                                                    drafts_bsons)]
 
 def replace_draft_ids_in_animation(a: dict, drafts_bsons: list[dict]):
     for block, draft in zip(a["blocks"], drafts_bsons):

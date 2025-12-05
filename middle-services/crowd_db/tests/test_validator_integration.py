@@ -1,8 +1,8 @@
 import pytest
+from pymongo.errors import WriteError
 from db.client import get_db
 from db.config import DRAFTS_COLLECTION, MAPS_COLLECTION
 from db.validators import apply_collection_validator
-from pymongo.errors import WriteError
 
 # pylint: disable=duplicate-code
 pytestmark = [

@@ -8,7 +8,8 @@ from pymongo.collection import Collection
 
 from .client import get_db, get_client
 from .config import ANIMATIONS_COLLECTION, MAPS_COLLECTION, USERS_COLLECTION, DRAFTS_COLLECTION
-from .models import AnimationDoc, MapDoc, UserDoc, replace_draft_ids_in_animation, transform_animation_to_db_schema, transform_to_db_schema, transform_from_db_schema
+from .models import AnimationDoc, MapDoc, UserDoc, replace_draft_ids_in_animation,\
+    transform_animation_to_db_schema, transform_to_db_schema, transform_from_db_schema
 
 
 def _col() -> Collection:
@@ -102,7 +103,8 @@ class MongoMapRepository:
             with session.start_transaction():
                 if not m.get_id():
                     raise ValueError("replace_for_user: _id required")
-                old_map = _col().find_one({"_id": m.get_id(), "user_id": user_id}, session = session)
+                old_map = _col().find_one({"_id": m.get_id(), "user_id": user_id},
+                                          session = session)
                 if old_map is None:
                     raise ValueError("no such id")
                 old_draft_id = old_map["draft_id"]
@@ -150,17 +152,16 @@ class MongoMapRepository:
                     replace_draft_ids_in_animation(doc, drafts)
                     _animations_col().insert_one(doc, session=session)
                     return doc["_id"]
-                else:
-                    first_draft_id = map_bson["draft_id"]
-                    increment_draft(first_draft_id, session=session)
-                    drafts = transform_animation_to_db_schema(doc)
-                    drafts_copy = drafts[1:]
-                    for draft in drafts_copy:
-                        _drafts_col().insert_one(draft, session=session)
-                    drafts_copy = [{"_id": first_draft_id}] + drafts
-                    replace_draft_ids_in_animation(doc, drafts_copy)
-                    _animations_col().insert_one(doc, session=session)
-                    return doc["_id"]
+                first_draft_id = map_bson["draft_id"]
+                increment_draft(first_draft_id, session=session)
+                drafts = transform_animation_to_db_schema(doc)
+                drafts_copy = drafts[1:]
+                for draft in drafts_copy:
+                    _drafts_col().insert_one(draft, session=session)
+                drafts_copy = [{"_id": first_draft_id}] + drafts
+                replace_draft_ids_in_animation(doc, drafts_copy)
+                _animations_col().insert_one(doc, session=session)
+                return doc["_id"]
 
     def get_animation_for_user(
         self,
@@ -231,7 +232,8 @@ class MongoMapRepository:
             with get_client().start_session() as session:
                 with session.start_transaction():
                     oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
-                    d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
+                    d = _animations_col().find_one({"_id": oid, "user_id": user_id},
+                                                   session=session)
                     if d is None:
                         return False
                     draft = transform_to_db_schema(new_block)
@@ -239,7 +241,8 @@ class MongoMapRepository:
                     new_block["draft_id"] = draft["_id"]
                     result = _animations_col().update_one(
                         {"_id": oid, "user_id": user_id},
-                        {"$set": {"blocks": d["blocks"] + [new_block], "statistics": new_statistics}},
+                        {"$set": {"blocks": d["blocks"] + [new_block],
+                                  "statistics": new_statistics}},
                         session=session
                     )
                     return result.matched_count > 0
