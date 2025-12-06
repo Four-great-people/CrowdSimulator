@@ -14,6 +14,7 @@ import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import NotFound from './src/components/NotFound';
 import './styles/App.css';
+import GistComponent from './src/components/GistComponent';
 
 const AnimationDetail: React.FC = () => {
     const { id, algo } = useParams<{ id: string, algo: string }>();
@@ -377,7 +378,7 @@ const AnimationDetail: React.FC = () => {
                             }
                         }
                         else {
-                            newGrid.markCell(newPosition.x, newPosition.y);
+                            newGrid.markCell(newPosition.x, newPosition.y, 1);
                         }
 
                         updatedPersons.push(newPerson);
@@ -539,6 +540,9 @@ const AnimationDetail: React.FC = () => {
                             <li>Фактическое время: {statisticsFormatString(validTime)}</li>
                         </ul>
                     </div>}
+                    <div className="gist-wrapper">
+                        {grid && <GistComponent maxSteps={grid.maxTicks} />}
+                    </div>
                 </div>
             </div>
             

@@ -455,6 +455,20 @@
   text-decoration: underline;
 }
 
+.text-table-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-table {
+  margin-left: 20px;
+}
+
+.gist-wrapper {
+  margin-left: 20px;
+  margin-top: 10px;
+  width: 200%;
+}
 
 @media (max-width: 768px) {
   .auth-page {
