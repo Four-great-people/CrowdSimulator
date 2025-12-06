@@ -32,6 +32,11 @@ const GistComponent: React.FC<GistProps> = ({ maxSteps}) => {
     return (
         <div className={`gist`}>
             {<GridComponent grid={getGrid()} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={false} objectPlacing={""} groupSize={1} />}
+            <div className="enumeration">
+                {getGrid().cells[0].map((cell) => {
+                    return <div className="enum-item">{cell.usedTicks * 5}c</div> // I know, that it's hardcoded. But do we really want to change middle-services for this?
+                })}
+            </div>
         </div>
     );
 };
