@@ -197,7 +197,7 @@ def test_simulate_calls_cpp_saved_animation_with_none_and_returns_routes(
     assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
-    resp = client.get(f"/animations/{anim_id}/statistics/dense", headers=auth_headers, json={
+    resp = client.post(f"/animations/{anim_id}/statistics/dense", headers=auth_headers, json={
         "block": {
             "borders": [
                 {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}},
