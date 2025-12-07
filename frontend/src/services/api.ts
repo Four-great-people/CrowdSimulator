@@ -3,7 +3,7 @@ import NamedPoint from '../models/NamedPoint';
 import Group from '../models/Group';
 
 const useFakeCalls = process.env.MODE ? true : false;
-const API_BASE_URL = 'http:
+const API_BASE_URL = 'http://localhost:5000';
 const AUTH_TOKEN_KEY = 'auth_token';
 
 export interface MapAnimItem {
@@ -608,7 +608,7 @@ async function getSavedAnimationStatisticsReal(
     const response = await fetch(
         `${API_BASE_URL}/animations/${animationId}/statistics/${algoName}`,
         {
-            method: 'GET',
+            method: 'POST',
             headers: buildHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         }

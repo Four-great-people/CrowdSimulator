@@ -83,7 +83,7 @@ const AnimationDetail: React.FC = () => {
     const [animationBlocks, setAnimationBlocks] = useState<AnimationBlockFrontend[]>([]);
     const animationBlocksRef = useRef<AnimationBlockFrontend[]>([]);
     const currentBlockIndexRef = useRef<number>(0);
-
+    const animationRunIdRef = useRef(0);
     const lastStepIndexRef = useRef<number>(0);
 
     const objectTypes: string[] = ['border', 'person', 'goal', 'group'];
@@ -370,8 +370,12 @@ const AnimationDetail: React.FC = () => {
         persons: NamedPoint[],
         stepIndex: number,
         routesForPersons: any[],
-        options: ExecuteOptions = {}
+        options: ExecuteOptions = {},
+        runId?: number
     ) => {
+        if (runId !== undefined && runId !== animationRunIdRef.current) {
+        return;
+    }  
         lastStepIndexRef.current = stepIndex;
 
         if (!animationPausedRef.current) {
@@ -387,16 +391,9 @@ const AnimationDetail: React.FC = () => {
                 stepIndex >= options.maxSteps;
 
             if (allRoutesCompleted || reachedMax) {
-                setIsAnimating(false);
-                setAnimationCompleted(true);
-
                 if (options.onFinished) {
                     options.onFinished(currentGrid, persons, stepIndex);
-                } else {
-                    const total = persons.length;
-                    setParticipantsNumber(total);
-                    setShowStatistics(true);
-                }
+                } 
                 return;
             }
 
@@ -501,7 +498,8 @@ const AnimationDetail: React.FC = () => {
                     updatedPersons,
                     nextStepIndex,
                     routesForPersons,
-                    options
+                    options,
+                    runId
                 );
             }, 200);
         } else {
@@ -511,7 +509,8 @@ const AnimationDetail: React.FC = () => {
                     persons,
                     stepIndex,
                     routesForPersons,
-                    options
+                    options,
+                    runId
                 );
             }, 200);
         }
@@ -524,6 +523,8 @@ const AnimationDetail: React.FC = () => {
         startIndex: number
     ) => {
         if (!blocks || blocks.length === 0) return;
+
+        const runId = ++animationRunIdRef.current;
 
         const playBlock = (index: number) => {
             if (index >= blocks.length) {
@@ -571,7 +572,7 @@ const AnimationDetail: React.FC = () => {
                         playBlock(index + 1);
                     }
                 },
-            });
+            }, runId);
         };
 
         playBlock(startIndex);
@@ -629,13 +630,15 @@ const AnimationDetail: React.FC = () => {
 
             setRoutes(routesFromBackend);
 
+            const runId = ++animationRunIdRef.current;
+
             executeSteps(gridCopy, persons, 0, routesForPlayback, {
                 onFinished: (_, personsAtEnd) => {
                     setAnimationCompleted(true);
                     setParticipantsNumber(personsAtEnd.length);
                     setShowStatistics(true);
                 },
-            });
+            }, runId);
         } catch (error) {
             console.error('Ошибка при работе с бэкендом:', error);
             setIsAnimating(false);
@@ -656,6 +659,7 @@ const AnimationDetail: React.FC = () => {
                 clearTimeout(animationRef.current);
             }
 
+            const runId = ++animationRunIdRef.current;
             const gridCopy = grid.clone();
             const pausedTicks = lastStepIndexRef.current;
 
@@ -748,7 +752,7 @@ const AnimationDetail: React.FC = () => {
                     setShowStatistics(true);
                     setParticipantsNumber(personsAtEnd.length);
                 },
-            });
+            }, runId);
         } catch (error) {
             console.error(
                 'Ошибка пересчёта маршрутов после изменения карты:',
