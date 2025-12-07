@@ -69,8 +69,8 @@ class Cell {
         return newCell;
     }
 
-    mark() {
-        this.usedTicks += 1;
+    mark(cnt: number) {
+        this.usedTicks += cnt;
     }
 
     reset() {
