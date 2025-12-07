@@ -1036,5 +1036,3 @@ const AnimationDetail: React.FC = () => {
 };
 
 export default AnimationDetail;
-
-

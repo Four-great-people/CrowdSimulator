@@ -374,6 +374,3 @@ const GridComponent: React.FC<GridProps> = ({
 };
 
 export default GridComponent;
-
-
-

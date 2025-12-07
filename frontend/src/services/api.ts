@@ -766,5 +766,3 @@ function fakeDeleteAnimation(animationId: string): void {
     const idx = fakeMapList.findIndex((item) => item.id === animationId);
     if (idx !== -1) fakeMapList.splice(idx, 1);
 }
-
-
