@@ -44,7 +44,7 @@ def clean_maps_collection():
 @pytest.fixture(scope="session")
 def mongo_running():
     from pymongo import MongoClient  # pylint: disable=import-outside-toplevel
-    uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+    uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/?replicaSet=rs0")
     try:
         MongoClient(uri).admin.command("ping")
         return True

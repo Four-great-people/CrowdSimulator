@@ -1,8 +1,32 @@
 import pytest
+from db.client import get_db
+from db.config import MAPS_COLLECTION
+from db.validators import apply_collection_validator
 from db.repository import MongoMapRepository
 from db.models import Point, NamedPointSpec, GroupSpec
 from .factories import make_test_mapdoc
-@pytest.mark.usefixtures("use_mongomock", "clean_maps_collection")
+
+# run with:  pytest --integration
+# pylint: disable=duplicate-code
+pytestmark = [
+    pytest.mark.skipif(
+        not pytest.config.getoption("--integration"),
+        reason="run with --integration",
+    ),
+]
+
+@pytest.fixture(autouse=True)
+def require_mongo(mongo_running):
+    if not mongo_running:
+        pytest.skip("MongoDB is not running")
+
+@pytest.fixture(autouse=True)
+def clean_and_validate():
+    apply_collection_validator()
+    get_db()[MAPS_COLLECTION].delete_many({})
+    yield
+    get_db()[MAPS_COLLECTION].delete_many({})
+
 def test_crud_maps_unit():
     repo = MongoMapRepository()
 

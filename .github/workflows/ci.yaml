@@ -209,19 +209,22 @@ jobs:
 
   test-crowddb-integration:
     runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mongo:4.4.6
-        env:
-          MONGO_INITDB_ROOT_USERNAME: user
-          MONGO_INITDB_ROOT_PASSWORD: password
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
+    # services:
+    #   mongo:
+    #     image: mongo:4.4.6
+    #     env:
+    #       MONGO_INITDB_ROOT_USERNAME: user
+    #       MONGO_INITDB_ROOT_PASSWORD: password
+    #     ports:
+    #       - 27017:27017
+    #     options: >-
+    #       --entrypoint init.sh
+    #       --health-cmd "mongo --username user --password password --authenticationDatabase admin --eval 'db.runCommand({ping:1})'"
+    #       --health-interval 5s
+    #       --health-timeout 5s
+    #       --health-retries 20
+    #       --health-start-period 5s
+
 
     steps:
       - uses: actions/checkout@v4
@@ -233,16 +236,55 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Install mongo
+        working-directory: middle-services/crowd_db
+        run: |
+          chmod +x scripts/install_mongodb_ubuntu.sh 
+          ./scripts/install_mongodb_ubuntu.sh && false
+          sleep 1;
+          sudo systemctl status mongod
+          mongosh --eval 'db.adminCommand({ ping: 1 })' || {
+            echo " mongod is not responding. Check: sudo systemctl status mongod"
+            exit 1
+          }
+          if [ ! -f data/keyfile ]; then
+              echo "Генерация keyfile для реплика-сета..."
+              mkdir -p data
+              openssl rand -base64 756 > data/keyfile
+              chmod 400 data/keyfile
+              echo "Keyfile создан"
+          fi;
+          echo "authentication"
+          mongosh --eval "
+              db = db.getSiblingDB(\"admin\");
+              db.createUser({
+              user: \"user\",
+              pwd: \"password\",
+              roles: [{ role: \"root\", db: \"admin\" }]
+              });
+          ";
+          sleep 1;
+          sudo systemctl stop mongod
+          sleep 1;
+          echo "new start"
+          echo -e "replication:\n  replSetName: \"rs0\"" | sudo tee -a /etc/mongod.conf
+          sudo systemctl start mongod
+          sleep 1;
+          mongosh -u user -p password --verbose --eval "rs.initiate()";
+          echo "finish"
+
       - name: Apply validator
         working-directory: middle-services
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
-        run: python3 -m crowd_db.scripts.setup_db || true
+        run:  python3 -m crowd_db.scripts.setup_db || true
 
       - name: Run integration tests
         working-directory: middle-services
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0
           MONGODB_DB: crowdsim_test
-        run: pytest -q crowd_db/tests --integration 
+        run: |
+          pytest -q crowd_db/tests --integration
+          sudo systemctl stop mongod
