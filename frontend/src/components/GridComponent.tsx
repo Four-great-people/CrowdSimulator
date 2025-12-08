@@ -185,6 +185,10 @@ const GridComponent: React.FC<GridProps> = ({
             const groupId = grid.groups.length;
             const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i);
             const group = new Group(groupId, position, groupSize, personIds);
+             personIds.forEach(personId => {
+                const person = new NamedPoint(personId, position);
+                grid.addPerson(person);
+            });
             grid.addGroup(group);
         }
         if (onModify) onModify();

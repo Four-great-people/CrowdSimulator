@@ -618,13 +618,6 @@ const AnimationDetail: React.FC = () => {
             grid.reset();
             const gridCopy = grid.clone();
 
-            gridCopy.groups.forEach(group => {
-                group.person_ids.forEach(personId => {
-                    const person = new NamedPoint(personId, group.start_position);
-                    gridCopy.addPerson(person);
-                });
-            });
-
             setGrid(gridCopy);
 
             const persons = collectPersons(gridCopy);
@@ -678,18 +671,6 @@ const AnimationDetail: React.FC = () => {
 
             const runId = ++animationRunIdRef.current;
             const gridCopy = grid.clone();
-            if (originalGrid) {
-            gridCopy.groups.forEach(group => {
-                const isOldGroup = originalGrid.groups.some(oldGroup =>
-                    oldGroup.start_position.x === group.start_position.x &&
-                    oldGroup.start_position.y === group.start_position.y
-                );
-                
-                if (isOldGroup) {
-                    group.person_ids = [];
-                }
-            });
-        }
             const pausedTicks = lastStepIndexRef.current;
 
             const persistedAnimationId = isSavedAnimation
@@ -731,16 +712,6 @@ const AnimationDetail: React.FC = () => {
                 );
             }
             const normalizedRoutes = routesFromBackend;
-             gridCopy.groups.forEach(group => {
-                const cell = gridCopy.getCell(group.start_position.x, group.start_position.y);
-                group.person_ids.forEach(personId => {
-                    const personExists = gridCopy.persons.some(p => p.id === personId);
-                    if (!personExists) {
-                        const person = new NamedPoint(personId, group.start_position);
-                        gridCopy.addPerson(person);
-                    }
-                });
-            });
 
             setAnimationBlocks(prevBlocks => {
                 const updated = [...prevBlocks];
