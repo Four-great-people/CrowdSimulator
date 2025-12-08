@@ -311,7 +311,7 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
     };
     const shouldShowScroll = grid.width > 40 || grid.height > 22;
     const cellSize = 30;
-    
+    const nodeSize = 10;
     return (
 
         <div ref={gridRef}
@@ -321,7 +321,8 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                 gridTemplateRows: `repeat(${grid.height}, ${cellSize}px)`,
                 width: shouldShowScroll ? `${grid.width * 30}px` : 'auto',
                 height: shouldShowScroll ? `${grid.height * 30}px` : 'auto',
-                transform: shouldShowScroll ? 'none' : `scale(${getScaleFactor()})`
+                transform: shouldShowScroll ? 'none' : `scale(${getScaleFactor()})`,
+                position: 'relative',
             }}
             onClick={handleOnClick}
             onContextMenu={handleOnDelete}
@@ -353,6 +354,22 @@ const GridComponent: React.FC<GridProps> = ({ grid, isAnimating = false, current
                         </div>
                     );
                 })
+            )}
+            {objectPlacing === borderType &&
+                state === inProcessState &&
+                savedX >= 0 &&
+                savedY >= 0 &&
+                !outsideBorders(savedX, savedY) && (
+                    <div
+                        className="grid-node-highlight"
+                        style={{
+                            position: 'absolute',
+                            left: `${savedX * cellSize - nodeSize / 2}px`,
+                            bottom: `${savedY * cellSize - nodeSize / 2}px`,
+                            width: `${nodeSize}px`,
+                            height: `${nodeSize}px`,
+                        }}
+                    />
             )}
         </div>
     );
