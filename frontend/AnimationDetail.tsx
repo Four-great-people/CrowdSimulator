@@ -171,7 +171,7 @@ const AnimationDetail: React.FC = () => {
                 value: null,
                 problematic: current.problematic,
             };
-            const animationId = await saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
+            const animationId = saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
             alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
             setOriginalAnimationName(nameToSave);
