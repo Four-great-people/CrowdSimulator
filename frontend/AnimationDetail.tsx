@@ -165,12 +165,14 @@ const AnimationDetail: React.FC = () => {
     const mergeStats = (prev?: TimeStat, current?: TimeStat): TimeStat | undefined => {
         if (!current) return prev;
         if (!prev) return current;
-
+ 
         if (prev.value == null || current.value == null) {
             return {
                 value: null,
                 problematic: current.problematic,
             };
+        }
+        try {
             const animationId = saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
             alert(`Анимация сохранена с именем: ${nameToSave}`);
             setIsAnimationSaved(true);
