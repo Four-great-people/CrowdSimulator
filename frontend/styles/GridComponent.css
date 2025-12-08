@@ -92,14 +92,13 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: min(1vw, 10px);
     justify-self: center;
     align-self: center;
     min-height: 0;
     height: 100%;
     padding: min(1.5vw, 20px);
     max-width: min(25vw, 400px);
-    border: 2px solid rgb(68, 0, 255);
+    border: 2px solid #654EE8;
     margin: 0 auto;
     box-sizing: border-box;
 }
@@ -109,10 +108,16 @@
     display: flex;
     flex-direction: column;
     gap: min(1vh, 4px);
-    padding-right: min(1vw, 10px);
+    margin-bottom: min(1vw, 10px);
     min-height: 0;
     max-height: min(70vh, 650px);
     flex: 1;
+}
+
+.map-list:empty {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    gap: 0;
 }
 
 .map-list::-webkit-scrollbar {
@@ -184,24 +189,6 @@
     flex-direction: column;
     gap: 20px;
     width: min(14vw, 300px);
-}
-
-.blue-button {
-    flex-shrink: 0;
-    background-color: #1976d2;
-    color: white;
-    border: none;
-    padding: min(0.8vw, 8px) min(1.5vw, 16px);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: min(1.1vw, 14px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.blue-button:hover {
-    background-color: #1565c0;
 }
 
 .text-table-wrapper {

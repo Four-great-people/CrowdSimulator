@@ -5,6 +5,7 @@ import Group from '../models/Group';
 const useFakeCalls = process.env.MODE ? true : false;
 const API_BASE_URL = 'http://localhost:5000';
 const AUTH_TOKEN_KEY = 'auth_token';
+const USERNAME_KEY = 'username';
 
 export interface MapAnimItem {
     id: string,
@@ -31,6 +32,26 @@ export const setAuthToken = (token: string | null): void => {
     }
 };
 
+export const getUsername = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return window.localStorage.getItem(USERNAME_KEY);
+};
+
+export const setUsername = (username: string | null): void => {
+    if (typeof window === 'undefined') return;
+    if (username) {
+        window.localStorage.setItem(USERNAME_KEY, username);
+    } else {
+        window.localStorage.removeItem(USERNAME_KEY);
+    }
+};
+
+export const getCurrentUser = (): { username: string | null } => {
+    return {
+        username: getUsername()
+    };
+};
+
 export const isAuthenticated = (): boolean => {
     if (useFakeCalls) {
         return true;
@@ -40,6 +61,7 @@ export const isAuthenticated = (): boolean => {
 
 export const logoutUser = (): void => {
     setAuthToken(null);
+    setUsername(null);
 };
 
 const buildHeaders = (extra: Record<string, string> = {}): Record<string, string> => {
@@ -77,6 +99,7 @@ export const registerUser = async (username: string, password: string): Promise<
   }
 
   setAuthToken(authData.access_token);
+  setUsername(username);
 };
 
 export const loginUser = async (username: string, password: string): Promise<void> => {
@@ -104,6 +127,7 @@ export const loginUser = async (username: string, password: string): Promise<voi
     }
 
     setAuthToken(authData.access_token);
+    setUsername(username);
 };
 
 
