@@ -162,14 +162,20 @@ const Maps: React.FC = () => {
                                     >
                                         <span className="map-name">{mapItem.name}</span>
 
-                                        <button
+                                        <span 
                                             className="icon-button delete cross-icon"
                                             aria-label="Удалить карту"
                                             title="Удалить карту"
-                                            disabled={busyId === mapItem.id}
-                                            onClick={e => deleteMap(e, mapItem.id)}
-                                            >
-                                        </button>
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                deleteMap(e, mapItem.id);
+                                            }}
+                                            style={{
+                                                display: 'inline-block',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                        </span>
                                     </button>
                                 </div>
                             ))}

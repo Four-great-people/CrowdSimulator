@@ -527,3 +527,9 @@
     width: 100%;
     box-sizing: border-box;
 }
+
+.icon-button.delete.cross-icon {
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
+}
