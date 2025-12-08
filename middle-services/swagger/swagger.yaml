@@ -11,6 +11,143 @@ SecurityDefinitions:
     name: Authorization
     in: header
     description: "Get your token in reigster endpoint"
+definitions:
+  Point:
+    type: object
+    properties:
+      x: 
+        type: integer
+      y: 
+        type: integer
+  Segment:
+    type: object
+    properties:
+      first:
+        $ref: '#/definitions/Point'
+      second:
+        $ref: '#/definitions/Point'
+  NamedPoint:
+    type: object
+    properties:
+      id: 
+        type: integer
+      position:
+        $ref: '#/definitions/Point'
+  Group:
+    type: object
+    properties:
+      id:
+        type: integer
+      start_position:
+        $ref: '#/definitions/Point'
+      total_count:
+        type: integer
+      person_ids:
+        type: array
+        items:
+          type: integer
+  Map:
+    type: object
+    properties:
+      up_right_point: 
+        $ref: '#/definitions/Point'
+      down_left_point: 
+        $ref: '#/definitions/Point'
+      borders:
+        type: array
+        items:
+          $ref: '#/definitions/Segment'      
+      persons:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      goals:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      name:
+        type: string
+  AnimationBlock:
+    type: object
+    properties:
+      borders:
+        type: array
+        items:
+          $ref: '#/definitions/Segment'      
+      persons:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      goals:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      routes:
+        type: array
+        items:
+          type: object
+          properties:
+            id: 
+              type: integer
+            route:
+              type: array
+              items:
+                type: string
+      ticks:
+        type: integer
+  StatResult:
+    type: object
+    properties:
+      value:
+        type: integer
+      problematic:
+        type: integer
+  Animation:
+    type: object
+    properties:
+      up_right_point: 
+        $ref: '#/definitions/Point'
+      down_left_point: 
+        $ref: '#/definitions/Point'
+      blocks:
+        type: array
+        items:
+          $ref: '#/definitions/AnimationBlock'
+      statistics:
+        type: object
+        properties:
+          valid:
+            $ref: '#/definitions/StatResult'
+          ideal:
+            $ref: '#/definitions/StatResult'
+      name:
+        type: string
+  BackendStat:
+    type: object
+    properties:
+      valid:
+        $ref: '#/definitions/StatResult'
+      ideal:
+        $ref: '#/definitions/StatResult'
+      routes:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            route:
+              type: array
+              items:
+                type: string
 paths:
   /maps:
     get:
@@ -18,8 +155,8 @@ paths:
       security:
         - jwtAuth: []
       responses:
-        201:
-          description: "Map created"
+        200:
+          description: "List of maps"
           content:
             application/json:
               schema:
@@ -29,6 +166,234 @@ paths:
                   properties:
                     id: string
                     name: string
+    post:
+      description: "Adds map"
+      security:
+        - jwtAuth: []
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Map'
+      responses:
+        201:
+          description: "Map created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+  /maps/{map_id}:
+    delete:
+      description: "Delete map by id"
+      security:
+        - jwtAuth: []
+      responses:
+        200:
+          description: "Map deleted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+    put:
+      description: "Update map by id"
+      security:
+        - jwtAuth: []
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Map'
+      responses:
+        200:
+          description: "Map deleted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+    get:
+      description: "Get map by id"
+      security:
+        - jwtAuth: []
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/Map'
+  /maps/{map_id}/statistics/{algo}:
+    get:
+      description: "Get routes statistics"
+      security:
+        - jwtAuth: []
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: object
+                    properties:
+                      value:
+                        type: integer
+                      problematic:
+                        type: integer
+                  ideal:
+                    type: object
+                    properties:
+                      value:
+                        type: integer
+                      problematic:
+                        type: integer
+                  routes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        route:
+                          type: array
+                          items:
+                            type: string
+  /animations:
+    get:
+      description: "Returns list of animations"
+      security:
+        - jwtAuth: []
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+  /animations/map/{map_id}:
+    post:
+      description: "Creates animation from map"
+      security:
+        - jwtAuth: []
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Animation'
+      responses:
+        201:
+          description: "Animation created from map"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+  /animations/{animation_id}:
+    post:
+      description: "Clone animation"
+      responses:
+        201:
+          description: "Animation cloned"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+    get:
+      description: "Get animation by id"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/Animation'
+    put:
+      description: "Update animation name"
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name: 
+              type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    delete:
+      description: "Delete animation"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /animations/statistics/{algo}:
+    post:
+      description: "Calculate animation block"
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            block: 
+              $ref: '#/definitions/AnimationBlock'
+            up_right_point: 
+              $ref: '#/definitions/Point'
+            down_left_point: 
+              $ref: '#/definitions/Point'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/BackendStat'
+  /animations/{animation_id}/statistics/{algo}:
+    post:
+      description: "Get saved animation statistics"
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Animation'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/BackendStat'
   /auth/register:
     post:
       description: "Register new user"
@@ -54,9 +419,33 @@ paths:
               schema:
                 type: object
                 properties:
+                  access_token: string     
+/auth/login:
+    post:
+      description: "Login"
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            username: 
+              type: string
+            password: 
+              type: string
+          example:
+            username: "John Doe"
+            password: "password"
+      responses:
+        201:
+          description: "Successful login"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   access_token: string
-          
-
 
 
 
