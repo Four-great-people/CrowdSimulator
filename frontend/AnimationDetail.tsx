@@ -856,20 +856,20 @@ const AnimationDetail: React.FC = () => {
         }
     };
 
-    const removeAnimation = async () => {
-        if (!isSavedAnimation || !id) return;
-        if (!confirm('Удалить эту анимацию? Это действие необратимо.')) return;
-        try {
-            setIsDeleting(true);
-            await deleteAnimationFromBackend(id);
-            navigate('/maps', { state: { activeTab: 'animations' } });
-        } catch (e) {
-            alert('Не удалось удалить анимацию');
-            console.error(e);
-        } finally {
-            setIsDeleting(false);
-        }
-    };
+    // const removeAnimation = async () => {
+    //     if (!isSavedAnimation || !id) return;
+    //     if (!confirm('Удалить эту анимацию? Это действие необратимо.')) return;
+    //     try {
+    //         setIsDeleting(true);
+    //         await deleteAnimationFromBackend(id);
+    //         navigate('/maps', { state: { activeTab: 'animations' } });
+    //     } catch (e) {
+    //         alert('Не удалось удалить анимацию');
+    //         console.error(e);
+    //     } finally {
+    //         setIsDeleting(false);
+    //     }
+    // };
 
     
 
