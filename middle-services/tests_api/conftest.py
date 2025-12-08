@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import os
 import sys
@@ -39,7 +40,7 @@ class FakeRepo:
         d = self._store_maps.get(str(map_id))
         return app_module.MapDoc.from_bson(d) if d else None
 
-    def create_animation(self, d: dict) -> ObjectId:
+    def create_animation(self, d: dict, map_id: str | ObjectId) -> ObjectId: # pylint: disable=unused-argument
         oid = d.get("_id") or ObjectId()
         d["_id"] = oid
         self._store_anims[str(oid)] = d
@@ -56,6 +57,20 @@ class FakeRepo:
             return None
         d = self._store_anims[str(oid)]
         return app_module.AnimationDoc.from_bson(d) if d else None
+
+    def clone_animation_for_user(
+        self,
+        animation_id: str | ObjectId,
+        user_id: ObjectId, # pylint: disable=unused-argument
+    ):
+        try:
+            oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
+        except Exception:
+            return None
+        d = self._store_anims[str(oid)]
+        new_id = ObjectId()
+        self._store_anims[str(new_id)] = deepcopy(d)
+        return new_id
 
     def get_animations_for_user(
         self,
@@ -80,16 +95,18 @@ class FakeRepo:
         except Exception:  # noqa: BLE001
             return False
 
-    def update_animation_for_user(
+    def update_animation_for_user(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         animation_id: str,
         user_id: ObjectId, # pylint: disable=unused-argument
-        new_blocks: list,
+        new_block: dict,
         new_statistics: dict,
+        ticks: int,
     ) -> bool:
         try:
             oid = ObjectId(animation_id) if isinstance(animation_id, str) else animation_id
-            self._store_anims[str(oid)]["blocks"] = new_blocks
+            self._store_anims[str(oid)]["blocks"][-1]["ticks"] = ticks
+            self._store_anims[str(oid)]["blocks"].append(new_block)
             self._store_anims[str(oid)]["statistics"] = new_statistics
             return True
         except Exception:  # noqa: BLE001

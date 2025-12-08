@@ -166,13 +166,13 @@ SAMPLE_ANIMATION = {
     }
 
 def test_create_animation(client, auth_headers):
-    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    resp = client.post("/animations/map/1", headers=auth_headers, json=SAMPLE_ANIMATION)
     assert resp.status_code == 201
     id_resp = resp.get_json()
     assert "_id" in id_resp
 
 def test_get_animation(client, auth_headers):
-    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    resp = client.post("/animations/map/1", headers=auth_headers, json=SAMPLE_ANIMATION)
     assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
@@ -180,7 +180,7 @@ def test_get_animation(client, auth_headers):
     assert get_resp.status_code == 200
 
 def test_clone_animation(client, auth_headers):
-    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    resp = client.post("/animations/map/1", headers=auth_headers, json=SAMPLE_ANIMATION)
     assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]
@@ -193,7 +193,7 @@ def test_clone_animation(client, auth_headers):
 def test_simulate_calls_cpp_saved_animation_with_none_and_returns_routes(
     client, auth_headers, mock_requests
 ):
-    resp = client.post("/animations", headers=auth_headers, json=SAMPLE_ANIMATION)
+    resp = client.post("/animations/map/1", headers=auth_headers, json=SAMPLE_ANIMATION)
     assert resp.status_code == 201
     id_resp = resp.get_json()
     anim_id = id_resp["_id"]

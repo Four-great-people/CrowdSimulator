@@ -321,10 +321,10 @@ export class Grid {
 }
 
 
-    markCell(x: number, y: number) {
+    markCell(x: number, y: number, cnt: number) {
         const cell = this.getCell(x, this.cells.length - 1 - y); // Inverted y for now, needs to be refactored
         if (cell) {
-            cell.mark();
+            cell.mark(cnt);
             this.maxTicks = Math.max(this.maxTicks, cell.usedTicks);
         }
     }

@@ -383,3 +383,30 @@
     -webkit-user-select: none;
     -moz-user-select: none;
 }
+
+.grid-node-highlight {
+    background: linear-gradient(135deg, #8a2be2, #00bfff);
+    background-size: 200% 200%;
+    animation: pulseGradient 2s ease infinite;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.7), 0 0 12px rgba(0, 191, 255, 0.7);
+    pointer-events: none;
+}
+
+@keyframes pulseGradient {
+    0% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        transform: scale(1.3);
+    }
+    100% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+}
+

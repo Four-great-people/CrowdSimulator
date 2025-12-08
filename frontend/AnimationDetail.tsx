@@ -18,6 +18,7 @@ import GridComponent from './src/components/GridComponent';
 import SVGRoundButton from './src/components/SVGRoundButton';
 import NotFound from './src/components/NotFound';
 import './styles/App.css';
+import GistComponent from './src/components/GistComponent';
 
 interface TimeStat {
     value: number | null;
@@ -170,6 +171,31 @@ const AnimationDetail: React.FC = () => {
                 value: null,
                 problematic: current.problematic,
             };
+            const animationId = await saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
+            alert(`Анимация сохранена с именем: ${nameToSave}`);
+            setIsAnimationSaved(true);
+            setOriginalAnimationName(nameToSave);
+            setSavedAnimationId(animationId);
+        } catch (error) {
+            console.error('Ошибка сохранения анимации:', error);
+            alert('Ошибка сохранения анимации');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const removeAnimation = async () => {
+        if (!isSavedAnimation || !id) return;
+        if (!confirm('Удалить эту анимацию? Это действие необратимо.')) return;
+        try {
+            setIsDeleting(true);
+            await deleteAnimationFromBackend(id);
+            navigate('/maps', { state: { activeTab: 'animations' } });
+        } catch (e) {
+            alert('Не удалось удалить анимацию');
+            console.error(e);
+        } finally {
+            setIsDeleting(false);
         }
 
         return {
@@ -439,8 +465,9 @@ const AnimationDetail: React.FC = () => {
                             if (goalCell) {
                                 goalCell.removeGoal();
                             }
-                        } else {
-                            newGrid.markCell(newPosition.x, newPosition.y);
+                        }
+                        else {
+                            newGrid.markCell(newPosition.x, newPosition.y, 1);
                         }
 
                         updatedPersons.push(newPerson);
@@ -1000,21 +1027,18 @@ const AnimationDetail: React.FC = () => {
                     )}
                 </div>
                 <div className="text-table-wrapper">
-                    {showStatistics && (
-                        <div className="text-table">
-                            <div className="text-table__title">Время движения</div>
-                            <ul className="text-table__list">
-                                <li>
-                                    Оптимальное время:{' '}
-                                    {statisticsFormatString(idealTime)}
-                                </li>
-                                <li>
-                                    Фактическое время:{' '}
-                                    {statisticsFormatString(validTime)}
-                                </li>
-                            </ul>
-                        </div>
-                    )}
+                    {showStatistics && <div className="text-table">
+                        <div className="text-table__title">Время движения</div>
+                        <ul className="text-table__list">
+                            <li>Оптимальное время:{' '}
+                              {statisticsFormatString(idealTime)}</li>
+                            <li>Фактическое время:{' '}
+                              {statisticsFormatString(validTime)}</li>
+                        </ul>
+                    </div>}
+                    <div className="gist-wrapper">
+                        {grid && <GistComponent maxSteps={grid.maxTicks} />}
+                    </div>
                 </div>
             </div>
 

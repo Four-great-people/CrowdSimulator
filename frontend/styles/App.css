@@ -455,6 +455,34 @@
   text-decoration: underline;
 }
 
+.text-table-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-table {
+  margin-left: 20px;
+}
+
+.gist-wrapper {
+  margin-left: 20px;
+  margin-top: 10px;
+  width: 200%;
+}
+
+.enumeration {
+  display: flex;
+  flex-direction: row;
+}
+
+.enum-item {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+}
 
 @media (max-width: 768px) {
   .auth-page {
