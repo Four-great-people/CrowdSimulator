@@ -4,15 +4,6 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.App {
-  text-align: center;
-  padding: 0.5vw;
-  max-width: 1800px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .App h1 {
   color: #333;
   margin-bottom: 1.2vw;

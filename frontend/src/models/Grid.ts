@@ -164,6 +164,7 @@ export class Grid {
         newGrid.maxTicks = this.maxTicks;
         newGrid.groups = this.groups.map(group => group.clone());
         
+        
         return newGrid;
     }
 
@@ -252,7 +253,7 @@ export class Grid {
             }
         }
     }   
-
+    
     setHotspots (hotspot: { x: number, y: number, usedTicks: number }) {
         const cell = this.getCell(hotspot.x, hotspot.y);
         if (cell) {
@@ -261,65 +262,49 @@ export class Grid {
     }
 
     getDataForBackend() {
-    const persons: NamedPoint[] = [];
-    this.cells.forEach(row =>
-        row.forEach(cell => {
-            if (cell.persons && cell.persons.length > 0) {
-                persons.push(...cell.persons);
-            }
-        })
-    );
+        return {
+            up_right_point: { x: this.width, y: this.height },
+            down_left_point: { x: 0, y: 0 },
+            borders: this.walls.map(wall => wall.toJSON()),
+            persons: this.persons.map(person => ({
+                id: person.id,
+                position: person.position,
+            })),
+            goals: this.goals.map(goal => ({
+                id: goal.id,
+                position: goal.position,
+            })),
+            groups: this.groups.map(group => group.toJSON())
+        };
+    }
 
-    return {
-        up_right_point: { x: this.width, y: this.height },
-        down_left_point: { x: 0, y: 0 },
-        borders: this.walls.map(wall => wall.toJSON()),
-        persons: persons.map(person => ({
-            id: person.id,
-            position: person.position,
-        })),
-        goals: this.goals.map(goal => ({
-            id: goal.id,
-            position: goal.position,
-        })),
-        groups: this.groups.map(group => group.toJSON()),
-    };
-}
-
-    getAnimationDataForBackend(routes: any[], statistics: any, ticks: number = -1) {
-    const cleanRoutes = routes.map(route => ({
-        id: route.id,
-        route: route.route
-    }));
-
-    const block = {
-        borders: this.walls.map(wall => wall.toJSON()),
-        persons: this.persons.map(person => ({
-            id: person.id,
-            position: person.position,
-        })),
-        goals: this.goals.map(goal => ({
-            id: goal.id,
-            position: goal.position,
-        })),
-        groups: this.groups.map(group => ({
-            id: group.id,
-            start_position: { x: group.start_position.x, y: group.start_position.y },
-            total_count: group.total_count,
-            person_ids: group.person_ids || [],
-        })),
-        routes: cleanRoutes,
-        ticks,
-    };
-
-    return {
-        up_right_point: { x: this.width, y: this.height },
-        down_left_point: { x: 0, y: 0 },
-        blocks: [block],
-        statistics,
-    };
-}
-
+    getAnimationDataForBackend(routes: any[], statistics: any) {
+        const cleanRoutes = routes.map(route => ({
+            id: route.id,
+            route: route.route
+        }));
+        return {
+            up_right_point: { x: this.width, y: this.height },
+            down_left_point: { x: 0, y: 0 },
+            borders: this.walls.map(wall => wall.toJSON()),
+            persons: this.persons.map(person => ({
+                id: person.id,
+                position: person.position,
+            })),
+            goals: this.goals.map(goal => ({
+                id: goal.id,
+                position: goal.position,
+            })),
+            groups: this.groups.map(group => ({
+                id: group.id,
+                start_position: { x: group.start_position.x, y: group.start_position.y },
+                total_count: group.total_count,
+                person_ids: group.person_ids || []
+            })),
+            routes: cleanRoutes,
+            statistics: statistics
+        };
+    }
 
     markCell(x: number, y: number, cnt: number) {
         const cell = this.getCell(x, this.cells.length - 1 - y); // Inverted y for now, needs to be refactored

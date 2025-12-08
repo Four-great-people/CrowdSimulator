@@ -222,65 +222,66 @@ const MapDetail: React.FC = () => {
     };
     return (
         <div className="App">
-            <div className="controls">
-                <div className="name-input-container">
-                        <input
-                            type="text"
-                            value={mapName}
-                            onChange={(e) => setMapName(e.target.value)}
-                            placeholder="Введите название карты"
-                            className="name-input"
-                            disabled={isSaving}
-                            maxLength={35}
-                        />
-                </div>
-                <button onClick={saveMap} disabled={isSaving}>
-                    {isSaving ? "Сохраняется..." : "Сохранить карту"}
-                </button>
-                <button onClick={saveMapAs} disabled={isSaving}>
-                    {isSaving ? "Сохраняется..." : "Сохранить как"}
-                </button>
-                <button onClick={goToAnimation}>Начать анимацию</button>
-                {objectTypes.map((type) =>
-                    <button disabled={type == currentObject} key={type}>
-                        <img src={"/" + type + ".png"} onClick={() => onObjectClick(type)} width="30" height="30"></img>
-                    </button>
-                )}
-                
-                <div className="group-size-input-container" style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    marginLeft: '10px',
-                    background: 'white',
-                    padding: '5px 10px',
-                    borderRadius: '5px',
-                    border: '1px solid #ccc'
-                }}>
-                    <label style={{ marginRight: '8px', fontSize: '14px' }}>Людей в группе:</label>
-                    <input
-                        type="text"
-                        value={groupSizeInput}
-                        onChange={handleGroupSizeChange}
-                        style={{
-                            width: '40px',
-                            padding: '2px 5px',
-                            border: '1px solid #ddd',
-                            borderRadius: '3px',
-                            textAlign: 'center'
-                        }}
-                    />
-                </div>
-                
-                
-                {id !== 'new' && (
-                    <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ marginLeft: 8, color: '#fff', background: '#d32f2f' }}>
-                        Удалить карту
-                    </button>
-                )}
-            </div>
             <div className="body">
+                <div className='left-section'>
                 <div className={`grid-wrapper ${shouldShowScroll() ? 'scrollable' : ''}`}>
                     {grid && <GridComponent grid={grid} isAnimating={false} currentSteps={{}} completedGoals={{}} editable={true} objectPlacing={currentObject} groupSize={groupSize} />}
+                </div>
+                <div className="resize-controls-under-grid">
+                    <h3 className="resize-title">Изменение размера сетки</h3>
+                    <div className="size-inputs">
+                        <label>
+                            Ширина:
+                            <input
+                                type='text'
+                                value={newWidth === 0 ? '' : newWidth.toString()}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                        if (value === '') {
+                                            setNewWidth(0);
+                                        } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (numValue >= 1 && numValue <= 150) {
+                                                setNewWidth(numValue);
+                                            }
+                                        }
+                                    }
+                                }}
+                                placeholder='40'
+                            />
+                        </label>
+                        <label>
+                            Высота:
+                            <input
+                                type="text"
+                                value={newHeight === 0 ? '' : newHeight.toString()}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                        if (value === '') {
+                                            setNewHeight(0);
+                                        } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (numValue >= 1 && numValue <= 150) {
+                                                setNewHeight(numValue);
+                                            }
+                                        }
+                                    }
+                                }}
+                                min="0"
+                                max="150"
+                                placeholder='22'
+                            />
+                        </label>
+                    </div>
+                    <div className="current-size-info">
+                        Текущий размер: {grid?.width} × {grid?.height}
+                    </div>
+                    <button onClick={handleResize} className="resize-button">
+                        Применить новый размер
+                    </button>
+                </div>
                 </div>
                 <div className="side-panel">
                     <div className="algo-list-container">
@@ -297,62 +298,65 @@ const MapDetail: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="resize-controls">
-                        <h3 className="resize-title">Изменение размера сетки</h3>
-                        <div className="size-inputs">
-                            <label>
-                                Ширина:
-                                <input
-                                    type='text'
-                                    value={newWidth === 0 ? '' : newWidth.toString()}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (/^\d*$/.test(value)) {
-                                            if (value === '') {
-                                                setNewWidth(0);
-                                            } else {
-                                                const numValue = parseInt(value, 10);
-                                                if (numValue >= 1 && numValue <= 150) {
-                                                    setNewWidth(numValue);
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    placeholder='40'
-                                />
-                            </label>
-                            <label>
-                                Высота:
+                    <div className="map-controls-section">
+                        <div className="name-input-container">
+                            <input
+                                type="text"
+                                value={mapName}
+                                onChange={(e) => setMapName(e.target.value)}
+                                placeholder="Введите название карты"
+                                className="name-input"
+                                disabled={isSaving}
+                                maxLength={35}
+                            />
+                        </div>
+                        
+                        <div className="control-buttons">
+                            <button onClick={saveMap} disabled={isSaving}>
+                                {isSaving ? "Сохраняется..." : "Сохранить карту"}
+                            </button>
+                            <button onClick={saveMapAs} disabled={isSaving}>
+                                {isSaving ? "Сохраняется..." : "Сохранить как"}
+                            </button>
+                            <button onClick={goToAnimation}>Начать анимацию</button>
+                            
+                            {id !== 'new' && (
+                                <button onClick={deleteMap} disabled={isDeleting || isSaving} style={{ color: '#fff', background: '#d32f2f' }}>
+                                    Удалить карту
+                                </button>
+                            )}
+                        </div>
+                        
+                        <div className="tools-section">
+                            {objectTypes.map((type) =>
+                                <button disabled={type == currentObject} key={type}>
+                                    <img src={"/" + type + ".png"} onClick={() => onObjectClick(type)} width="30" height="30"></img>
+                                </button>
+                            )}
+                            
+                            <div className="group-size-input-container" style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                marginLeft: '10px',
+                                background: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                border: '1px solid #ccc'
+                            }}>
+                                <label style={{ marginRight: '8px', fontSize: '14px' }}>Людей в группе:</label>
                                 <input
                                     type="text"
-                                    value={newHeight === 0 ? '' : newHeight.toString()}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (/^\d*$/.test(value)) {
-                                            if (value === '') {
-                                                setNewHeight(0);
-                                            } else {
-                                                const numValue = parseInt(value, 10);
-                                                if (numValue >= 1 && numValue <= 150) {
-                                                    setNewHeight(numValue);
-                                                }
-                                            }
-                                        }
+                                    value={groupSizeInput}
+                                    onChange={handleGroupSizeChange}
+                                    style={{
+                                        width: '40px',
+                                        padding: '2px 5px',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '3px',
+                                        textAlign: 'center'
                                     }}
-                                    min="0"
-                                    max="150"
-                                    placeholder='22'
                                 />
-                            </label>
-                        </div>
-                        <div className="current-size-info">
-                            Текущий размер: {grid?.width} × {grid?.height}
-                        </div>
-                        <button onClick={handleResize} className="resize-button">
-                            Применить новый размер
-                        </button>
-                        <div className="size-warning">
-                            Внимание: При уменьшении размера объекты за пределами новой сетки будут удалены!
+                            </div>
                         </div>
                     </div>
                 </div>

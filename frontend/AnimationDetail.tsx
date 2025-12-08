@@ -172,18 +172,10 @@ const AnimationDetail: React.FC = () => {
                 problematic: current.problematic,
             };
         }
-        try {
-            const animationId = saveAnimationToBackend(gridToSave, routes, statistics, nameToSave, id);
-            alert(`Анимация сохранена с именем: ${nameToSave}`);
-            setIsAnimationSaved(true);
-            setOriginalAnimationName(nameToSave);
-            setSavedAnimationId(animationId);
-        } catch (error) {
-            console.error('Ошибка сохранения анимации:', error);
-            alert('Ошибка сохранения анимации');
-        } finally {
-            setIsSaving(false);
-        }
+        return {
+            value: prev.value + current.value,
+            problematic: current.problematic,
+        };
     };
     
     const removeAnimation = async () => {
@@ -200,10 +192,6 @@ const AnimationDetail: React.FC = () => {
             setIsDeleting(false);
         }
 
-        return {
-            value: prev.value + current.value,
-            problematic: current.problematic,
-        };
     };
 
     const statisticsFormatString = (timeObj: TimeStat | undefined): string => {
@@ -690,6 +678,18 @@ const AnimationDetail: React.FC = () => {
 
             const runId = ++animationRunIdRef.current;
             const gridCopy = grid.clone();
+            if (originalGrid) {
+            gridCopy.groups.forEach(group => {
+                const isOldGroup = originalGrid.groups.some(oldGroup =>
+                    oldGroup.start_position.x === group.start_position.x &&
+                    oldGroup.start_position.y === group.start_position.y
+                );
+                
+                if (isOldGroup) {
+                    group.person_ids = [];
+                }
+            });
+        }
             const pausedTicks = lastStepIndexRef.current;
 
             const persistedAnimationId = isSavedAnimation
@@ -730,8 +730,17 @@ const AnimationDetail: React.FC = () => {
                     mergeStats(prev, statisticsFromBackend.valid)
                 );
             }
-
             const normalizedRoutes = routesFromBackend;
+             gridCopy.groups.forEach(group => {
+                const cell = gridCopy.getCell(group.start_position.x, group.start_position.y);
+                group.person_ids.forEach(personId => {
+                    const personExists = gridCopy.persons.some(p => p.id === personId);
+                    if (!personExists) {
+                        const person = new NamedPoint(personId, group.start_position);
+                        gridCopy.addPerson(person);
+                    }
+                });
+            });
 
             setAnimationBlocks(prevBlocks => {
                 const updated = [...prevBlocks];
@@ -823,7 +832,8 @@ const AnimationDetail: React.FC = () => {
                 baseGrid,
                 blocksToSave,
                 statistics,
-                nameToSave
+                nameToSave,
+                id
             );
 
             alert(`Анимация сохранена с именем: ${nameToSave}`);
@@ -915,135 +925,137 @@ const AnimationDetail: React.FC = () => {
 
     return (
         <div className="App">
-            <div className="animation-controls">
-                <div className="name-input-container">
-                    <input
-                        type="text"
-                        value={animationName}
-                        onChange={e => setAnimationName(e.target.value)}
-                        placeholder="Введите название анимации"
-                        className="name-input"
-                        maxLength={35}
-                    />
-                </div>
-
-                <button
-                    onClick={saveAnimation}
-                    disabled={isSaving}
-                    className="save-animation-btn"
-                >
-                    {isSaving
-                        ? 'Сохраняется...'
-                        : isSavedAnimation || isAnimationSaved
-                        ? 'Переименовать'
-                        : 'Сохранить анимацию'}
-                </button>
-
-                {isSavedAnimation && (
-                    <button
-                        onClick={removeAnimation}
-                        disabled={isDeleting}
-                        style={{ color: '#fff', background: '#d32f2f' }}
-                    >
-                        {isDeleting ? 'Удаляется...' : 'Удалить анимацию'}
-                    </button>
-                )}
-
-                <button
-                    onClick={restartAnimation}
-                    disabled={!animationCompleted && !animationPaused}
-                    className="save-animation-btn"
-                >
-                    {animationPaused ? 'Сбросить анимацию' : 'Повторить анимацию'}
-                </button>
-
-                <button
-                    onClick={changeAnimationPauseState}
-                    className="save-animation-btn"
-                    disabled={animationCompleted}
-                >
-                    {animationPaused ? 'Возобновить анимацию' : 'Приостановить анимацию'}
-                </button>
-
-                {objectTypes.map(type => (
-                    <button disabled={type === currentObject} key={type}>
-                        <img
-                            src={'/' + type + '.png'}
-                            onClick={() => onObjectClick(type)}
-                            width="30"
-                            height="30"
-                            alt={type}
-                        />
-                    </button>
-                ))}
-
-                <div
-                    style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        marginLeft: '12px',
-                        padding: '4px 8px',
-                        borderRadius: '5px',
-                        border: '1px solid #ccc',
-                    }}
-                >
-                    <label
-                        style={{ marginRight: '8px', fontSize: '14px' }}
-                    >
-                        Людей в группе:
-                    </label>
-                    <input
-                        type="text"
-                        value={groupSizeInput}
-                        onChange={handleGroupSizeChange}
-                        style={{
-                            width: '40px',
-                            padding: '2px 5px',
-                            border: '1px solid #ddd',
-                            borderRadius: '3px',
-                            textAlign: 'center',
-                        }}
-                    />
-                </div>
-            </div>
-
             <div className="body">
-                <div
-                    className={`grid-wrapper ${shouldShowScroll() ? 'scrollable' : ''}`}
-                >
-                    {grid && (
-                        <GridComponent
-                            grid={grid}
-                            isAnimating={isAnimating}
-                            currentSteps={currentSteps}
-                            completedGoals={completedGoals}
-                            editable={animationPaused}
-                            objectPlacing={currentObject}
-                            groupSize={groupSize}
-                            onModify={() => {
-                                if (animationPaused) {
-                                    gridChangedFlag.current = true;
-                                }
-                            }}
-                        />
+                <div className="left-section">
+                    <div className={`grid-wrapper ${shouldShowScroll() ? 'scrollable' : ''}`}>
+                        {grid && (
+                            <GridComponent
+                                grid={grid}
+                                isAnimating={isAnimating}
+                                currentSteps={currentSteps}
+                                completedGoals={completedGoals}
+                                editable={animationPaused}
+                                objectPlacing={currentObject}
+                                groupSize={groupSize}
+                                onModify={() => {
+                                    if (animationPaused) {
+                                        gridChangedFlag.current = true;
+                                    }
+                                }}
+                            />
+                        )}
+                    </div>
+                </div>  
+                <div className="side-panel">
+                    {showStatistics && (
+                        <div className="stats-section">
+                            <h3 className="stats-title">Статистика движения</h3>
+                            <div className="stats-content">
+                                <div className="stat-item">
+                                    <span className="stat-label">Оптимальное время:</span>
+                                    <span className="stat-value">
+                                        {statisticsFormatString(idealTime)}
+                                    </span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Фактическое время:</span>
+                                    <span className="stat-value">
+                                        {statisticsFormatString(validTime)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     )}
-                </div>
-                <div className="text-table-wrapper">
-                    {showStatistics && <div className="text-table">
-                        <div className="text-table__title">Время движения</div>
-                        <ul className="text-table__list">
-                            <li>Оптимальное время:{' '}
-                              {statisticsFormatString(idealTime)}</li>
-                            <li>Фактическое время:{' '}
-                              {statisticsFormatString(validTime)}</li>
-                        </ul>
-                    </div>}
-                    <div className="gist-wrapper">
-                        {grid && <GistComponent maxSteps={grid.maxTicks} />}
+                    
+                    {/* Гистограмма */}
+                    <div className="gist-section">
+                        <h3 className="gist-title">График загруженности</h3>
+                        <div className="gist-container">
+                            {grid && <GistComponent maxSteps={grid.maxTicks} />}
+                        </div>
+                    </div>
+                    
+                    <div className="animation-controls-section">
+                        <div className="name-input-container">
+                            <input
+                                type="text"
+                                value={animationName}
+                                onChange={e => setAnimationName(e.target.value)}
+                                placeholder="Введите название анимации"
+                                className="name-input"
+                                maxLength={35}
+                            />
+                        </div>
+                        
+                        <div className="control-buttons">
+                            <button
+                                onClick={saveAnimation}
+                                disabled={isSaving}
+                                className="animation-btn animation-btn-primary"
+                            >
+                                {isSaving
+                                    ? 'Сохраняется...'
+                                    : isSavedAnimation || isAnimationSaved
+                                    ? 'Переименовать'
+                                    : 'Сохранить анимацию'}
+                            </button>
+
+                            {isSavedAnimation && (
+                                <button
+                                    onClick={removeAnimation}
+                                    disabled={isDeleting}
+                                    className="animation-btn animation-btn-danger"
+                                >
+                                    {isDeleting ? 'Удаляется...' : 'Удалить анимацию'}
+                                </button>
+                            )}
+
+                            <button
+                                onClick={restartAnimation}
+                                disabled={!animationCompleted && !animationPaused}
+                                className="animation-btn animation-btn-primary"
+                            >
+                                {animationPaused ? 'Сбросить' : 'Повторить'}
+                            </button>
+
+                            <button
+                                onClick={changeAnimationPauseState}
+                                className="animation-btn animation-btn-primary"
+                                disabled={animationCompleted}
+                            >
+                                {animationPaused ? 'Возобновить' : 'Приостановить'}
+                            </button>
+                        </div>
+                        
+                        <div className="tools-section">
+                            {objectTypes.map(type => (
+                                <button 
+                                    key={type}
+                                    className={`tool-btn ${currentObject === type ? 'active' : ''}`}
+                                    onClick={() => onObjectClick(type)}
+                                    title={type === 'border' ? 'Стена' : 
+                                        type === 'person' ? 'Человек' : 
+                                        type === 'goal' ? 'Цель' : 
+                                        'Группа'}
+                                >
+                                    <img src={`/${type}.png`} alt={type} />
+                                </button>
+                            ))}
+                            
+                            <div className="group-size-input-container">
+                                <label>Людей в группе:</label>
+                                <input
+                                    type="text"
+                                    value={groupSizeInput}
+                                    onChange={handleGroupSizeChange}
+                                    className="group-size-input"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
+            
             <div className="back-button-container">
                 <SVGRoundButton
                     direction="left"
@@ -1051,8 +1063,8 @@ const AnimationDetail: React.FC = () => {
                         isSavedAnimation
                             ? navigate('/maps', { state: { activeTab: 'animations' } })
                             : navigate('/map/' + String(id), {
-                                  state: { activeTab: 'maps' },
-                              })
+                                state: { activeTab: 'maps' },
+                            })
                     }
                     className="svg-round-button"
                 />

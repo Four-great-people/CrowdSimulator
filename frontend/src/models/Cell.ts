@@ -1,4 +1,5 @@
 import NamedPoint from './NamedPoint';
+import Group from './Group';
 
 class Cell {
     x: number;
@@ -8,6 +9,7 @@ class Cell {
     persons: NamedPoint[];
     goals: NamedPoint[];
     usedTicks: number;
+    groups: Group[];
 
     constructor(x: number, y: number, isWall: boolean = false) {
         this.x = x;

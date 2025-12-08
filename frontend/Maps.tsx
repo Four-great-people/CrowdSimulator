@@ -205,16 +205,23 @@ const Maps: React.FC = () => {
                                         disabled={!!busyAnimationId}
                                         title={animItem.name}
                                     >
-                                        {animItem.name}
+                                        <span className="map-name">{animItem.name}</span>
+                                        <span 
+                                            className="icon-button delete cross-icon"
+                                            aria-label="Удалить анимацию"
+                                            title="Удалить анимацию"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                deleteAnimation(e, animItem.id);
+                                            }}
+                                            style={{
+                                                display: 'inline-block',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                        </span>
                                     </button>
-                                    <button
-                                        className="icon-button delete"
-                                        aria-label="Удалить анимацию"
-                                        title="Удалить анимацию"
-                                        disabled={busyAnimationId === animItem.id}
-                                        onClick={e => deleteAnimation(e, animItem.id)}
-                                    >
-                                    </button>
+                                    
                                 </div>
                             ))
                         )}
