@@ -5,18 +5,18 @@ info:
   version: 1.0.0
 servers: 
   - url: "http://localhost:5000"
-componemts:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+SecurityDefinitions:
+  jwtAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "Get your token in reigster endpoint"
 paths:
   /maps:
     get:
       description: "Returns list of maps"
       security:
-        - bearerAuth: []
+        - jwtAuth: []
       responses:
         201:
           description: "Map created"
@@ -29,6 +29,34 @@ paths:
                   properties:
                     id: string
                     name: string
+  /auth/register:
+    post:
+      description: "Register new user"
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            username: 
+              type: string
+            password: 
+              type: string
+          example:
+            username: "John Doe"
+            password: "password"
+      responses:
+        201:
+          description: "User created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: string
+          
+
 
 
 
