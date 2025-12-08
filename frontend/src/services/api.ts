@@ -8,8 +8,8 @@ const AUTH_TOKEN_KEY = 'auth_token';
 const USERNAME_KEY = 'username';
 
 export interface MapAnimItem {
-    id: string,
-    name: string
+    id: string;
+    name: string;
 }
 
 interface AuthResponse {
@@ -17,6 +17,13 @@ interface AuthResponse {
     error?: string;
     message?: string;
 }
+
+export interface AnimationBlockFrontend {
+    grid: Grid;
+    routes: any[];
+    ticks: number;
+}
+
 
 export const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
@@ -74,29 +81,29 @@ const buildHeaders = (extra: Record<string, string> = {}): Record<string, string
 };
 
 export const registerUser = async (username: string, password: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  });
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+    });
 
-  let data: any = {};
-  try {
-    data = await response.json();
-  } catch {
-    data = {};
-  }
+    let data: any = {};
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
 
-  if (!response.ok) {
-    const message = data.error || data.message || 'Ошибка регистрации';
-    throw new Error(message);
-  }
+    if (!response.ok) {
+        const message = data.error || data.message || 'Ошибка регистрации';
+        throw new Error(message);
+    }
 
-  const authData = data as AuthResponse;  
+    const authData = data as AuthResponse;
 
-  if (!authData.access_token) {
-    throw new Error('Некорректный ответ сервера при регистрации');
-  }
+    if (!authData.access_token) {
+        throw new Error('Некорректный ответ сервера при регистрации');
+    }
 
   setAuthToken(authData.access_token);
   setUsername(username);
@@ -131,6 +138,7 @@ export const loginUser = async (username: string, password: string): Promise<voi
 };
 
 
+
 export const saveMapToBackend = async (grid: Grid, name: string): Promise<string> => {
     try {
         if (useFakeCalls) {
@@ -142,8 +150,11 @@ export const saveMapToBackend = async (grid: Grid, name: string): Promise<string
     }
 };
 
-
-export const updateMapInBackend = async (mapId: string, grid: Grid, name: string): Promise<void> => {
+export const updateMapInBackend = async (
+    mapId: string,
+    grid: Grid,
+    name: string
+): Promise<void> => {
     try {
         if (useFakeCalls) {
             return fakeUpdate(mapId, grid, name);
@@ -154,8 +165,10 @@ export const updateMapInBackend = async (mapId: string, grid: Grid, name: string
     }
 };
 
-
-export const GetStatisticsFromBackend = async (mapId: string, algoName: string): Promise<any> => {
+export const GetStatisticsFromBackend = async (
+    mapId: string,
+    algoName: string
+): Promise<any> => {
     try {
         if (useFakeCalls) {
             return fakeGetRoutes(mapId);
@@ -177,9 +190,11 @@ export const GetMapsFromBackend = async (): Promise<MapAnimItem[]> => {
     }
 };
 
-export const GetMapFromBackend = async (mapId: string): Promise<{ grid: Grid, name: string }> => {
+export const GetMapFromBackend = async (
+    mapId: string
+): Promise<{ grid: Grid; name: string }> => {
     try {
-        let map;
+        let map: any;
         if (useFakeCalls) {
             map = fakeGetMap(mapId);
         } else {
@@ -187,7 +202,6 @@ export const GetMapFromBackend = async (mapId: string): Promise<{ grid: Grid, na
         }
         const name = map['name'] || 'Без названия';
         return { grid: createGridByMap(map), name: name };
-
     } catch (error) {
         throw error;
     }
@@ -204,28 +218,73 @@ export const deleteMapFromBackend = async (mapId: string): Promise<void> => {
     }
 };
 
+
+
+
 export const GetAnimationFromBackend = async (
     animationId: string
-): Promise<{ grid: Grid, routes: any[], statistics: any, name: string }> => {
+): Promise<{ name: string; statistics: any; blocks: AnimationBlockFrontend[] }> => {
     try {
         if (useFakeCalls) {
             const map = fakeGetMap('');
+            const routesObj = fakeGetRoutes('');
+            const grid = createGridByMap(map);
+            const singleBlock: AnimationBlockFrontend = {
+                grid,
+                routes: routesObj.routes || [],
+                ticks: -1,
+            };
             return {
                 name: 'Без названия',
-                grid: createGridByMap(map),
-                routes: fakeGetRoutes('')['routes'] || [],
-                statistics: fakeGetRoutes('') || {},
+                statistics: {
+                    ideal: routesObj.ideal,
+                    valid: routesObj.valid,
+                },
+                blocks: [singleBlock],
             };
         }
-        const animationMap = await getAnimation(animationId);
-        const name = animationMap['name'] || 'Без названия';
 
-        const newGrid = createGridByMap(animationMap);
+        const animation = await getAnimation(animationId);
+        const name = animation['name'] || 'Без названия';
+
+        const upRight = animation['up_right_point'];
+        const downLeft = animation['down_left_point'];
+        const blocksRaw: any[] = Array.isArray(animation['blocks'])
+            ? animation['blocks']
+            : [];
+
+        const blocks: AnimationBlockFrontend[] = blocksRaw.map((block) => {
+            const mapForGrid = {
+                up_right_point: upRight,
+                down_left_point: downLeft,
+                borders: block['borders'] || [],
+                persons: block['persons'] || [],
+                goals: block['goals'] || [],
+                groups: block['groups'] || [],
+            };
+
+            const grid = createGridByMap(mapForGrid);
+            const routes = (block['routes'] || []).map((r: any) => ({
+                id: r.id,
+                route: Array.isArray(r.route) ? [...r.route] : r.route,
+            }));
+
+            return {
+                grid,
+                routes,
+                ticks:
+                    typeof block['ticks'] === 'number'
+                        ? block['ticks']
+                        : -1,
+            };
+        });
+
+        const statistics = animation['statistics'] || {};
+
         return {
-            grid: newGrid,
-            routes: animationMap['routes'] || [],
-            statistics: animationMap['statistics'] || {},
-            name: name,
+            name,
+            statistics,
+            blocks,
         };
     } catch (error) {
         throw error;
@@ -243,9 +302,10 @@ export const GetAnimationsFromBackend = async (): Promise<MapAnimItem[]> => {
     }
 };
 
+
 export const saveAnimationToBackend = async (
     grid: Grid,
-    routes: any[],
+    routesOrBlocks: any[],
     statistics: any,
     name: string,
     mapId: string
@@ -254,13 +314,16 @@ export const saveAnimationToBackend = async (
         if (useFakeCalls) {
             return fakeSaveAnimation();
         }
-        return await saveAnimationToRealBackend(grid, routes, statistics, name, mapId);
+        return await saveAnimationToRealBackend(grid, routesOrBlocks, statistics, name, mapId);
     } catch (error) {
         throw error;
     }
 };
 
-export const updateAnimationInBackend = async (animId: string, name: string): Promise<void> => {
+export const updateAnimationInBackend = async (
+    animId: string,
+    name: string
+): Promise<void> => {
     try {
         return updateAnimationInRealBackend(animId, name);
     } catch (error) {
@@ -268,12 +331,51 @@ export const updateAnimationInBackend = async (animId: string, name: string): Pr
     }
 };
 
-export const deleteAnimationFromBackend = async (animationId: string): Promise<void> => {
+export const deleteAnimationFromBackend = async (
+    animationId: string
+): Promise<void> => {
     try {
         if (useFakeCalls) {
             return fakeDeleteAnimation(animationId);
         }
         return await deleteAnimationReal(animationId);
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const GetUnsavedAnimationStatisticsFromBackend = async (
+    grid: Grid,
+    algoName: string
+): Promise<any> => {
+    try {
+        if (useFakeCalls) {
+            return fakeGetRoutes('');
+        }
+        return await getUnsavedAnimationStatistics(grid, algoName);
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const GetSavedAnimationStatisticsFromBackend = async (
+    animationId: string,
+    algoName: string,
+    grid: Grid,
+    ticks: number
+): Promise<any> => {
+    try {
+        if (useFakeCalls) {
+            return fakeGetRoutes('');
+        }
+        return await getSavedAnimationStatisticsReal(
+            animationId,
+            algoName,
+            grid,
+            ticks
+        );
     } catch (error) {
         throw error;
     }
@@ -317,16 +419,62 @@ async function getAnimation(animationId: string) {
     return data;
 }
 
+
 async function saveAnimationToRealBackend(
     grid: Grid,
-    routes: any[],
+    routesOrBlocks: any[],
     statistics: any,
     name: string,
     mapId: string
 ): Promise<string> {
+    const baseData = grid.getDataForBackend();
+
+    let blocksPayload: any[] = [];
+
+    if (routesOrBlocks.length > 0 && routesOrBlocks[0]?.grid) {
+        
+        const blocks = routesOrBlocks as AnimationBlockFrontend[];
+        blocksPayload = blocks.map((block) => {
+            const blockData = block.grid.getDataForBackend();
+            return {
+                borders: blockData.borders || [],
+                persons: blockData.persons || [],
+                goals: blockData.goals || [],
+                groups: blockData.groups || [],
+                routes: (block.routes || []).map((r: any) => ({
+                    id: r.id,
+                    route: r.route,
+                })),
+                ticks:
+                    typeof block.ticks === 'number'
+                        ? block.ticks
+                        : -1,
+            };
+        });
+    } else {
+        
+        const data = grid.getDataForBackend();
+        blocksPayload = [
+            {
+                borders: data.borders || [],
+                persons: data.persons || [],
+                goals: data.goals || [],
+                groups: data.groups || [],
+                routes: (routesOrBlocks || []).map((r: any) => ({
+                    id: r.id,
+                    route: r.route,
+                })),
+                ticks: -1,
+            },
+        ];
+    }
+
     const animationData = {
-        ...grid.getAnimationDataForBackend(routes, statistics),
-        name: name,
+        name,
+        up_right_point: baseData.up_right_point,
+        down_left_point: baseData.down_left_point,
+        blocks: blocksPayload,
+        statistics,
     };
 
     const response = await fetch(`${API_BASE_URL}/animations/map/${mapId}`, {
@@ -341,7 +489,7 @@ async function saveAnimationToRealBackend(
 async function getRoutes(
     mapId: string,
     algoName: string
-): Promise<{ id: number, route: string[] }[]> {
+): Promise<{ id: number; route: string[] }[]> {
     const response = await fetch(
         `${API_BASE_URL}/maps/${mapId}/statistics/${algoName}`,
         {
@@ -350,7 +498,6 @@ async function getRoutes(
         }
     );
     const data = await response.json();
-    console.log(data);
     return data;
 }
 
@@ -368,7 +515,11 @@ async function saveToRealBackend(grid: Grid, name: string): Promise<string> {
     return data._id;
 }
 
-async function updateToRealBackend(mapId: string, grid: Grid, name: string): Promise<void> {
+async function updateToRealBackend(
+    mapId: string,
+    grid: Grid,
+    name: string
+): Promise<void> {
     const requestData = {
         ...grid.getDataForBackend(),
         name: name,
@@ -395,7 +546,10 @@ async function deleteFromRealBackend(mapId: string): Promise<void> {
     }
 }
 
-async function updateAnimationInRealBackend(animationId: string, name: string): Promise<void> {
+async function updateAnimationInRealBackend(
+    animationId: string,
+    name: string
+): Promise<void> {
     const updateData = {
         name: name,
     };
@@ -424,75 +578,124 @@ async function deleteAnimationReal(animationId: string): Promise<void> {
 
 
 
+function buildBlockFromGrid(grid: Grid) {
+    const data = grid.getDataForBackend();
+    return {
+        borders: data.borders || [],
+        persons: data.persons || [],
+        goals: data.goals || [],
+        routes: [],
+        groups: data.groups || [],
+    };
+}
+
+async function getUnsavedAnimationStatistics(
+    grid: Grid,
+    algoName: string
+): Promise<any> {
+    const data = grid.getDataForBackend();
+
+    const payload = {
+        up_right_point: data.up_right_point,
+        down_left_point: data.down_left_point,
+        block: buildBlockFromGrid(grid),
+    };
+
+    const response = await fetch(
+        `${API_BASE_URL}/animations/statistics/${algoName}`,
+        {
+            method: 'POST',
+            headers: buildHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload),
+        }
+    );
+
+    const json = await response.json();
+    if (!response.ok) {
+        const msg =
+            (json && (json.error || json.message)) ||
+            'Ошибка получения статистики анимации';
+        throw new Error(msg);
+    }
+    return json;
+}
+
+async function getSavedAnimationStatisticsReal(
+    animationId: string,
+    algoName: string,
+    grid: Grid,
+    ticks: number
+): Promise<any> {
+    const payload = {
+        block: buildBlockFromGrid(grid),
+        ticks,
+    };
+
+    const response = await fetch(
+        `${API_BASE_URL}/animations/${animationId}/statistics/${algoName}`,
+        {
+            method: 'POST',
+            headers: buildHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload),
+        }
+    );
+
+    const json = await response.json();
+    if (!response.ok) {
+        const msg =
+            (json && (json.error || json.message)) ||
+            'Ошибка получения статистики сохранённой анимации';
+        throw new Error(msg);
+    }
+    return json;
+}
+
+
+
 const fakeMapList: MapAnimItem[] = [
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
-    { id: "0", name: "0 - Без названия" },
-    { id: "1", name: "1 - Без названия" },
-    { id: "2", name: "2 - Без названия" },
-    { id: "3", name: "3 - Без названия" },
-    { id: "4", name: "4 - Без названия" },
+    { id: '0', name: '0 - Без названия' },
+    { id: '1', name: '1 - Без названия' },
+    { id: '2', name: '2 - Без названия' },
+    { id: '3', name: '3 - Без названия' },
+    { id: '4', name: '4 - Без названия' },
 ];
 
 function createGridByMap(map: any) {
     const width = map['up_right_point']['x'];
     const height = map['up_right_point']['y'];
     const newGrid = new Grid(width, height);
-    map['borders'].forEach((border: { [x: string]: { [x: string]: number } }) => {
-        newGrid.addWall(
-            border['first']['x'],
-            border['first']['y'],
-            border['second']['x'],
-            border['second']['y']
-        );
-    });
-    if (map["groups"] && Array.isArray(map["groups"])) {
-        map["groups"].forEach((group: any) => {
+    (map['borders'] || []).forEach(
+        (border: { [x: string]: { [x: string]: number } }) => {
+            newGrid.addWall(
+                border['first']['x'],
+                border['first']['y'],
+                border['second']['x'],
+                border['second']['y']
+            );
+        }
+    );
+    if (map['groups'] && Array.isArray(map['groups'])) {
+        map['groups'].forEach((group: any) => {
             const g = new Group(
-                group["id"],
-                group["start_position"], 
-                group["total_count"],
-                group["person_ids"] || []
+                group['id'],
+                group['start_position'],
+                group['total_count'],
+                group['person_ids'] || []
             );
             newGrid.addGroup(g);
         });
     }
-    map['persons'].forEach(
-        (person: { position: { x: number; y: number }; goal: { x: number; y: number }; id: number }
-        ) => {
+    (map['persons'] || []).forEach(
+        (person: {
+            position: { x: number; y: number };
+            goal: { x: number; y: number };
+            id: number;
+        }) => {
             const p = new NamedPoint(person['id'], person['position']);
             newGrid.addPerson(p);
         }
     );
-    map['goals'].forEach(
+    (map['goals'] || []).forEach(
         (goal: { position: { x: number; y: number }; id: number }) => {
             const g = new NamedPoint(goal['id'], goal['position']);
             newGrid.addGoal(g);
@@ -566,21 +769,26 @@ function fakeSave(grid: Grid, name: string) {
 
 function fakeUpdate(mapId: string, grid: Grid, name: string): void {
     const payload = grid.getDataForBackend();
-    console.log('[FAKE updateMapInBackend] mapId:', mapId, 'payload:', payload, 'name: ', name);
-    const mapItem = fakeMapList.find(item => item.id === mapId);
+    console.log(
+        '[FAKE updateMapInBackend] mapId:',
+        mapId,
+        'payload:',
+        payload,
+        'name: ',
+        name
+    );
+    const mapItem = fakeMapList.find((item) => item.id === mapId);
     if (mapItem) {
         mapItem.name = name;
     }
 }
 
 function fakeDelete(mapId: string): void {
-    const idx = fakeMapList.findIndex(item => item.id === mapId);
+    const idx = fakeMapList.findIndex((item) => item.id === mapId);
     if (idx !== -1) fakeMapList.splice(idx, 1);
 }
 
 function fakeDeleteAnimation(animationId: string): void {
-    const idx = fakeMapList.findIndex(item => item.id === animationId);
+    const idx = fakeMapList.findIndex((item) => item.id === animationId);
     if (idx !== -1) fakeMapList.splice(idx, 1);
 }
-
-

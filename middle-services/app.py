@@ -392,7 +392,7 @@ def get_animation(animation_id: str):
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 
-@app.route("/animations/<animation_id>/statistics/<algo>", methods=["GET"])
+@app.route("/animations/<animation_id>/statistics/<algo>", methods=["POST"])
 @jwt_required()
 def get_saved_animation_statistics(animation_id: str, algo: str): # pylint: disable=too-many-return-statements
     if algo not in {"dense", "simple", "random"}:
