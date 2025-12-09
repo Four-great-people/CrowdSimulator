@@ -9,7 +9,7 @@ import requests
 from bson import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, make_response
 from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
@@ -17,6 +17,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
+from flasgger import Swagger
 
 from crowd_db.db.models import (
     AnimationBlock, AnimationDoc, MapDoc, UserDoc, Point, Segment, NamedPointSpec, GroupSpec
@@ -30,7 +31,10 @@ CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://localhost:8080/route")
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "CHANGE_ME_IN_PRODUCTION")
+app.config["JWT_AUTH_URL_RULE"] = "/auth/register"
 CORS(app)
+
+swagger = Swagger(app, template_file="./swagger/swagger.yaml")
 
 jwt = JWTManager(app)
 
@@ -104,7 +108,9 @@ def register():
     user.set_password(password)
     user_id = user_repo.create(user)
     access_token = create_access_token(identity=str(user_id))
-    return jsonify({"access_token": access_token}), 201
+    resp = make_response(jsonify({"access_token": access_token}), 201)
+    resp.headers["jwt-token"] = access_token
+    return resp
 
 
 @app.route("/auth/login", methods=["POST"])
