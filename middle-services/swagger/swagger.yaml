@@ -191,6 +191,11 @@ paths:
       description: "Delete map by id"
       security:
         - jwtAuth: []
+      parameters:
+        - name: "map_id"
+          in: path
+          type: integer
+          required: true
       responses:
         200:
           description: "Map deleted"
@@ -211,6 +216,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/Map'
+      - name: "map_id"
+        in: path
+        type: integer
+        required: true
       responses:
         200:
           description: "Map deleted"
@@ -225,6 +234,11 @@ paths:
       description: "Get map by id"
       security:
         - jwtAuth: []
+      parameters:
+        - name: "map_id"
+          in: path
+          type: integer
+          required: true
       responses:
         200:
           content:
@@ -236,38 +250,21 @@ paths:
       description: "Get routes statistics"
       security:
         - jwtAuth: []
+      parameters:
+        - name: "map_id"
+          in: path
+          type: integer
+          required: true
+        - name: "algo"
+          in: path
+          type: string
+          required: true
       responses:
         200:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  valid:
-                    type: object
-                    properties:
-                      value:
-                        type: integer
-                      problematic:
-                        type: integer
-                  ideal:
-                    type: object
-                    properties:
-                      value:
-                        type: integer
-                      problematic:
-                        type: integer
-                  routes:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        route:
-                          type: array
-                          items:
-                            type: string
+                $ref: '#/definitions/BackendStat'
   /animations:
     get:
       description: "Returns list of animations"
@@ -290,11 +287,15 @@ paths:
       security:
         - jwtAuth: []
       parameters:
-      - in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/Animation'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Animation'
+        - name: "map_id"
+          in: path
+          type: integer
+          required: true
       responses:
         201:
           description: "Animation created from map"
@@ -308,6 +309,13 @@ paths:
   /animations/{animation_id}:
     post:
       description: "Clone animation"
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: "animation_id"
+          in: path
+          type: integer
+          required: true
       responses:
         201:
           description: "Animation cloned"
@@ -320,6 +328,13 @@ paths:
                     type: string
     get:
       description: "Get animation by id"
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: "animation_id"
+          in: path
+          type: integer
+          required: true
       responses:
         200:
           content:
@@ -328,15 +343,21 @@ paths:
                 $ref: '#/definitions/Animation'
     put:
       description: "Update animation name"
+      security:
+        - jwtAuth: []
       parameters:
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          properties:
-            name: 
-              type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: 
+                type: string
+        - name: "animation_id"
+          in: path
+          type: integer
+          required: true
       responses:
         200:
           content:
@@ -348,6 +369,13 @@ paths:
                     type: string
     delete:
       description: "Delete animation"
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: "animation_id"
+          in: path
+          type: integer
+          required: true
       responses:
         200:
           content:
@@ -360,19 +388,25 @@ paths:
   /animations/statistics/{algo}:
     post:
       description: "Calculate animation block"
+      security:
+        - jwtAuth: []
       parameters:
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          properties:
-            block: 
-              $ref: '#/definitions/AnimationBlock'
-            up_right_point: 
-              $ref: '#/definitions/Point'
-            down_left_point: 
-              $ref: '#/definitions/Point'
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              block: 
+                $ref: '#/definitions/AnimationBlock'
+              up_right_point: 
+                $ref: '#/definitions/Point'
+              down_left_point: 
+                $ref: '#/definitions/Point'
+        - name: "algo"
+          in: path
+          type: string
+          required: true
       responses:
         200:
           content:
@@ -382,12 +416,22 @@ paths:
   /animations/{animation_id}/statistics/{algo}:
     post:
       description: "Get saved animation statistics"
+      security:
+        - jwtAuth: []
       parameters:
-      - in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/Animation'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Animation'
+        - name: "animation_id"
+          in: path
+          type: integer
+          required: true
+        - name: "algo"
+          in: path
+          type: string
+          required: true
       responses:
         200:
           content:
@@ -420,7 +464,7 @@ paths:
                 type: object
                 properties:
                   access_token: string     
-/auth/login:
+  /auth/login:
     post:
       description: "Login"
       parameters:
