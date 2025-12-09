@@ -7,6 +7,7 @@ import {
     deleteAnimationFromBackend,
     MapAnimItem,
     logoutUser,
+    getCurrentUser,
 } from './src/services/api';
 
 import './styles/App.css';
@@ -19,6 +20,7 @@ const Maps: React.FC = () => {
     const [animationList, setAnimations] = useState<MapAnimItem[]>([]);
     const [busyAnimationId, setBusyAnimationId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [username, setUsername] = useState<string>('');
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -101,6 +103,11 @@ const Maps: React.FC = () => {
     };
 
     useEffect(() => {
+        const user = getCurrentUser();
+        if (user && user.username) {
+            setUsername(user.username);
+        }
+        
         if (activeTab === 'maps') {
             loadMaps();
         } else {
@@ -110,64 +117,76 @@ const Maps: React.FC = () => {
 
     return (
         <div className="maps">
-            <div className="maps-header">
-                <button className="blue-button" onClick={handleLogout}>
-                    Выйти
-                </button>
-            </div>
             <div className="tabs">
-                <button
-                    className={`tab-button ${activeTab === 'maps' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('maps')}
-                >
-                    Карты
-                </button>
-                <button
-                    className={`tab-button ${activeTab === 'animations' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('animations')}
-                >
-                    Анимации
-                </button>
+                {username && (
+                    <div className="username-top">
+                        {username}
+                    </div>
+                )}
+                <div className="tab-buttons-center">
+                    <button
+                        className={`tab-button ${activeTab === 'maps' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('maps')}
+                    >
+                        Карты
+                    </button>
+                    <button
+                        className={`tab-button ${activeTab === 'animations' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('animations')}
+                    >
+                        Анимации
+                    </button>
+                </div>
+                <div className="logout-container">
+                    <button className="logout-button" onClick={handleLogout}>
+                        Выйти
+                    </button>
+                </div>
             </div>
             <div className="map-list-wrapper">
                 {isLoading ? (
                     <div className="loading">Загрузка...</div>
                 ) : activeTab === 'maps' ? (
                     <>
-                        <div className="create-map-button-container">
-                            <button
-                                className="blue-button create-map-button"
-                                onClick={createNewMap}
-                            >
-                                + Создать новую карту
-                            </button>
-                        </div>
                         <div className="map-list">
                             {mapList.map(mapItem => (
                                 <div
                                     key={mapItem.id}
                                     className="map-row"
-                                    onClick={() => handleMapClick(mapItem.id)}
                                 >
                                     <button
                                         className="blue-button map-row__title"
                                         disabled={isLoadingMaps || !!busyId}
                                         title={mapItem.name}
+                                        onClick={() => handleMapClick(mapItem.id)}
                                     >
-                                        {mapItem.name}
-                                    </button>
+                                        <span className="map-name">{mapItem.name}</span>
 
-                                    <button
-                                        className="icon-button delete"
-                                        aria-label="Удалить карту"
-                                        title="Удалить карту"
-                                        disabled={busyId === mapItem.id}
-                                        onClick={e => deleteMap(e, mapItem.id)}
-                                    >
-                                        🗑
+                                        <span 
+                                            className="icon-button delete cross-icon"
+                                            aria-label="Удалить карту"
+                                            title="Удалить карту"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                deleteMap(e, mapItem.id);
+                                            }}
+                                            style={{
+                                                display: 'inline-block',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                        </span>
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                        <div className="create-map-button-container">
+                            <button
+                                className="blue-button map-row__title create-map-button"
+                                onClick={createNewMap}
+                            >
+                                Создать новую карту
+                            </button>
                         </div>
                     </>
                 ) : (
@@ -186,17 +205,23 @@ const Maps: React.FC = () => {
                                         disabled={!!busyAnimationId}
                                         title={animItem.name}
                                     >
-                                        {animItem.name}
+                                        <span className="map-name">{animItem.name}</span>
+                                        <span 
+                                            className="icon-button delete cross-icon"
+                                            aria-label="Удалить анимацию"
+                                            title="Удалить анимацию"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                deleteAnimation(e, animItem.id);
+                                            }}
+                                            style={{
+                                                display: 'inline-block',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                        </span>
                                     </button>
-                                    <button
-                                        className="icon-button delete"
-                                        aria-label="Удалить анимацию"
-                                        title="Удалить анимацию"
-                                        disabled={busyAnimationId === animItem.id}
-                                        onClick={e => deleteAnimation(e, animItem.id)}
-                                    >
-                                        🗑
-                                    </button>
+                                    
                                 </div>
                             ))
                         )}

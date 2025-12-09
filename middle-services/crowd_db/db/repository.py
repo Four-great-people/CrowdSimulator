@@ -127,7 +127,7 @@ class MongoMapRepository:
             return False
         with get_client().start_session() as session:
             with session.start_transaction():
-                old_map = _col().find_one({"_id": map_id, "user_id": user_id}, session = session)
+                old_map = _col().find_one({"_id": oid, "user_id": user_id}, session = session)
                 if old_map is None:
                     raise ValueError("no such id")
                 old_draft_id = old_map["draft_id"]
@@ -265,9 +265,12 @@ class MongoMapRepository:
                 d = _animations_col().find_one({"_id": oid, "user_id": user_id}, session=session)
                 if d is None:
                     return False
+                if 'blocks' in d and isinstance(d['blocks'], list):
+                    for block in d['blocks']:
+                        if 'draft_id' in block:
+                            remove_draft(block["draft_id"], session=session)
                 result = _animations_col().delete_one(
                     {"_id": oid, "user_id": user_id}, session=session)
-                remove_draft(d["draft_id"], session=session)
                 return result.deleted_count == 1
 
 
