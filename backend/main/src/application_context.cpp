@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 #include "actions.h"
@@ -64,10 +63,7 @@ struct Group {
     std::vector<int> person_ids;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Group,
-                                   id,
-                                   start_position,
-                                   total_count,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Group, id, start_position, total_count,
                                    person_ids)
 
 struct Map {

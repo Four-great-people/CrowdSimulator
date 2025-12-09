@@ -24,9 +24,8 @@ class ApplicationContext {
     static nlohmann::json calculate_route_random(nlohmann::json input);
 
  private:
-
     static nlohmann::json calculate_route(nlohmann::json input,
-                                   PlannerFactory planner_factory);
+                                          PlannerFactory planner_factory);
 };
 
 #endif  // APPLICATION_CONTEXT_H
