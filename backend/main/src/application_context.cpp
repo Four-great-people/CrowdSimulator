@@ -131,7 +131,6 @@ json ApplicationContext::calculate_route(json input,
 }
 
 json ApplicationContext::calculate_route_dense(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<PrioritizedPlanner>(ps, gs, g);
@@ -139,7 +138,6 @@ json ApplicationContext::calculate_route_dense(json input) {
 }
 
 json ApplicationContext::calculate_route_simple(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<SimplePlanner>(ps, gs, g);
@@ -147,7 +145,6 @@ json ApplicationContext::calculate_route_simple(json input) {
 }
 
 json ApplicationContext::calculate_route_random(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<RandomPlanner>(ps, gs, g);
