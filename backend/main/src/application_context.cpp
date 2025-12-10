@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 #include "actions.h"
@@ -64,10 +63,7 @@ struct Group {
     std::vector<int> person_ids;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Group,
-                                   id,
-                                   start_position,
-                                   total_count,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Group, id, start_position, total_count,
                                    person_ids)
 
 struct Map {
@@ -131,7 +127,6 @@ json ApplicationContext::calculate_route(json input,
 }
 
 json ApplicationContext::calculate_route_dense(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<PrioritizedPlanner>(ps, gs, g);
@@ -139,7 +134,6 @@ json ApplicationContext::calculate_route_dense(json input) {
 }
 
 json ApplicationContext::calculate_route_simple(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<SimplePlanner>(ps, gs, g);
@@ -147,7 +141,6 @@ json ApplicationContext::calculate_route_simple(json input) {
 }
 
 json ApplicationContext::calculate_route_random(json input) {
-    std::lock_guard<std::mutex> lock(_mutex);
     return calculate_route(input, [](const std::vector<Person> &ps,
                                      const std::vector<Goal> gs, Grid *g) {
         return std::make_unique<RandomPlanner>(ps, gs, g);
