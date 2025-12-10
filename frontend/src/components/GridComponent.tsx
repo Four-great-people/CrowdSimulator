@@ -328,6 +328,19 @@ const GridComponent: React.FC<GridProps> = ({
         const scaleY = containerHeight / (grid.height * 30);
         return Math.min(scaleX, scaleY, 1);
     };
+
+    const checkOnCorrectWallPlacing = () => {
+        return objectPlacing === borderType && state === inProcessState
+                && savedX >= 0 && savedY >= 0 
+                && !outsideBorders(savedX, savedY);
+    }
+
+    const checkOnCorrectWallDeleting = () => {
+        return objectPlacing === borderType && delState === delWall
+                && delSavedX >= 0 && delSavedY >= 0 
+                && !outsideBorders(delSavedX, delSavedY);
+    }
+
     const shouldShowScroll = grid.width > 40 || grid.height > 22;
     const cellSize = 30;
     const nodeSize = 10;
@@ -374,17 +387,25 @@ const GridComponent: React.FC<GridProps> = ({
                     );
                 })
             )}
-            {objectPlacing === borderType &&
-                state === inProcessState &&
-                savedX >= 0 &&
-                savedY >= 0 &&
-                !outsideBorders(savedX, savedY) && (
+            {checkOnCorrectWallPlacing() && (
                     <div
                         className="grid-node-highlight"
                         style={{
                             position: 'absolute',
                             left: `${savedX * cellSize - nodeSize / 2}px`,
                             bottom: `${savedY * cellSize - nodeSize / 2}px`,
+                            width: `${nodeSize}px`,
+                            height: `${nodeSize}px`,
+                        }}
+                    />
+            )}
+            {checkOnCorrectWallDeleting() && (
+                    <div
+                        className="grid-node-highlight-delete"
+                        style={{
+                            position: 'absolute',
+                            left: `${delSavedX * cellSize - nodeSize / 2}px`,
+                            bottom: `${delSavedY * cellSize - nodeSize / 2}px`,
                             width: `${nodeSize}px`,
                             height: `${nodeSize}px`,
                         }}

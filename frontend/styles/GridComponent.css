@@ -640,6 +640,17 @@
     pointer-events: none;
 }
 
+.grid-node-highlight-delete {
+    background: linear-gradient(135deg, #8a2be2, #f11b1b);
+    background-size: 200% 200%;
+    animation: pulseGradient 2s ease infinite;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.7), 0 0 12px rgba(241, 27, 27, 0.7);
+    pointer-events: none;
+}
+
 .stats-section {
   background: white;
   border-radius: 12px;
