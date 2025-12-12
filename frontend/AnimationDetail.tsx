@@ -457,7 +457,7 @@ const AnimationDetail: React.FC = () => {
                             }
                         }
                         else {
-                            newGrid.markCell(newPosition.x, newPosition.y, 1);
+                            newGrid.markCell(newPosition.x, newPosition.y, 1, stepIndex);
                         }
 
                         updatedPersons.push(newPerson);

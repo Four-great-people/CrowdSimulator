@@ -18,13 +18,13 @@ const GistComponent: React.FC<GistProps> = ({ maxSteps}) => {
     const getGrid = () => {
         const length = getLength();
         const grid = new Grid(length, 1);
-        grid.markCell(length - 1, 0, maxSteps);
+        grid.markCell(length - 1, 0, maxSteps, 0);
         if (length == 1) {
             return grid;
         }
         const step = maxSteps / (length - 1);
         for (var i = 1; i < length - 1; ++i) {
-            grid.markCell(i, 0, step * i);
+            grid.markCell(i, 0, step * i, 0);
         }
         return grid;
     }

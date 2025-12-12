@@ -9,6 +9,7 @@ class Cell {
     persons: NamedPoint[];
     goals: NamedPoint[];
     usedTicks: number;
+    lastTick: number;
     groups: Group[];
 
     constructor(x: number, y: number, isWall: boolean = false) {
@@ -19,6 +20,7 @@ class Cell {
         this.goals = [];
         this.directionOfWall = [];
         this.usedTicks = 0;
+        this.lastTick = -1;
     }
 
     addPerson(person: NamedPoint) {
@@ -71,8 +73,12 @@ class Cell {
         return newCell;
     }
 
-    mark(cnt: number) {
+    mark(cnt: number, tick: number) {
+        if (tick == this.lastTick) {
+            return;
+        }
         this.usedTicks += cnt;
+        this.lastTick = tick;
     }
 
     reset() {
