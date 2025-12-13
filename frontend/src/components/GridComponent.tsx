@@ -9,6 +9,7 @@ interface GridProps {
     isAnimating?: boolean;
     currentSteps?: {[id: number]: number};
     completedGoals?: {[id: number]: boolean};
+    goalCounts?: { [goalId: number]: number };
     editable?: boolean;
     objectPlacing: string;
     groupSize?: number;
@@ -20,6 +21,7 @@ const GridComponent: React.FC<GridProps> = ({
     isAnimating = false,
     currentSteps = {},
     completedGoals = {},
+    goalCounts = {},
     editable = false,
     objectPlacing = "",
     groupSize = 5,
@@ -365,6 +367,8 @@ const GridComponent: React.FC<GridProps> = ({
                     const personsInCell = grid.getCell(cell.x, cell.y)?.persons || [];
                     const isPersonCell = isPerson(cell.x, cell.y);
                     const isGoalCell = isGoal(cell.x, cell.y);
+                    const goalInCell = grid.getCell(cell.x, cell.y)?.goals?.[0];
+                    const goalCount = goalInCell ? (goalCounts[goalInCell.id] ?? 0) : 0;
                     const direction = directionOfWall(cell.x, cell.y);
 
                     return (
@@ -373,7 +377,14 @@ const GridComponent: React.FC<GridProps> = ({
                             className={`cell ${isWallCell ? 'wall' : ''} ${direction.includes("vertical") ? 'vertical' : ''} ${direction.includes("horizontal") ? 'horizontal' : ''}`}
                             style={{backgroundColor: cell.getColorString(grid.maxTicks)}}
                         >
-                            {isGoalCell && !isPersonCell && <div className="goal"></div>}
+                            {isGoalCell && !isPersonCell && (
+                                <>
+                                    <div className="goal"></div>
+                                    {goalCount > 0 && (
+                                        <div className="goal-counter">{goalCount}</div>
+                                    )}
+                                </>
+                            )}
                             {isPersonCell && (
                                 <div
                                 key={`${animationKey}-${personsInCell[0].id}`}
