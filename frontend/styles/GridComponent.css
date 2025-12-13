@@ -878,4 +878,21 @@
         transform: scale(1);
     }
 }
+.cell {
+  position: relative; 
+}
 
+.goal-counter {
+  position: absolute;
+  left: 50%;
+  top: 58%;               
+  transform: translate(-50%, -50%);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  min-width: 2ch;         
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 5;
+}
