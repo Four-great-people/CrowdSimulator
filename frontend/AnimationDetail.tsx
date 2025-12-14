@@ -48,7 +48,7 @@ const AnimationDetail: React.FC = () => {
 
     const [grid, setGrid] = useState<Grid | null>(null);
     const [originalGrid, setOriginalGrid] = useState<Grid | null>(null);
-
+    const [goalCounts, setGoalCounts] = useState<{ [goalId: number]: number }>({});
     const [currentSteps, setCurrentSteps] = useState<{ [id: number]: number }>({});
     const [completedGoals, setCompletedGoals] = useState<{ [id: number]: boolean }>({});
 
@@ -237,6 +237,7 @@ const AnimationDetail: React.FC = () => {
 
             setCurrentSteps({});
             setCompletedGoals({});
+            setGoalCounts({});
             setAnimationCompleted(false);
             setShowStatistics(false);
             setIdealTime(undefined);
@@ -417,6 +418,7 @@ const AnimationDetail: React.FC = () => {
             const updatedPersons: NamedPoint[] = [];
             const updatedSteps = { ...currentSteps };
             const updatedCompleted = { ...completedGoals };
+            const goalEntriesThisTick: Record<number, number> = {};
 
             persons.forEach(person => {
                 const route = routesForPersons.find(r => r.id === person.id);
@@ -425,61 +427,47 @@ const AnimationDetail: React.FC = () => {
                 if (!isRouteCompleted(route)) {
                     const newPosition = { ...person.position };
                     transformToNextRouteState(route, newPosition);
+
                     const targetCell = currentGrid.getCell(newPosition.x, newPosition.y);
 
                     if (targetCell) {
-                        const oldCell = newGrid.getCell(
-                            person.position.x,
-                            person.position.y
-                        );
+                        const oldCell = newGrid.getCell(person.position.x, person.position.y);
                         if (oldCell) {
-                            oldCell.persons = oldCell.persons.filter(
-                                p => p.id !== person.id
-                            );
+                            oldCell.persons = oldCell.persons.filter(p => p.id !== person.id);
                         }
 
-                        const newPerson = new NamedPoint(
-                            person.id,
-                            newPosition,
-                            person.reachedGoal
-                        );
+                        const newPerson = new NamedPoint(person.id, newPosition, person.reachedGoal);
 
                         if (targetCell.hasGoal()) {
                             newPerson.reachedGoal = true;
                             updatedCompleted[person.id] = true;
 
-                            const goalCell = newGrid.getCell(
-                                targetCell.x,
-                                targetCell.y
-                            );
-                            if (goalCell) {
-                                goalCell.removeGoal();
+                            const goalId = targetCell.goals?.[0]?.id;
+                            if (goalId !== undefined) {
+                                goalEntriesThisTick[goalId] = (goalEntriesThisTick[goalId] || 0) + 1;
                             }
-                        }
-                        else {
-                            newGrid.markCell(newPosition.x, newPosition.y, 1, stepIndex);
+
+                            updatedPersons.push(newPerson);
+                            updatedSteps[person.id] = stepIndex + 1;
+                            return;
                         }
 
+                        newGrid.markCell(newPosition.x, newPosition.y, 1, stepIndex);
                         updatedPersons.push(newPerson);
                         newGrid.addPerson(newPerson);
                         updatedSteps[person.id] = stepIndex + 1;
                     } else {
-                        const newPerson = new NamedPoint(
-                            person.id,
-                            person.position,
-                            person.reachedGoal
-                        );
+                        const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                         updatedPersons.push(newPerson);
                         newGrid.addPerson(newPerson);
                     }
                 } else {
-                    const newPerson = new NamedPoint(
-                        person.id,
-                        person.position,
-                        person.reachedGoal
-                    );
+                    const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                     updatedPersons.push(newPerson);
-                    newGrid.addPerson(newPerson);
+
+                    if (!newPerson.reachedGoal) {
+                        newGrid.addPerson(newPerson);
+                    }
                 }
             });
 
@@ -510,6 +498,16 @@ const AnimationDetail: React.FC = () => {
                 setGrid(newGrid);
                 setCurrentSteps(updatedSteps);
                 setCompletedGoals(updatedCompleted);
+                if (Object.keys(goalEntriesThisTick).length) {
+                    setGoalCounts(prev => {
+                        const next = { ...prev };
+                        for (const [goalIdStr, inc] of Object.entries(goalEntriesThisTick)) {
+                            const goalId = Number(goalIdStr);
+                            next[goalId] = (next[goalId] || 0) + inc;
+                        }
+                        return next;
+                    });
+                }
                 executeSteps(
                     newGrid,
                     updatedPersons,
@@ -876,6 +874,7 @@ const AnimationDetail: React.FC = () => {
 
         setCurrentSteps({});
         setCompletedGoals({});
+        setGoalCounts({});
         setAnimationCompleted(false);
         setShowStatistics(false);
 
@@ -905,6 +904,7 @@ const AnimationDetail: React.FC = () => {
                                 isAnimating={isAnimating}
                                 currentSteps={currentSteps}
                                 completedGoals={completedGoals}
+                                goalCounts={goalCounts}
                                 editable={animationPaused}
                                 objectPlacing={currentObject}
                                 groupSize={groupSize}
