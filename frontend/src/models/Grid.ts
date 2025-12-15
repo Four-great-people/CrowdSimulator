@@ -252,7 +252,9 @@ export class Grid {
         if (cell) {
             if (cell.goals.length == 0) {
                 cell.addPerson(person);
-                this.persons.push(person);
+                if (!this.persons.some(p => p.id === person.id)) {
+                    this.persons.push(person);
+                }
             }
         }
     }   
