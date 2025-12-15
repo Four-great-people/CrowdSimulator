@@ -83,7 +83,58 @@ const GridComponent: React.FC<GridProps> = ({
     useEffect(() => {
         setAnimationKey(prev => prev + 1);
     }, [currentSteps]);
+    
+    const generateUniquePersonId = (): number => {
+        const existingPersonIds = new Set<number>();
+        grid.cells.forEach(row => 
+            row.forEach(cell => 
+                cell.persons.forEach(person => 
+                    existingPersonIds.add(person.id)
+                )
+            )
+        );
+        
+        grid.groups.forEach(group => 
+            group.person_ids.forEach(id => 
+                existingPersonIds.add(id)
+            )
+        );
+        
+        let newId = 1;
+        while (existingPersonIds.has(newId)) {
+            newId++;
+        }
+        return newId;
+    };
 
+    const generateUniquePersonIdsForGroup = (count: number): number[] => {
+        const existingPersonIds = new Set<number>();
+        grid.cells.forEach(row => 
+            row.forEach(cell => 
+                cell.persons.forEach(person => 
+                    existingPersonIds.add(person.id)
+                )
+            )
+        );
+        
+        grid.groups.forEach(group => 
+            group.person_ids.forEach(id => 
+                existingPersonIds.add(id)
+            )
+        );
+        
+        const newIds: number[] = [];
+        let currentId = 1;
+        
+        while (newIds.length < count) {
+            if (!existingPersonIds.has(currentId)) {
+                newIds.push(currentId);
+            }
+            currentId++;
+        }
+        
+        return newIds;
+    };
     const isWall = (x: number, y: number) => {
         const cell = grid.getCell(x, y);
         return cell ? cell.isCellWall() : false;
@@ -177,7 +228,8 @@ const GridComponent: React.FC<GridProps> = ({
     const processNonWall = (cellX: number, cellY: number) => {
         const position = { x: cellX, y: cellY };
         if (objectPlacing == personType) {
-            const point = new NamedPoint(grid.persons.length, position)
+            const uniqueId = generateUniquePersonId();
+            const point = new NamedPoint(uniqueId, position);
             grid.addPerson(point);
         }
         else if (objectPlacing == goalType) {
@@ -185,11 +237,11 @@ const GridComponent: React.FC<GridProps> = ({
             grid.addGoal(point);
         }  else {
             const groupId = grid.groups.length > 0 
-            ? Math.max(...grid.groups.map(g => g.id)) 
+            ? Math.max(...grid.groups.map(g => g.id)) + 1 
             : 0;
-            const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i);
+            const personIds = generateUniquePersonIdsForGroup(groupSize);
             const group = new Group(groupId, position, groupSize, personIds);
-             personIds.forEach(personId => {
+            personIds.forEach(personId => {
                 const person = new NamedPoint(personId, position);
                 grid.addPerson(person);
             });
