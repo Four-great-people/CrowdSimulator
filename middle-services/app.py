@@ -68,7 +68,8 @@ def mapdoc_to_json(m: MapDoc) -> OrderedDict:
     od["borders"] = d.get("borders", [])
     od["persons"] = d.get("persons", [])
     od["goals"] = d.get("goals", [])
-    od["groups"] = d.get("groups", [])
+    if "groups" in d:
+        od["groups"] = d["groups"]
     return od
 
 def block_request_to_json(b: dict, up_right_point: dict, down_left_point: dict) -> OrderedDict:
@@ -158,7 +159,8 @@ def create_map():
             borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
             goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
-            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
+            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])]
+              if "groups" in payload else [],
             name=payload.get("name", "Без названия"),
         )
         oid = repo.create(m)
@@ -307,7 +309,8 @@ def update_map(map_id: str):
             borders=[Segment.from_bson(s) for s in payload.get("borders", [])],
             persons=[NamedPointSpec.from_bson(p) for p in payload.get("persons", [])],
             goals=[NamedPointSpec.from_bson(g) for g in payload.get("goals", [])],
-            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])],
+            groups=[GroupSpec.from_bson(g) for g in payload.get("groups", [])]
+              if "groups" in payload else [],
             name=payload.get("name", "Без названия"),
         )
         m.set_id(ObjectId(map_id))

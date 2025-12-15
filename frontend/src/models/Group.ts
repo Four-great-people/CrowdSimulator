@@ -9,7 +9,6 @@ export class Group {
         this.start_position = start_position;
         this.total_count = total_count;
         this.person_ids = person_ids;
-        
     }
 
     toJSON() {

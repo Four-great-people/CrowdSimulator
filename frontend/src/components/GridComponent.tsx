@@ -184,7 +184,9 @@ const GridComponent: React.FC<GridProps> = ({
             const point = new NamedPoint(grid.goals.length, position)
             grid.addGoal(point);
         }  else {
-            const groupId = grid.groups.length;
+            const groupId = grid.groups.length > 0 
+            ? Math.max(...grid.groups.map(g => g.id)) 
+            : 0;
             const personIds = Array.from({length: groupSize}, (_, i) => 1000 + grid.groups.length * 100 + i);
             const group = new Group(groupId, position, groupSize, personIds);
              personIds.forEach(personId => {

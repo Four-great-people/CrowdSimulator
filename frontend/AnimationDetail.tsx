@@ -211,18 +211,28 @@ const AnimationDetail: React.FC = () => {
 
     const handleGroupSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        if (value === '' || /^\d*$/.test(value)) {
+        if (value === '' || /^\d+$/.test(value)) {
             setGroupSizeInput(value);
+            
             if (value !== '') {
                 const numValue = parseInt(value, 10);
-                if (!isNaN(numValue) && numValue >= 1 && numValue <= 50) {
-                    setGroupSize(numValue);
+                if (!isNaN(numValue)) {
+                    if (numValue >= 1 && numValue <= 50) {
+                        setGroupSize(numValue);
+                    } else {
+                        alert('Размер группы должен быть от 1 до 50');
+                        setGroupSizeInput('5');
+                        setGroupSize(5);
+                    }
                 }
+            } else {
+                setGroupSize(5);
             }
+        } else {
+            e.target.value = groupSizeInput;
         }
     };
 
-    
 
     const loadContent = async (contentId: string) => {
         if (isAnimating || isLoadingMap) return;
@@ -477,11 +487,12 @@ const AnimationDetail: React.FC = () => {
                     group.start_position.y
                 );
                 if (cell) {
-                    const personsInGroup = cell.persons.filter(p =>
-                        group.person_ids.includes(p.id)
-                    ).length;
-                    group.total_count = personsInGroup;
+                    const currentPersonIds = cell.persons
+                        .filter(p => group.person_ids.includes(p.id))
+                        .map(p => p.id);
 
+                    group.person_ids = currentPersonIds;
+                    group.total_count = currentPersonIds.length;
                     if (group.total_count <= 0) {
                         if (typeof (newGrid as any).removeGroupAt === 'function') {
                             (newGrid as any).removeGroupAt(

@@ -206,14 +206,25 @@ const MapDetail: React.FC = () => {
     }
     const handleGroupSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        if (value === '' || /^\d*$/.test(value)) {
+        if (value === '' || /^\d+$/.test(value)) {
             setGroupSizeInput(value);
+            
             if (value !== '') {
-                const numValue = parseInt(value);
-                if (!isNaN(numValue) && numValue >= 1 && numValue <= 50) {
-                    setGroupSize(numValue);
+                const numValue = parseInt(value, 10);
+                if (!isNaN(numValue)) {
+                    if (numValue >= 1 && numValue <= 50) {
+                        setGroupSize(numValue);
+                    } else {
+                        alert('Размер группы должен быть от 1 до 50');
+                        setGroupSizeInput('5');
+                        setGroupSize(5);
+                    }
                 }
+            } else {
+                setGroupSize(5);
             }
+        } else {
+            e.target.value = groupSizeInput;
         }
     };
 
