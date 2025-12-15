@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import timedelta
 import json
 import os
 from collections import OrderedDict
@@ -31,6 +32,7 @@ CPP_BACKEND_URL = os.getenv("CPP_BACKEND_URL", "http://localhost:8080/route")
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "CHANGE_ME_IN_PRODUCTION")
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
 app.config["JWT_AUTH_URL_RULE"] = "/auth/register"
 CORS(app)
 
