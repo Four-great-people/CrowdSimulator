@@ -658,6 +658,7 @@ const AnimationDetail: React.FC = () => {
 
     const recalculateAfterGridChange = async () => {
         if (!grid) return;
+        if (currentBlockIndexRef.current != animationBlocksRef.current.length - 1) return;
 
         const algoName = algo || 'dense';
 
