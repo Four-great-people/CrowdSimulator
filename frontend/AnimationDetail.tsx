@@ -643,6 +643,7 @@ const AnimationDetail: React.FC = () => {
             executeSteps(gridCopy, persons, 0, routesForPlayback, {
                 onFinished: (_, personsAtEnd) => {
                     setAnimationCompleted(true);
+                    setIsAnimating(false);
                     setParticipantsNumber(personsAtEnd.length);
                     setShowStatistics(true);
                 },
