@@ -86,7 +86,7 @@ def apply_collection_validator():
                 "borders": {"bsonType": "array", "items": segment}, #
                 "persons": {"bsonType": "array", "items": named_point}, #
                 "goals": {"bsonType": "array", "items": named_point}, #
-                "groups": {"bsonType": "array", "items": group_schema}, #
+                "groups": {"bsonType": ["array", "null"], "items": group_schema}, #
             },
             "additionalProperties": False,
         },
@@ -114,13 +114,13 @@ def apply_collection_validator():
             "borders",
             "persons",
             "goals",
-            "groups",
             "routes",
             "ticks",
         ],
         "properties": {
             "draft_id": {"bsonType": "objectId"},
             "routes": {"bsonType": "array", "items": route_person},
+            "groups": {"bsonType": ["array", "null"], "items": group_schema},
             "ticks": {"bsonType": "int"},
         },
         "additionalProperties": False,

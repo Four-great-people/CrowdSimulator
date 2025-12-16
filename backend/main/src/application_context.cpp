@@ -108,11 +108,6 @@ json ApplicationContext::calculate_route(json input,
     for (const auto &person_data : map.persons) {
         persons.emplace_back(person_data.id, to_point(person_data.position));
     }
-    for (const auto &group : map.groups) {
-        for (int person_id : group.person_ids) {
-            persons.emplace_back(person_id, to_point(group.start_position));
-        }
-    }
     for (const auto &goal_data : map.goals) {
         goals.emplace_back(goal_data.id, to_point(goal_data.position));
     }

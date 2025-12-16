@@ -50,9 +50,23 @@ export class Grid {
     }
 
     removeGroupAt(x: number, y: number) {
-        this.groups = this.groups.filter(g => 
-            g.start_position.x !== x || g.start_position.y !== y
+         const group = this.groups.find(g => 
+            g.start_position.x === x && g.start_position.y === y
         );
+        if (group) {
+            const cell = this.getCell(x, y);
+            if (cell) {
+                cell.persons = cell.persons.filter(person => 
+                    !group.person_ids.includes(person.id)
+                );
+            }
+            this.persons = this.persons.filter(person => 
+                !group.person_ids.includes(person.id)
+            );
+            this.groups = this.groups.filter(g => 
+            g.start_position.x !== x || g.start_position.y !== y
+            );
+        }
     }
     getGroupAt(x: number, y: number): Group | null {
         return this.groups.find(g => 
@@ -238,7 +252,9 @@ export class Grid {
         if (cell) {
             if (cell.goals.length == 0) {
                 cell.addPerson(person);
-                this.persons.push(person);
+                if (!this.persons.some(p => p.id === person.id)) {
+                    this.persons.push(person);
+                }
             }
         }
     }   
@@ -261,30 +277,42 @@ export class Grid {
     }
 
     getDataForBackend() {
-    const persons: NamedPoint[] = [];
-    this.cells.forEach(row =>
-        row.forEach(cell => {
-            if (cell.persons && cell.persons.length > 0) {
-                persons.push(...cell.persons);
-            }
-        })
-    );
+        const persons: NamedPoint[] = [];
+        this.cells.forEach(row =>
+            row.forEach(cell => {
+                if (cell.persons && cell.persons.length > 0) {
+                    persons.push(...cell.persons);
+                }
+            })
+        );
 
-    return {
-        up_right_point: { x: this.width, y: this.height },
-        down_left_point: { x: 0, y: 0 },
-        borders: this.walls.map(wall => wall.toJSON()),
-        persons: persons.map(person => ({
-            id: person.id,
-            position: person.position,
-        })),
-        goals: this.goals.map(goal => ({
-            id: goal.id,
-            position: goal.position,
-        })),
-        groups: this.groups.map(group => group.toJSON()),
-    };
-}
+        return {
+            up_right_point: { x: this.width, y: this.height },
+            down_left_point: { x: 0, y: 0 },
+            borders: this.walls.map(wall => wall.toJSON()),
+            persons: persons.map(person => ({
+                id: person.id,
+                position: person.position,
+            })),
+            goals: this.goals.map(goal => ({
+                id: goal.id,
+                position: goal.position,
+            })),
+            groups: this.groups.map(group => group.toJSON())
+        };
+    }
+    getGroupsForBackend() {
+        if (this.groups) {
+            return this.groups.map(group => ({
+                id: group.id,
+                start_position: group.start_position,
+                total_count: group.total_count,
+                person_ids: group.person_ids || []
+            }));
+        } else {
+            return []
+        }
+    }
 
     getAnimationDataForBackend(routes: any[], statistics: any, ticks: number = -1) {
     const cleanRoutes = routes.map(route => ({
@@ -301,12 +329,6 @@ export class Grid {
         goals: this.goals.map(goal => ({
             id: goal.id,
             position: goal.position,
-        })),
-        groups: this.groups.map(group => ({
-            id: group.id,
-            start_position: { x: group.start_position.x, y: group.start_position.y },
-            total_count: group.total_count,
-            person_ids: group.person_ids || [],
         })),
         routes: cleanRoutes,
         ticks,
