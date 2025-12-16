@@ -1,7 +1,7 @@
 # Middle Services
 
-### Purpose
-This services are working with many computation-lite requests like signing up, saving map etc. This services are also between frontend and backend on finding paths requests.
+### Цель
+Сервис для взаимодействия с бд, авторизации, промежуточных вычислений
 
 # Включить Pylint
 ```
@@ -39,6 +39,15 @@ flask run --port 5000
 
 ```
 ## Эндпоинты
+### POST /auth/register
+Регистрирует пользователя
+Тело: ```{ "username": "...", "password": "..." }```
+Ответ: ```{ "access_token": "..." }```
+
+### POST /auth/login
+Тело: ```{ "username": "...", "password": "..." }```
+Ответ: ```{ "access_token": "..." }```
+
 ### POST /maps - сохранить карту
 сохраняет документ и возвращает _id
 ```bash
@@ -89,7 +98,6 @@ curl -X PUT http://127.0.0.1:5000/maps/{id} \
 
 ### DELETE /maps/{id} - удалить карту по ID
 Удаляет документ из базы по его идентификатору.
-Возвращает статус выполнения операции.
 ```bash
 curl -X DELETE http://127.0.0.1:5000/maps/{id}
 ```
@@ -98,11 +106,37 @@ curl -X DELETE http://127.0.0.1:5000/maps/{id}
 curl http://127.0.0.1:5000/maps
 ```
 
+```
+[
+{
+    "id": "123",
+    "name": "Без названия",
+}, ...
+]
+```
+
 ### GET /maps/\{id\} — получить карту по ID
 Возвращает карту в «правильном» порядке ключей (как выше).
 ```bash
 curl http://127.0.0.1:5000/maps/{id}
 ```
+
+```{
+    "_id": "123",
+    "name": "Моя карта",
+    "up_right_point": {"x": 20, "y": 20},
+    "down_left_point": {"x": 0, "y": 0},
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
+    ]
+}```
+
 ### GET /maps/\{id\}/statistics/{algo name} — получить статистику по маршрутам
 "algo name" - это одно из simple, dense, random
 - Достаёт карту из БД,
@@ -153,9 +187,9 @@ curl -X GET http://127.0.0.1:5000/maps/{id}/statistics/{algo name}
 
 Ответ:
 ```json
-{ "_id": "..." }
+{ "_id": "123" }
 ```
-### POST /animations - создать анимацию
+### POST /animations/map/{map_id} - создать анимацию
 Сохраняет анимацию и возвращает id
 
 ```bash
@@ -170,15 +204,48 @@ curl -X GET http://127.0.0.1:5000/maps/{id}/statistics/{algo name}
     "down_left_point": {"x": 0, "y": 0},
     "blocks": [
       {
-        "borders": [...],
-        "persons": [...],
-        "goals": [...],
-        "routes": [...],
-        "groups": [...],
+        "borders": [
+          {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+        ],
+        "persons": [
+          {"id": 1, "position": {"x": 1, "y": 1}}
+        ],
+        "goals": [
+          {"id": 1, "position": {"x": 5, "y": 5}}
+        ],
+        "routes": [
+          {
+              "id": 0,
+              "route": [
+                  "UP",
+                  "LEFT",
+                  "UP",
+                  "RIGHT",
+                  "DOWN",
+                  "RIGHT",
+              ]
+          }
+        ],
+        "groups": [
+          {
+            "id": "123",
+            "start_position": {"x": 10, "y": 10},
+            "total_count": 5,
+            "person_ids": [1, 2, 3, 4, 5]
+          }
+        ],
         "ticks": 5,
       }, ...
     ],
-    "statistics": {...}
+    "statistics": {
+      "ideal": {
+        "value": null,
+        "problematic": 2,
+      },
+      "valid": {
+        "value": 25,
+        "problematic": 3,
+      }
   }'
 ```
 
@@ -188,11 +255,20 @@ ticks == -1 означает, что статистика проигрывает
 
 Ответ:
 ```json
-{ "_id": "..." }
+{ "_id": "123" }
 ```
 ### GET /animations — получить список всех анимаций
 ```bash
 curl http://127.0.0.1:5000/animations
+```
+
+```
+[
+  {
+    "id": "123",
+    "name": "Без названия",
+  }, ...
+]
 ```
 
 ### GET /animations/{id}/statistics/{algo_name} — обновить сохранённую в бд анимацию и вернуть СУММАРНУЮ статистику
@@ -206,11 +282,36 @@ curl -X GET http://127.0.0.1:5000/animations/{id}/statistics/{algo name}
 ```json
 {
   "block": {
-    "borders": [...],
-    "persons": [...],
-    "goals": [...],
-    "routes": [...],
-    "groups": [...],
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
+    ],
+    "routes": [
+        {
+            "id": 0,
+            "route": [
+                "UP",
+                "LEFT",
+                "UP",
+                "RIGHT",
+                "DOWN",
+                "RIGHT",
+            ]
+        }
+    ],
+    "groups": [
+      {
+        "id": "123",
+        "start_position": {"x": 10, "y": 10},
+        "total_count": 5,
+        "person_ids": [1, 2, 3, 4, 5]
+      }
+    ],
   },
   "ticks": 10,
 }
@@ -244,7 +345,7 @@ ticks - количество тиков, которое прошло начин�
               "RIGHT",
           ]
       }
-  ]
+    ]
 }
 ```
 Пустой маршрут тоже возможен. Если добраться невозможно:
@@ -267,11 +368,36 @@ curl -X GET http://127.0.0.1:5000/animations/statistics/{algo_name}
   "up_right_point": {"x": 10, "y": 10},
   "down_left_point": {"x": 0, "y": 0},
   "block": {
-    "borders": [...],
-    "persons": [...],
-    "goals": [...],
-    "routes": [...],
-    "groups": [...],
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
+    ],
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+    ],
+    "groups": [
+      {
+        "id": "123",
+        "start_position": {"x": 10, "y": 10},
+        "total_count": 5,
+        "person_ids": [1, 2, 3, 4, 5]
+      }
+    ],
   }
 }
 ```
@@ -317,10 +443,56 @@ block - новая карта
 curl http://127.0.0.1:5000/animations/{id}
 ```
 
+```
+{
+  "_id": "123",
+  "up_right_point": {"x": 10, "y": 10},
+  "down_left_point": {"x": 0, "y": 0},
+  "block": {
+    "borders": [
+      {"first": {"x": 0, "y": 0}, "second": {"x": 10, "y": 0}}
+    ],
+    "persons": [
+      {"id": 1, "position": {"x": 1, "y": 1}}
+    ],
+    "goals": [
+      {"id": 1, "position": {"x": 5, "y": 5}}
+    ],
+    "routes": [
+      {
+          "id": 0,
+          "route": [
+              "UP",
+              "LEFT",
+              "UP",
+              "RIGHT",
+              "DOWN",
+              "RIGHT",
+          ]
+      }
+    ],
+    "groups": [
+      {
+        "id": "123",
+        "start_position": {"x": 10, "y": 10},
+        "total_count": 5,
+        "person_ids": [1, 2, 3, 4, 5]
+      }
+    ],
+  }
+}
+```
+
 ### PUT /animations/{id} — обновить имя анимации
 Меняет только имя у анимации.
 ```bash
 curl -X PUT http://127.0.0.1:5000/animations/{id}
+```
+
+```
+{
+  "name": "имя"
+}
 ```
 
 ```json
@@ -417,6 +589,11 @@ admin> db.createUser({
 ... })
 { ok: 1 }
 admin> exit
+```
+- активировать режим replSet
+```
+echo -e "replication:\n  replSetName: \"rs0\"" | sudo tee -a /etc/mongod.conf
+mongosh -u "user" -p "password" --verbose --eval "rs.initiate()"
 ```
 
 - Применить схему и индексы:
