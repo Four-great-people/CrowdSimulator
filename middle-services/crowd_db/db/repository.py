@@ -158,7 +158,7 @@ class MongoMapRepository:
                 drafts_copy = drafts[1:]
                 for draft in drafts_copy:
                     _drafts_col().insert_one(draft, session=session)
-                drafts_copy = [{"_id": first_draft_id}] + drafts
+                drafts_copy = [{"_id": first_draft_id}] + drafts_copy
                 replace_draft_ids_in_animation(doc, drafts_copy)
                 _animations_col().insert_one(doc, session=session)
                 return doc["_id"]
