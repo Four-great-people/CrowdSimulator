@@ -85,7 +85,7 @@ Grid
 
     walls: Wall[] - список стен
 
-    maxTicks: number - максимальное количество ходов
+    maxTicks: number - максимальное среди всех клеток число тиков, где был человек
 
 Cell
 
@@ -97,9 +97,9 @@ Cell
 
     goals: NamedPoint[] - цель в клетке
 
-    usedTicks: number
+    usedTicks: number - число тиков для конкретной клетки
 
-    lastTick: number
+    lastTick: number - последний раз, когда на этой клетке был человек 
 
     directionOfWall: string[] - направление стены
 
