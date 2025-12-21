@@ -24,7 +24,9 @@ class Cell {
     }
 
     addPerson(person: NamedPoint) {
-        this.persons.push(person);
+        if (!this.persons.some(p => p.id === person.id)) {
+            this.persons.push(person);
+        }
     }
 
     addGoal(goal: NamedPoint) {
