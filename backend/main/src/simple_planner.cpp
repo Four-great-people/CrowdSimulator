@@ -40,7 +40,6 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
     while (!f_to_point.empty()) {
         auto first_node = f_to_point.begin();
         Point current_position = first_node->second;
-        int current_f = first_node->first;
         f_to_point.erase(first_node);
         point_to_iterator.erase(current_position);
         if (is_reached_goal(current_position)) {
@@ -51,7 +50,7 @@ std::optional<std::vector<Action>> SimplePlanner::calculate_route(
             if (_grid->is_incorrect_move(Segment(current_position, position))) {
                 continue;
             }
-            int new_g = current_f + current_position.get_move_cost(position);
+            int new_g = point_to_g[current_position] + current_position.get_move_cost(position);
             if (!point_to_g.contains(position) ||
                 new_g < point_to_g[position]) {
                 point_to_g[position] = new_g;
