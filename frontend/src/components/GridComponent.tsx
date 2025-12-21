@@ -84,6 +84,17 @@ const GridComponent: React.FC<GridProps> = ({
         setAnimationKey(prev => prev + 1);
     }, [currentSteps]);
     
+    useEffect(() => {
+        if (objectPlacing !== borderType) {
+            setState(idleState);
+            setSavedX(-1);
+            setSavedY(-1);
+        }
+        setDelState(delIdle);
+        setDelSavedX(-1);
+        setDelSavedY(-1);
+    }, [objectPlacing]);
+
     const generateUniquePersonId = (): number => {
         const existingPersonIds = new Set<number>();
         grid.cells.forEach(row => 
