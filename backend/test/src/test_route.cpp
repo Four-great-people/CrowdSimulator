@@ -89,6 +89,30 @@ TEST(test_route, calculate_route__diagonal_point__returns_efficient_route) {
     ASSERT_EQ(prioritized_route, simple_route);
 }
 
+TEST(test_route, calculate_route__in_bottle__returns_efficient_route) {
+    std::vector border{
+        Border(Point(1, 0), Point(5, 0)),
+        Border(Point(5, 0), Point(5, 1)),
+        Border(Point(5, 1), Point(1, 1)),
+    };
+    Grid grid(border);
+    Person person(0, Point(0, 3));
+    Goal goal(0, Point(4, 0));
+
+    SimplePlanner simple_planner({person}, {goal}, &grid);
+    auto simple_route = simple_planner.calculate_route(person);
+
+    ASSERT_TRUE(simple_route.has_value());
+    ASSERT_EQ(simple_route.value().size(), 7);
+    ASSERT_EQ(simple_route.value()[0], Action::DOWN);
+    ASSERT_EQ(simple_route.value()[1], Action::DOWN);
+    ASSERT_EQ(simple_route.value()[2], Action::DOWN);
+    ASSERT_EQ(simple_route.value()[3], Action::RIGHT);
+    ASSERT_EQ(simple_route.value()[4], Action::RIGHT);
+    ASSERT_EQ(simple_route.value()[5], Action::RIGHT);
+    ASSERT_EQ(simple_route.value()[6], Action::RIGHT);
+}
+
 TEST(test_route,
      calculate_route__fbd_corner_mv_diagonal_op__returns_not_simple_route) {
     std::vector border{Border(Point(0, 2), Point(2, 2)),

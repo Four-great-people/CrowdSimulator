@@ -80,6 +80,43 @@ const buildHeaders = (extra: Record<string, string> = {}): Record<string, string
     return headers;
 };
 
+type ApiError = Error & { status?: number };
+
+async function fetchJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: buildHeaders({
+      'Content-Type': 'application/json',
+      ...(init.headers as Record<string, string> | undefined),
+    }),
+  });
+
+  let data: any = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (response.status === 401) {
+    logoutUser();               
+    window.location.href = '/login'; 
+    const err: ApiError = new Error('Unauthorized');
+    err.status = 401;
+    throw err;
+  }
+
+  if (!response.ok) {
+    const message = data?.error || data?.message || 'Ошибка запроса';
+    const err: ApiError = new Error(message);
+    err.status = response.status;
+    throw err;
+  }
+
+  return data as T;
+}
+
+
 export const registerUser = async (username: string, password: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -384,40 +421,23 @@ export const GetSavedAnimationStatisticsFromBackend = async (
 
 
 async function getMaps(): Promise<MapAnimItem[]> {
-    const response = await fetch(`${API_BASE_URL}/maps`, {
-        method: 'GET',
-        headers: buildHeaders(),
-    });
-    const data = await response.json();
-    return data;
+    return await fetchJson<MapAnimItem[]>('/maps', { method: 'GET' });
 }
 
 async function getMap(mapId: string) {
-    const response = await fetch(`${API_BASE_URL}/maps/${mapId}`, {
-        method: 'GET',
-        headers: buildHeaders(),
-    });
-    const data = await response.json();
-    return data;
+    return await fetchJson<any>(`/maps/${mapId}`, { method: 'GET' });
 }
+
 
 async function getAnimations(): Promise<MapAnimItem[]> {
-    const response = await fetch(`${API_BASE_URL}/animations`, {
-        method: 'GET',
-        headers: buildHeaders(),
-    });
-    const data = await response.json();
-    return data;
+    return await fetchJson<MapAnimItem[]>('/animations', { method: 'GET' });
 }
 
+
 async function getAnimation(animationId: string) {
-    const response = await fetch(`${API_BASE_URL}/animations/${animationId}`, {
-        method: 'GET',
-        headers: buildHeaders(),
-    });
-    const data = await response.json();
-    return data;
+    return await fetchJson<any>(`/animations/${animationId}`, { method: 'GET' });
 }
+
 
 
 async function saveAnimationToRealBackend(
@@ -432,7 +452,6 @@ async function saveAnimationToRealBackend(
     let blocksPayload: any[] = [];
 
     if (routesOrBlocks.length > 0 && routesOrBlocks[0]?.grid) {
-        
         const blocks = routesOrBlocks as AnimationBlockFrontend[];
         blocksPayload = blocks.map((block) => {
             const blockData = block.grid.getDataForBackend();
@@ -441,18 +460,11 @@ async function saveAnimationToRealBackend(
                 persons: blockData.persons || [],
                 goals: blockData.goals || [],
                 groups: blockData.groups || [],
-                routes: (block.routes || []).map((r: any) => ({
-                    id: r.id,
-                    route: r.route,
-                })),
-                ticks:
-                    typeof block.ticks === 'number'
-                        ? block.ticks
-                        : -1,
+                routes: (block.routes || []).map((r: any) => ({ id: r.id, route: r.route })),
+                ticks: typeof block.ticks === 'number' ? block.ticks : -1,
             };
         });
     } else {
-        
         const data = grid.getDataForBackend();
         blocksPayload = [
             {
@@ -460,10 +472,7 @@ async function saveAnimationToRealBackend(
                 persons: data.persons || [],
                 goals: data.goals || [],
                 groups: data.groups || [],
-                routes: (routesOrBlocks || []).map((r: any) => ({
-                    id: r.id,
-                    route: r.route,
-                })),
+                routes: (routesOrBlocks || []).map((r: any) => ({ id: r.id, route: r.route })),
                 ticks: -1,
             },
         ];
@@ -477,104 +486,62 @@ async function saveAnimationToRealBackend(
         statistics,
     };
 
-    const response = await fetch(`${API_BASE_URL}/animations/map/${mapId}`, {
+    const data = await fetchJson<{ _id: string }>(`/animations/map/${mapId}`, {
         method: 'POST',
-        headers: buildHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(animationData),
     });
-    const data = await response.json();
+
     return data._id;
 }
 
-async function getRoutes(
-    mapId: string,
-    algoName: string
-): Promise<{ id: number; route: string[] }[]> {
-    const response = await fetch(
-        `${API_BASE_URL}/maps/${mapId}/statistics/${algoName}`,
-        {
-            method: 'GET',
-            headers: buildHeaders(),
-        }
-    );
-    const data = await response.json();
-    return data;
+
+async function getRoutes(mapId: string, algoName: string): Promise<any> {
+    return await fetchJson<any>(`/maps/${mapId}/statistics/${algoName}`, { method: 'GET' });
 }
+
 
 async function saveToRealBackend(grid: Grid, name: string): Promise<string> {
     const requestData = {
         ...grid.getDataForBackend(),
-        name: name,
+        name,
     };
-    const response = await fetch(`${API_BASE_URL}/maps`, {
+
+    const data = await fetchJson<{ _id: string }>('/maps', {
         method: 'POST',
-        headers: buildHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(requestData),
     });
-    const data = await response.json();
+
     return data._id;
 }
 
-async function updateToRealBackend(
-    mapId: string,
-    grid: Grid,
-    name: string
-): Promise<void> {
-    const requestData = {
-        ...grid.getDataForBackend(),
-        name: name,
-    };
-    const response = await fetch(`${API_BASE_URL}/maps/${mapId}`, {
+
+async function updateToRealBackend(mapId: string, grid: Grid, name: string): Promise<void> {
+    const requestData = { ...grid.getDataForBackend(), name };
+
+    await fetchJson<{ message: string }>(`/maps/${mapId}`, {
         method: 'PUT',
-        headers: buildHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(requestData),
     });
-    if (!response.ok) {
-        const t = await response.text().catch(() => '');
-        throw new Error(`Ошибка обновления карты: ${response.status} ${t}`);
-    }
 }
+
 
 async function deleteFromRealBackend(mapId: string): Promise<void> {
-    const res = await fetch(`${API_BASE_URL}/maps/${mapId}`, {
-        method: 'DELETE',
-        headers: buildHeaders(),
-    });
-    if (!res.ok && res.status !== 204) {
-        const t = await res.text().catch(() => '');
-        throw new Error(`Не удалось удалить карту: ${res.status} ${t}`);
-    }
+    await fetchJson<{ message: string }>(`/maps/${mapId}`, { method: 'DELETE' });
 }
 
-async function updateAnimationInRealBackend(
-    animationId: string,
-    name: string
-): Promise<void> {
-    const updateData = {
-        name: name,
-    };
 
-    const response = await fetch(`${API_BASE_URL}/animations/${animationId}`, {
+async function updateAnimationInRealBackend(animationId: string, name: string): Promise<void> {
+    await fetchJson<{ message: string }>(`/animations/${animationId}`, {
         method: 'PUT',
-        headers: buildHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(updateData),
+        body: JSON.stringify({ name }),
     });
-    if (!response.ok) {
-        const t = await response.text().catch(() => '');
-        throw new Error(`Ошибка обновления анимации: ${response.status} ${t}`);
-    }
 }
+
 
 async function deleteAnimationReal(animationId: string): Promise<void> {
-    const res = await fetch(`${API_BASE_URL}/animations/${animationId}`, {
-        method: 'DELETE',
-        headers: buildHeaders(),
-    });
-    if (!res.ok && res.status !== 204) {
-        const t = await res.text().catch(() => '');
-        throw new Error(`Не удалось удалить анимацию: ${res.status} ${t}`);
-    }
+    await fetchJson<{ message: string }>(`/animations/${animationId}`, { method: 'DELETE' });
 }
+
 
 
 
@@ -589,36 +556,20 @@ function buildBlockFromGrid(grid: Grid) {
     };
 }
 
-async function getUnsavedAnimationStatistics(
-    grid: Grid,
-    algoName: string
-): Promise<any> {
+async function getUnsavedAnimationStatistics(grid: Grid, algoName: string): Promise<any> {
     const data = grid.getDataForBackend();
-
     const payload = {
         up_right_point: data.up_right_point,
         down_left_point: data.down_left_point,
         block: buildBlockFromGrid(grid),
     };
 
-    const response = await fetch(
-        `${API_BASE_URL}/animations/statistics/${algoName}`,
-        {
-            method: 'POST',
-            headers: buildHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify(payload),
-        }
-    );
-
-    const json = await response.json();
-    if (!response.ok) {
-        const msg =
-            (json && (json.error || json.message)) ||
-            'Ошибка получения статистики анимации';
-        throw new Error(msg);
-    }
-    return json;
+    return await fetchJson<any>(`/animations/statistics/${algoName}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
 }
+
 
 async function getSavedAnimationStatisticsReal(
     animationId: string,
@@ -626,29 +577,14 @@ async function getSavedAnimationStatisticsReal(
     grid: Grid,
     ticks: number
 ): Promise<any> {
-    const payload = {
-        block: buildBlockFromGrid(grid),
-        ticks,
-    };
+    const payload = { block: buildBlockFromGrid(grid), ticks };
 
-    const response = await fetch(
-        `${API_BASE_URL}/animations/${animationId}/statistics/${algoName}`,
-        {
-            method: 'POST',
-            headers: buildHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify(payload),
-        }
-    );
-
-    const json = await response.json();
-    if (!response.ok) {
-        const msg =
-            (json && (json.error || json.message)) ||
-            'Ошибка получения статистики сохранённой анимации';
-        throw new Error(msg);
-    }
-    return json;
+    return await fetchJson<any>(`/animations/${animationId}/statistics/${algoName}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
 }
+
 
 
 
