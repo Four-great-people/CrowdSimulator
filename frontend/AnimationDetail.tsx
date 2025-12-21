@@ -478,7 +478,7 @@ const AnimationDetail: React.FC = () => {
                     const cell = newGrid.getCell(person.position.x, person.position.y);
                     if (cell && !cell.persons.some(p => p.id === person.id)) {
                         cell.addPerson(newPerson);
-                    }
+                    }   
                 }
             });
 
