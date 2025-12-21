@@ -475,10 +475,9 @@ const AnimationDetail: React.FC = () => {
                     const newPerson = new NamedPoint(person.id, person.position, person.reachedGoal);
                     updatedPersons.push(newPerson);
 
-                    const cell = newGrid.getCell(person.position.x, person.position.y);
-                    if (cell && !cell.persons.some(p => p.id === person.id)) {
-                        cell.addPerson(newPerson);
-                    }   
+                    if (!newPerson.reachedGoal) {
+                        newGrid.addPerson(newPerson);
+                    }
                 }
             });
 
