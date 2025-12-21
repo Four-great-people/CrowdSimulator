@@ -73,13 +73,19 @@ frontend/
 ```
 Grid
 
-    width, height - размеры сетки (40×22 клеток)
+    width, height - размеры сетки (40×22 клеток по умолчанию)
 
     cells: Cell[][] - двумерный массив клеток
 
-    persons: Person[] - список персонажей
+    persons: NamedPoint[] - список персонажей
+
+    goals: NamedPoint[] - список целей
+
+    groups: Group[] - список групп
 
     walls: Wall[] - список стен
+
+    maxTicks: number - максимальное среди всех клеток число тиков, где был человек
 
 Cell
 
@@ -87,34 +93,32 @@ Cell
 
     isWall: boolean - является ли стеной
 
-    persons: Person[] - персонажи в клетке
+    persons: NamedPoint[] - список персонажей
 
-    goal: Position | null - цель в клетке
+    goals: NamedPoint[] - цель в клетке
 
-    directionOfWall: string - направление стены
+    usedTicks: number - число тиков для конкретной клетки
+
+    lastTick: number - последний раз, когда на этой клетке был человек 
+
+    directionOfWall: string[] - направление стены
+
+Group
+    id: number - ID группы
+    start_position: { x: number; y: number } - начальная позиция
+    total_count: number - количество участников в группе
+    person_ids: number[] - список ID участников в группе
 
 NamedPoint
 
     id: number - идентификатор
-
     position: Position - текущая позиция
-
     reachedGoal: boolean - достигнута ли цель
 
-```
-
-## Интеграция с бэкендом
-
-Проект готов к интеграции с бэкендом через функции в src/api.ts:
-```typescript
-
-export const SendGridDataToBackend = async (grid: Grid): Promise<void> => {
-  // Реализовать вызов к бэкенду
-};
-
-export const GetStatisticsFromBackend = async (): Promise<any> => {
-  // Реализовать получение маршрутов
-};
+Wall
+    first: { x: number; y: number } - первая точка стены
+    second: { x: number; y: number } - вторая точка стены
+    direction: 'horizontal' | 'vertical' - направление стены
 ```
 
 ## Замечания

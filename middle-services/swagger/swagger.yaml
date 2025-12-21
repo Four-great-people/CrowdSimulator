@@ -103,6 +103,36 @@ definitions:
                 type: string
       ticks:
         type: integer
+  AnimationBlockWOTicks:
+    type: object
+    properties:
+      borders:
+        type: array
+        items:
+          $ref: '#/definitions/Segment'      
+      persons:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      goals:
+        type: array
+        items:
+          $ref: '#/definitions/NamedPoint'
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      routes:
+        type: array
+        items:
+          type: object
+          properties:
+            id: 
+              type: integer
+            route:
+              type: array
+              items:
+                type: string
   StatResult:
     type: object
     properties:
@@ -398,7 +428,7 @@ paths:
             type: object
             properties:
               block: 
-                $ref: '#/definitions/AnimationBlock'
+                $ref: '#/definitions/AnimationBlockWOTicks'
               up_right_point: 
                 $ref: '#/definitions/Point'
               down_left_point: 
@@ -423,7 +453,13 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/Animation'
+            type: object
+            properties:
+              block: 
+                $ref: '#/definitions/AnimationBlockWOTicks'
+              ticks:
+                type: integer
+                required: true
         - name: "animation_id"
           in: path
           type: integer
